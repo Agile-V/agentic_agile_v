@@ -1,0 +1,37 @@
+{
+  "task_id": "AAV-000",
+  "title": "Short title",
+  "task_type": "feature",
+  "risk_level": "L2",
+  "requirement_ids": ["REQ-001"],
+  "brief_path": "tasks/AAV-000/brief.md",
+  "plan_path": "tasks/AAV-000/agent_plan.md",
+  "changed_files": [],
+  "tests": [
+    {
+      "name": "unit tests",
+      "command": "pytest",
+      "result": "not_run",
+      "artifact": ""
+    }
+  ],
+  "checks": [
+    {
+      "name": "lint",
+      "command": "",
+      "result": "not_run",
+      "artifact": ""
+    }
+  ],
+  "evidence_artifacts": [],
+  "reviewer_gate": {
+    "required": true,
+    "status": "pending",
+    "reviewer": "",
+    "notes": ""
+  },
+  "rollback_path": "Describe rollback path or explain why not applicable.",
+  "residual_risks": ["List residual risks or write none."],
+  "agent_summary": "What the agent changed and why.",
+  "human_summary": "Reviewer decision summary."
+}

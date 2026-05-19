@@ -1,0 +1,1 @@
+example lint log: passed
