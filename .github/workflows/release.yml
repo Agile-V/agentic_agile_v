@@ -1,0 +1,90 @@
+name: Create Versioned Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'  # Triggers on version tags like v1.0.0, v2.1.3, etc.
+  workflow_dispatch:  # Allows manual triggering
+    inputs:
+      version:
+        description: 'Version number (e.g., 1.0.0)'
+        required: true
+        type: string
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required for creating releases
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Determine version
+        id: version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION="${{ inputs.version }}"
+          else
+            VERSION="${GITHUB_REF#refs/tags/v}"
+          fi
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+      
+      - name: Create version file
+        run: |
+          echo "${{ steps.version.outputs.version }}" > VERSION
+          echo "Created VERSION file with version: ${{ steps.version.outputs.version }}"
+      
+      - name: Create release archive
+        run: |
+          # Create a temporary directory for the files to zip
+          mkdir -p release-temp
+          
+          # Copy all files except excluded ones
+          rsync -av \
+            --exclude='.git/' \
+            --exclude='.github/' \
+            --exclude='README.md' \
+            --exclude='release-temp/' \
+            --exclude='*.zip' \
+            ./ release-temp/
+          
+          # Ensure VERSION file is included
+          cp VERSION release-temp/VERSION
+          
+          # Create the zip file
+          cd release-temp
+          zip -r ../agentic-agile-v${{ steps.version.outputs.version }}.zip .
+          cd ..
+          
+          echo "Created archive: agentic-agile-v${{ steps.version.outputs.version }}.zip"
+          echo "Archive contents:"
+          unzip -l agentic-agile-v${{ steps.version.outputs.version }}.zip | head -20
+      
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ github.event_name == 'workflow_dispatch' && format('v{0}', steps.version.outputs.version) || github.ref_name }}
+          name: Release v${{ steps.version.outputs.version }}
+          draft: false
+          prerelease: false
+          files: |
+            agentic-agile-v${{ steps.version.outputs.version }}.zip
+          body: |
+            ## Release v${{ steps.version.outputs.version }}
+            
+            This release contains a packaged version of the Agentic Agile framework.
+            
+            ### What's Included
+            - All project files except:
+              - `.github/` workflows directory
+              - `README.md`
+              - Git metadata
+            - `VERSION` file containing the release version
+            
+            ### Installation
+            Download the zip file and extract it to your desired location.
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
