@@ -1,0 +1,50 @@
+# AI Coding Tool Configurations (managed as git submodules)
+# These are tracked via .gitmodules, but we ignore any local overrides
+
+# OpenCode
+.opencode/skills/
+
+# Cursor / Claude Code
+.cursor/
+
+# VS Code + Continue
+.continue/
+
+# Windsurf
+.windsurf/
+
+# Cline
+.cline/
+
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/settings.json
+.vscode/launch.json
+.idea/
+
+# Test coverage
+.coverage
+htmlcov/
+
+# Temporary files
+*.tmp
+*.swp
+*.swo
+*~

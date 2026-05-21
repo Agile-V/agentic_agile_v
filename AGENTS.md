@@ -2,6 +2,57 @@
 
 These rules apply to all agentic changes in this repository.
 
+## First-time agent setup
+
+Before starting work in this repository, agents must install tool-specific configurations to properly follow the Agentic Agile-V workflow.
+
+**Run this command once:**
+
+```bash
+bash scripts/agent_setup.sh
+```
+
+This script auto-detects your runtime environment (OpenCode, Cursor, VS Code + Continue, Windsurf, Cline, etc.) and installs the appropriate skills, configurations, or extensions as git submodules.
+
+If you prefer manual setup or the script fails, see the tool-specific instructions below:
+
+### OpenCode
+
+```bash
+git submodule add git@github.com:Agile-V/agile_v_skills.git .opencode/skills
+git submodule update --init --recursive
+```
+
+### Cursor / Claude Code
+
+```bash
+git submodule add git@github.com:Agile-V/agile_v_cursor_config.git .cursor/
+git submodule update --init --recursive
+```
+
+### VS Code + Continue
+
+```bash
+git submodule add git@github.com:Agile-V/agile_v_continue_config.git .continue/
+git submodule update --init --recursive
+```
+
+### Windsurf
+
+```bash
+git submodule add git@github.com:Agile-V/agile_v_windsurf_config.git .windsurf/
+git submodule update --init --recursive
+```
+
+### Cline
+
+```bash
+git submodule add git@github.com:Agile-V/agile_v_cline_config.git .cline/
+git submodule update --init --recursive
+```
+
+**After installation:** Reload your agent session to activate the new configurations.
+
 ## Operating principle
 
 Conversation is allowed for discovery. Implementation requires a structured task brief.
