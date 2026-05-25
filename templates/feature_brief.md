@@ -28,6 +28,17 @@ What is explicitly out of scope?
 
 Describe APIs, message formats, hardware interfaces, or public behavior that must remain stable or change explicitly.
 
+### API Compatibility Checklist
+
+If task provides examples or test framework:
+
+- [ ] Reviewed task description for interface examples
+- [ ] Identified all delivery methods that must be called (send(), write(), publish(), etc.)
+- [ ] Verified method signatures match expected API
+- [ ] Ensured parameters match task examples (if example shows `Foo(a, b)`, accept exactly `Foo(a, b)`)
+- [ ] Made extra parameters optional with sensible defaults
+- [ ] Tested object creation with minimal arguments from examples
+
 ## Constraints
 
 - Compatibility:
@@ -47,6 +58,14 @@ Describe APIs, message formats, hardware interfaces, or public behavior that mus
 - [ ] Integration tests:
 - [ ] Regression tests:
 - [ ] Manual or HIL tests:
+
+### Test Quality Requirements
+
+- [ ] Tests verify external interface (what consumers see), not internal implementation
+- [ ] Tests use realistic data types (CSV = strings, not clean numbers)
+- [ ] Tests verify actual delivery mechanisms (connection.send(), etc.)
+- [ ] Tests include end-to-end workflows
+- [ ] Tests include negative cases (what should NOT happen)
 
 ## Risk level
 

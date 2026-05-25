@@ -22,11 +22,72 @@ What files, modules, tests, and dependencies are relevant?
 - broader tests:
 - manual/HIL tests:
 
+### Data Type Considerations
+
+For file-based data sources:
+
+- [ ] CSV data is always strings (even numbers) - need type conversion for comparisons
+- [ ] JSON data types verified against schema
+- [ ] Numeric operations on file data require explicit conversion (float(), int())
+- [ ] Tests use realistic data types (string "35", not number 35)
+- [ ] Comparison operators (>, <, >=, <=) handle type conversion correctly
+
 ## Risk classification
 
 `L0 | L1 | L2 | L3 | L4`
 
-Why?
+### Risk Factors Assessment
+
+Check all that apply (**if ANY checked → consider escalating to higher level**):
+
+- [ ] Concurrency/thread safety required
+- [ ] Security/authentication involved
+- [ ] Customer-visible behavior changes
+- [ ] Data storage/migration needed
+- [ ] Public API changes
+- [ ] Complex state management
+- [ ] External integrations (APIs, services, connections)
+- [ ] Safety-critical/hardware/regulated
+- [ ] Hard to test/verify
+
+### Classification Rule
+
+⚠️ **Escalate to L3 if ANY concurrency, security, complex state, or external integration**
+
+**Justification:**
+
+Why this level? What factors determined it?
+
+## Time Allocation
+
+### Minimum Time Calculation
+
+Based on complexity and risk factors:
+
+- Base time (from risk level):
+  - L0: 15-20 min
+  - L1: 30-60 min
+  - L2: 90-180 min
+  - L3: 180-360 min
+  - L4: 360+ min
+
+- Multipliers (add if applicable):
+  - Concurrency/thread safety: +60 min
+  - External integration: +30 min
+  - Complex state: +30 min
+  - Security: +30 min
+  - Testing infrastructure: +20 min
+
+**Total Minimum Required:** ___ minutes
+
+**Actual Time Available:** ___ minutes
+
+### Time Check Gate
+
+- [ ] Actual time >= Minimum required
+- [ ] If not: ⚠️ **STOP** - Either reduce scope, allocate more time, or re-evaluate risk
+
+**Time calculation shows adequate allocation for quality implementation.**
 
 ## Approval needed before edit?
 
