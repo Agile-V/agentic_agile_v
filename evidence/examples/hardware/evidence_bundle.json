@@ -1,0 +1,75 @@
+{
+  "task_id": "EX-003",
+  "title": "Adjust SPI sensor initialization delay",
+  "task_type": "firmware",
+  "risk_level": "L4",
+  "requirement_ids": [
+    "REQ-SPI-INIT-004"
+  ],
+  "brief_path": "tasks/examples/hardware/brief.md",
+  "plan_path": "tasks/examples/hardware/agent_plan.md",
+  "changed_files": [
+    "firmware/sensor_init.c",
+    "firmware/tests/test_sensor_init.c"
+  ],
+  "tests": [
+    {
+      "name": "simulation boot test",
+      "command": "make sim-test",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/simulation.txt"
+    },
+    {
+      "name": "HIL sensor init test",
+      "command": "make hil-test",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/hil.txt"
+    },
+    {
+      "name": "hardware regression matrix",
+      "command": "check regression matrix",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/regression-matrix.txt"
+    }
+  ],
+  "checks": [
+    {
+      "name": "firmware build",
+      "command": "make firmware",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/build.txt"
+    },
+    {
+      "name": "timing analysis",
+      "command": "capture timing",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/timing.txt"
+    },
+    {
+      "name": "independent verification",
+      "command": "review timing trace",
+      "result": "pass",
+      "artifact": "evidence/examples/hardware/logs/independent-review.txt"
+    }
+  ],
+  "evidence_artifacts": [
+    "evidence/examples/hardware/logs/build.txt",
+    "evidence/examples/hardware/logs/simulation.txt",
+    "evidence/examples/hardware/logs/hil.txt",
+    "evidence/examples/hardware/logs/timing.txt",
+    "evidence/examples/hardware/logs/traceability-matrix.csv",
+    "evidence/examples/hardware/logs/regression-matrix.txt"
+  ],
+  "reviewer_gate": {
+    "required": true,
+    "status": "approved",
+    "reviewer": "example-reviewer",
+    "notes": "Example L4 evidence only."
+  },
+  "rollback_path": "Revert reset delay constant and deploy previous firmware image.",
+  "residual_risks": [
+    "none"
+  ],
+  "agent_summary": "Changed delay constant and added timing evidence.",
+  "human_summary": "Example approved L4 bundle."
+}

@@ -1,0 +1,37 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agentic Agile-V Evidence Bundle",
+  "type": "object",
+  "required": [
+    "task_id",
+    "title",
+    "task_type",
+    "risk_level",
+    "requirement_ids",
+    "brief_path",
+    "plan_path",
+    "changed_files",
+    "tests",
+    "checks",
+    "evidence_artifacts",
+    "reviewer_gate",
+    "rollback_path",
+    "residual_risks"
+  ],
+  "properties": {
+    "task_id": {"type": "string", "pattern": "^[A-Z]+-[0-9]+$"},
+    "title": {"type": "string", "minLength": 1},
+    "task_type": {"type": "string", "enum": ["feature", "bug", "hardware", "firmware", "test", "refactor", "docs", "security", "other"]},
+    "risk_level": {"type": "string", "enum": ["L0", "L1", "L2", "L3", "L4"]},
+    "requirement_ids": {"type": "array", "items": {"type": "string"}},
+    "brief_path": {"type": "string"},
+    "plan_path": {"type": "string"},
+    "changed_files": {"type": "array", "items": {"type": "string"}},
+    "tests": {"type": "array", "items": {"type": "object"}},
+    "checks": {"type": "array", "items": {"type": "object"}},
+    "evidence_artifacts": {"type": "array", "items": {"type": "string"}},
+    "reviewer_gate": {"type": "object"},
+    "rollback_path": {"type": "string"},
+    "residual_risks": {"type": "array", "items": {"type": "string"}}
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Agentic Agile-V Task Brief",
+  "type": "object",
+  "required": ["task_id", "task_type", "objective", "scope", "non_goals", "acceptance_criteria", "risk_level", "required_evidence"],
+  "properties": {
+    "task_id": {"type": "string"},
+    "task_type": {"type": "string"},
+    "objective": {"type": "string"},
+    "scope": {"type": "array", "items": {"type": "string"}},
+    "non_goals": {"type": "array", "items": {"type": "string"}},
+    "acceptance_criteria": {"type": "array", "items": {"type": "string"}},
+    "risk_level": {"type": "string", "enum": ["L0", "L1", "L2", "L3", "L4"]},
+    "required_evidence": {"type": "array", "items": {"type": "string"}}
+  }
+}

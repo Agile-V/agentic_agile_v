@@ -1,0 +1,33 @@
+# Agentic Agile-V configuration reference.
+# The current validation scripts do not require external YAML parsers.
+
+risk_levels:
+  L0: docs_or_trivial
+  L1: low_risk_internal
+  L2: normal_production
+  L3: high_risk_software_or_data
+  L4: safety_hardware_regulated_or_irreversible
+
+required_gates:
+  L0:
+    - brief
+    - plan
+  L1:
+    - brief
+    - plan
+    - tests_or_rationale
+    - lint_or_static_check
+  L2:
+    - brief
+    - plan
+    - passing_test
+    - passing_check
+    - human_review
+  L3:
+    - l2_gates
+    - security_or_privacy_or_regression_evidence
+    - rollback_path
+  L4:
+    - l3_gates
+    - independent_verification
+    - hil_or_simulation_or_formal_or_timing_or_traceability

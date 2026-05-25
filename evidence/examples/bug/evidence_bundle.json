@@ -1,0 +1,22 @@
+{
+  "task_id": "EX-002",
+  "title": "Fix timeout handling in device polling",
+  "task_type": "bug",
+  "risk_level": "L2",
+  "requirement_ids": ["REQ-POLL-009"],
+  "brief_path": "tasks/examples/bug/brief.md",
+  "plan_path": "tasks/examples/bug/agent_plan.md",
+  "changed_files": ["src/device/polling.py", "tests/test_polling_timeout.py"],
+  "tests": [
+    {"name": "polling timeout regression", "command": "pytest tests/test_polling_timeout.py", "result": "pass", "artifact": "evidence/examples/bug/logs/regression.txt"}
+  ],
+  "checks": [
+    {"name": "static analysis", "command": "mypy src", "result": "pass", "artifact": "evidence/examples/bug/logs/mypy.txt"}
+  ],
+  "evidence_artifacts": ["evidence/examples/bug/logs/regression.txt", "evidence/examples/bug/logs/mypy.txt"],
+  "reviewer_gate": {"required": true, "status": "approved", "reviewer": "example-reviewer", "notes": "Example evidence only."},
+  "rollback_path": "Revert polling timeout patch and regression test.",
+  "residual_risks": ["none"],
+  "agent_summary": "Added timeout regression and minimal fix.",
+  "human_summary": "Example approved bundle."
+}

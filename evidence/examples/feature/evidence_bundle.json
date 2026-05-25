@@ -1,0 +1,22 @@
+{
+  "task_id": "EX-001",
+  "title": "Add device status endpoint",
+  "task_type": "feature",
+  "risk_level": "L2",
+  "requirement_ids": ["REQ-STATUS-001"],
+  "brief_path": "tasks/examples/feature/brief.md",
+  "plan_path": "tasks/examples/feature/agent_plan.md",
+  "changed_files": ["src/api/status.py", "tests/test_status.py"],
+  "tests": [
+    {"name": "status unit tests", "command": "pytest tests/test_status.py", "result": "pass", "artifact": "evidence/examples/feature/logs/status-tests.txt"}
+  ],
+  "checks": [
+    {"name": "lint", "command": "ruff check src tests", "result": "pass", "artifact": "evidence/examples/feature/logs/lint.txt"}
+  ],
+  "evidence_artifacts": ["evidence/examples/feature/logs/status-tests.txt", "evidence/examples/feature/logs/lint.txt"],
+  "reviewer_gate": {"required": true, "status": "approved", "reviewer": "example-reviewer", "notes": "Example evidence only."},
+  "rollback_path": "Revert endpoint handler and test files.",
+  "residual_risks": ["none"],
+  "agent_summary": "Added read-only endpoint and tests.",
+  "human_summary": "Example approved bundle."
+}
