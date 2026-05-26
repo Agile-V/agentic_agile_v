@@ -1,7 +1,24 @@
-.PHONY: test validate-evidence new-feature new-bug
+.PHONY: test test-unit test-cov install install-dev lint typecheck validate-evidence new-feature new-bug
 
-test:
-	@echo "Add project-specific tests here."
+install:
+	pip install -e .
+
+install-dev:
+	pip install -e .[dev]
+
+test: test-unit
+
+test-unit:
+	pytest tests/unit -v
+
+test-cov:
+	pytest tests/unit --cov=agilev --cov-report=term-missing --cov-report=html
+
+lint:
+	ruff check src/ tests/
+
+typecheck:
+	mypy src/agilev/
 
 validate-evidence:
 	python scripts/validate_evidence.py --root evidence

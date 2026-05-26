@@ -13,10 +13,12 @@ The scaffold gives teams a practical way to run AI agents inside a disciplined e
 - `AGENTS.md`: repository-level rules for coding agents.
 - `templates/`: feature, bug, hardware/firmware, test, review, and evidence templates.
 - `docs/`: process documentation for Agile-V, SCOPE-V, testing, hardware, and evidence gates.
-- `schemas/`: JSON schemas for task briefs and evidence bundles.
+- `schemas/`: JSON schemas for task briefs, evidence bundles, system graph, impact map, and traceability.
 - `scripts/`: local validation and task bootstrap tools.
 - `.github/`: PR template, issue templates, and CI workflow for evidence gates.
 - `examples/`: sample feature, bug, and hardware task packages.
+- `src/agilev/`: Python runtime library — graph adapter, impact analysis, traceability.
+- `tests/`: Unit tests for the Python runtime library.
 
 ## Recommended workflow
 
@@ -60,6 +62,24 @@ python scripts/validate_evidence.py --bundle evidence/examples/feature/evidence_
 | L2 | Normal production feature or bug fix | Unit/integration tests, CI, reviewer gate |
 | L3 | Security, customer-visible, data, APIs, persistent state | Regression tests, security/privacy check, rollback path, approval |
 | L4 | Safety, hardware/firmware, regulated, money movement, critical infrastructure | Independent verification, HIL/simulation/formal evidence, traceability matrix, approval |
+
+## Understand Anything Integration
+
+Agile V can consume an [Understand Anything](https://github.com/Lum1104/Understand-Anything)
+knowledge graph to add system context, impact analysis, graph traceability, and
+regression-test selection to the Agile-V lifecycle.
+
+```bash
+# Install the runtime library
+pip install -e .[dev]
+
+# Run tests
+make test
+```
+
+See `docs/understand-anything-integration.md` for full usage documentation.
+
+The companion skill documentation is in `agile_v_skills/integrations/understand-anything/`.
 
 ## Principle
 

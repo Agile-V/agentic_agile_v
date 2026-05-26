@@ -1,0 +1,120 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agile-v.org/schemas/impact_map/1.0.0",
+  "title": "ImpactMap",
+  "description": "Agile-V impact map produced by impact-analysis-agent.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "change_request_id",
+    "summary",
+    "direct_components",
+    "indirect_components",
+    "confidence"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "change_request_id": {
+      "type": "string",
+      "description": "ID of the change request (e.g. CR-001).",
+      "examples": ["CR-001"]
+    },
+    "summary": {
+      "type": "string",
+      "description": "Plain-English summary of the change."
+    },
+    "direct_components": {
+      "type": "array",
+      "description": "Components directly affected by the change.",
+      "items": { "$ref": "#/$defs/AffectedComponent" }
+    },
+    "indirect_components": {
+      "type": "array",
+      "description": "Components indirectly affected by the change.",
+      "items": { "$ref": "#/$defs/AffectedComponent" }
+    },
+    "required_tests": {
+      "type": "array",
+      "description": "Test file paths that must be run.",
+      "items": { "type": "string" }
+    },
+    "risks": {
+      "type": "array",
+      "description": "Risks identified during impact analysis.",
+      "items": { "$ref": "#/$defs/ImpactRisk" }
+    },
+    "assumptions": {
+      "type": "array",
+      "description": "Assumptions made during impact analysis.",
+      "items": { "type": "string" }
+    },
+    "confidence": {
+      "type": "string",
+      "description": "Overall confidence level of the impact analysis.",
+      "enum": ["high", "medium", "low"]
+    }
+  },
+  "$defs": {
+    "AffectedComponent": {
+      "type": "object",
+      "required": ["component_id", "path", "impact_type", "reason", "confidence"],
+      "properties": {
+        "component_id": {
+          "type": "string",
+          "description": "SystemNode ID."
+        },
+        "path": {
+          "type": "string",
+          "description": "File path relative to the repository root."
+        },
+        "symbol": {
+          "type": ["string", "null"],
+          "description": "Function or class name."
+        },
+        "impact_type": {
+          "type": "string",
+          "description": "How the component is affected.",
+          "enum": ["modify", "add", "remove", "review", "test-only", "doc-only"]
+        },
+        "reason": {
+          "type": "string",
+          "description": "Why this component is in the impact map."
+        },
+        "confidence": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "ImpactRisk": {
+      "type": "object",
+      "required": ["risk_id", "description", "severity"],
+      "properties": {
+        "risk_id": {
+          "type": "string",
+          "description": "Unique risk identifier (e.g. RISK-001)."
+        },
+        "description": {
+          "type": "string"
+        },
+        "severity": {
+          "type": "string",
+          "enum": ["high", "medium", "low"]
+        },
+        "mitigation": {
+          "type": "string",
+          "default": ""
+        },
+        "verification": {
+          "type": "string",
+          "default": ""
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
