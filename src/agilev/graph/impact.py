@@ -113,6 +113,16 @@ def analyze_impact(
     test_paths: list[str] = []
     seen_test_paths: set[str] = set()
 
+    # 1. If a test node was itself a direct/indirect match, include it immediately.
+    for node_id in all_affected_ids:
+        node = graph.node_by_id(node_id)
+        if node and node.type == "test":
+            path = node.path or node.name
+            if path not in seen_test_paths:
+                seen_test_paths.add(path)
+                test_paths.append(path)
+
+    # 2. Follow explicit "tests" / "covers" edges from affected nodes.
     for node_id in all_affected_ids:
         test_nodes = get_test_nodes_for(graph, node_id)
         for tn in test_nodes:
@@ -121,7 +131,7 @@ def analyze_impact(
                 seen_test_paths.add(path)
                 test_paths.append(path)
 
-    # Also include nodes of type "test" that reference affected paths.
+    # 3. Heuristic: include test nodes whose name or summary references an affected file.
     for node in graph.nodes:
         if node.type == "test" and node.id not in all_affected_ids:
             for affected_id in all_affected_ids:

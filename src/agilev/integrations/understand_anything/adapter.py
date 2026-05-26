@@ -40,6 +40,7 @@ class AdapterResult:
         graph: The normalized SystemGraph, or None if the graph was not found or failed to load.
         graph_path: The path to the source graph file, if found.
         diff_path: The path to the diff overlay file, if found.
+        graph_hash: SHA-256 hex digest of the source graph file (``sha256:<hex>``), or None.
         error: A human-readable error message if the graph could not be loaded.
         warnings: List of normalization warnings.
         mode: One of 'consume-graph' (graph found), 'standalone' (no graph).
@@ -48,6 +49,7 @@ class AdapterResult:
     graph: SystemGraph | None = None
     graph_path: Path | None = None
     diff_path: Path | None = None
+    graph_hash: str | None = None
     error: str | None = None
     warnings: list[str] = field(default_factory=list)
     mode: str = "standalone"
@@ -72,8 +74,13 @@ class UnderstandAnythingAdapter:
     def __init__(self, repo_root: str | Path = ".") -> None:
         self.repo_root = Path(repo_root)
 
-    def load(self) -> AdapterResult:
+    def load(self, graph_path: str | Path | None = None) -> AdapterResult:
         """Detect, hash, load, and normalize the knowledge graph.
+
+        Args:
+            graph_path: Optional explicit path to the knowledge graph JSON.
+                If provided, skips auto-detection and loads this file directly.
+                Useful for testing and for non-standard repository layouts.
 
         Returns:
             An ``AdapterResult``. The ``.graph`` field is None if no graph was found
@@ -81,8 +88,16 @@ class UnderstandAnythingAdapter:
         """
         result = AdapterResult()
 
-        # 1. Detect graph file.
-        graph_path = find_understand_graph(self.repo_root)
+        # 1. Detect graph file (or use the explicitly provided path).
+        if graph_path is not None:
+            graph_path = Path(graph_path)
+            if not graph_path.exists():
+                result.error = f"Specified graph path does not exist: {graph_path}"
+                logger.error(result.error)
+                return result
+        else:
+            graph_path = find_understand_graph(self.repo_root)
+
         if graph_path is None:
             logger.info(
                 "No Understand Anything knowledge graph found in %s. "
@@ -110,6 +125,8 @@ class UnderstandAnythingAdapter:
             logger.error("Failed to hash graph: %s", exc)
             return result
 
+        result.graph_hash = graph_hash
+
         # 4. Load JSON tolerantly.
         try:
             raw_data = load_graph_json(graph_path)
@@ -135,7 +152,14 @@ class UnderstandAnythingAdapter:
 
         result.warnings = warnings
 
-        # 7. Build the SystemGraph.
+        # 7. Thread any source-level metadata from the raw JSON (e.g. "meta", "metadata" keys).
+        source_meta: dict = {}
+        for meta_key in ("meta", "metadata", "info"):
+            if isinstance(raw_data.get(meta_key), dict):
+                source_meta = raw_data[meta_key]
+                break
+
+        # 8. Build the SystemGraph.
         result.graph = SystemGraph(
             source="understand-anything",
             source_graph_path=str(graph_path),
@@ -144,6 +168,7 @@ class UnderstandAnythingAdapter:
             nodes=nodes,
             edges=edges,
             metadata={
+                **source_meta,
                 "adapter_name": ADAPTER_NAME,
                 "adapter_version": ADAPTER_VERSION,
                 "source": "Lum1104/Understand-Anything",
