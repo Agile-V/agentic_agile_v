@@ -1,0 +1,132 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agile-v.org/schemas/graph_traceability/1.0.0",
+  "title": "GraphTraceabilityMatrix",
+  "description": "Agile-V graph traceability matrix: requirement → graph node → file → test.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "change_request_id",
+    "links",
+    "orphan_requirements",
+    "orphan_changes",
+    "decision"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0.0"
+    },
+    "change_request_id": {
+      "type": "string",
+      "description": "ID of the change request."
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "links": {
+      "type": "array",
+      "description": "All traceability links.",
+      "items": { "$ref": "#/$defs/GraphTraceabilityLink" }
+    },
+    "req_to_component_links": {
+      "type": "array",
+      "description": "Machine-readable requirement-to-component links.",
+      "items": {
+        "type": "object",
+        "required": ["requirement_id", "component_id", "path"],
+        "properties": {
+          "requirement_id": { "type": "string" },
+          "component_id": { "type": "string" },
+          "path": { "type": "string" },
+          "symbol": { "type": ["string", "null"] },
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] }
+        }
+      }
+    },
+    "component_to_test_links": {
+      "type": "array",
+      "description": "Machine-readable component-to-test links.",
+      "items": {
+        "type": "object",
+        "required": ["component_id", "path"],
+        "properties": {
+          "component_id": { "type": "string" },
+          "path": { "type": "string" },
+          "test_path": { "type": ["string", "null"] },
+          "evidence_path": { "type": ["string", "null"] },
+          "test_result": { "type": "string" }
+        }
+      }
+    },
+    "orphan_requirements": {
+      "type": "array",
+      "description": "Requirements with no linked component or test.",
+      "items": {
+        "type": "object",
+        "required": ["requirement_id", "issue"],
+        "properties": {
+          "requirement_id": { "type": "string" },
+          "issue": { "type": "string" }
+        }
+      }
+    },
+    "orphan_changes": {
+      "type": "array",
+      "description": "Files changed in the diff but not linked to any requirement.",
+      "items": {
+        "type": "object",
+        "required": ["path", "issue"],
+        "properties": {
+          "path": { "type": "string" },
+          "issue": { "type": "string" },
+          "justification": { "type": ["string", "null"] }
+        }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "decision": {
+      "type": "string",
+      "description": "Traceability gate decision.",
+      "enum": ["pass", "fail", "pass_with_findings"]
+    }
+  },
+  "$defs": {
+    "GraphTraceabilityLink": {
+      "type": "object",
+      "required": ["requirement_id", "component_id", "path", "status"],
+      "properties": {
+        "requirement_id": {
+          "type": "string"
+        },
+        "component_id": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": ["string", "null"]
+        },
+        "test_id": {
+          "type": ["string", "null"]
+        },
+        "test_path": {
+          "type": ["string", "null"]
+        },
+        "evidence_path": {
+          "type": ["string", "null"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["verified", "failed", "missing", "not_applicable"]
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}

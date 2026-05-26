@@ -1,0 +1,148 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agile-v.org/schemas/system_graph/1.0.0",
+  "title": "SystemGraph",
+  "description": "Agile-V normalized knowledge graph produced by the Understand Anything adapter.",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "source",
+    "source_graph_path",
+    "source_graph_hash",
+    "generated_at",
+    "nodes",
+    "edges"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "description": "Version of the SystemGraph schema.",
+      "const": "1.0.0"
+    },
+    "source": {
+      "type": "string",
+      "description": "Name of the external tool that produced the original graph.",
+      "examples": ["understand-anything"]
+    },
+    "source_graph_path": {
+      "type": "string",
+      "description": "Path to the original graph file, relative to the repository root."
+    },
+    "source_graph_hash": {
+      "type": "string",
+      "description": "SHA-256 hash of the original graph file.",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "generated_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO-8601 timestamp when this normalized graph was generated."
+    },
+    "nodes": {
+      "type": "array",
+      "description": "Normalized system nodes.",
+      "items": { "$ref": "#/$defs/SystemNode" }
+    },
+    "edges": {
+      "type": "array",
+      "description": "Normalized system edges.",
+      "items": { "$ref": "#/$defs/SystemEdge" }
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Adapter metadata including version, warnings, and detected keys.",
+      "properties": {
+        "adapter_name": { "type": "string" },
+        "adapter_version": { "type": "string" },
+        "source": { "type": "string" },
+        "normalization_warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "SystemNode": {
+      "type": "object",
+      "required": ["id", "type", "name"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique node identifier."
+        },
+        "type": {
+          "type": "string",
+          "description": "Normalized node type.",
+          "enum": [
+            "file", "function", "class", "module", "domain",
+            "flow", "step", "test", "doc", "unknown"
+          ]
+        },
+        "name": {
+          "type": "string",
+          "description": "Human-readable node name."
+        },
+        "path": {
+          "type": ["string", "null"],
+          "description": "File path relative to the repository root."
+        },
+        "symbol": {
+          "type": ["string", "null"],
+          "description": "Qualified symbol name (e.g. AuthController.login)."
+        },
+        "language": {
+          "type": ["string", "null"],
+          "description": "Programming language."
+        },
+        "layer": {
+          "type": ["string", "null"],
+          "description": "Architectural layer (api, service, data, ui, utility, etc.)."
+        },
+        "summary": {
+          "type": ["string", "null"],
+          "description": "Plain-English description of the node."
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Tags or labels from the source graph."
+        }
+      },
+      "additionalProperties": false
+    },
+    "SystemEdge": {
+      "type": "object",
+      "required": ["id", "source", "target", "type"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique edge identifier."
+        },
+        "source": {
+          "type": "string",
+          "description": "ID of the source node."
+        },
+        "target": {
+          "type": "string",
+          "description": "ID of the target node."
+        },
+        "type": {
+          "type": "string",
+          "description": "Normalized edge type.",
+          "enum": [
+            "imports", "calls", "contains", "extends", "implements",
+            "uses", "tests", "documents", "depends_on", "unknown"
+          ]
+        },
+        "confidence": {
+          "type": "string",
+          "description": "Confidence level of this edge.",
+          "enum": ["high", "medium", "low"],
+          "default": "high"
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
