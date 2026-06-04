@@ -5,6 +5,11 @@ Master Quality Validation Script for Agentic Agile-V v2.2
 Runs all quality gates before allowing task submission.
 This is the enforcement mechanism that makes v2.2 work.
 
+IMPORTANT: This script implements FAIL-CLOSED behavior (P0-3 improvement):
+- Missing gate scripts cause FAILURE (not warnings)
+- Missing required inputs cause FAILURE (not skipping)
+- No gates configured causes FAILURE (prevents silent pass)
+
 Quality Gates (inspired by Agile-V Skills quality-gates):
 1. Time Allocation Gate - Prevents rushing complex tasks
 2. Interface Contract Gate - Ensures API compatibility
@@ -48,9 +53,11 @@ class QualityGate:
         script_path = scripts_dir / self.script
         
         if not script_path.exists():
-            print(f"⚠️  WARNING: {self.name} script not found: {script_path}")
-            print(f"   Skipping this gate\n")
-            return True  # Don't fail if script missing
+            print(f"❌ ERROR: {self.name} script not found: {script_path}")
+            print(f"   Quality gates fail closed - missing gate scripts are errors\n")
+            self.passed = False
+            self.exit_code = 2
+            return False  # Fail closed: missing script is an error
         
         print(f"\n{'='*70}")
         print(f"Running: {self.name}")
@@ -194,9 +201,10 @@ def run_quality_gates(task_desc: Optional[Path] = None,
         ))
     
     if not gates:
-        print(f"\n⚠️  WARNING: No quality gates configured or all inputs missing")
-        print(f"   Cannot validate quality without required files\n")
-        return True  # Don't fail if no gates can run
+        print(f"\n❌ ERROR: No quality gates configured or all inputs missing")
+        print(f"   Quality gates fail closed - cannot validate without gates")
+        print(f"   This prevents silently passing without validation\n")
+        return False  # Fail closed: no gates configured is an error
     
     # Run all gates
     print(f"\n{'#'*70}")

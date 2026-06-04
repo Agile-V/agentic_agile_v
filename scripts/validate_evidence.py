@@ -13,6 +13,7 @@ BASE_REQUIRED = [
     "title",
     "task_type",
     "risk_level",
+    "requirement_ids",
     "brief_path",
     "plan_path",
     "changed_files",
