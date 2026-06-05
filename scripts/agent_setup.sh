@@ -2,7 +2,7 @@
 # Agent Setup Script for Agentic Agile-V
 # Auto-detects AI coding tool environment and installs appropriate configurations
 
-set -e
+set -euo pipefail
 
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$REPO_ROOT"
@@ -44,7 +44,7 @@ detect_environment() {
     fi
     
     # VS Code + Continue detection
-    if [ -n "$VSCODE_PID" ] || [ -n "$TERM_PROGRAM" = "vscode" ]; then
+    if [ -n "${VSCODE_PID:-}" ] || [ "${TERM_PROGRAM:-}" = "vscode" ]; then
         echo "vscode"
         return
     fi

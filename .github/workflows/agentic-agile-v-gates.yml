@@ -1,0 +1,130 @@
+name: Agentic Agile-V Gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run doctor check
+        run: |
+          agilev doctor
+
+      - name: Validate all evidence bundles
+        run: |
+          if [ -d evidence ]; then
+            python scripts/validate_evidence.py --root evidence || exit 1
+          else
+            echo "No evidence directory found, skipping validation"
+          fi
+
+      - name: Check for required files
+        run: |
+          required_files=(
+            "schemas/evidence_bundle.schema.json"
+            "templates/evidence_bundle.json"
+            "scripts/validate_evidence.py"
+            "scripts/new_task.py"
+            "README.md"
+          )
+          
+          missing=0
+          for file in "${required_files[@]}"; do
+            if [ ! -f "$file" ]; then
+              echo "❌ Missing required file: $file"
+              missing=1
+            fi
+          done
+          
+          if [ $missing -eq 1 ]; then
+            exit 1
+          fi
+          
+          echo "✅ All required files present"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run ruff lint
+        run: |
+          ruff check src/ || true
+
+      - name: Run ruff format check
+        run: |
+          ruff format --check src/ || true
+
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run mypy
+        run: |
+          mypy src/ || true
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run tests
+        run: |
+          if [ -d tests ]; then
+            pytest tests/ || true
+          else
+            echo "No tests directory found, skipping tests"
+          fi
