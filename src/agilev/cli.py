@@ -32,6 +32,8 @@ from agilev.openhands.session_manager import (
     OpenHandsSessionManager,
     SessionConfig,
 )
+from agilev.embedded.cli import build_embedded_parser
+from agilev.firmware.cli import build_firmware_parser
 from agilev.pcb.cli import build_pcb_parser
 from agilev.state import EventLogger, LockManager, TaskState
 from agilev.task_context import TaskContextResolver
@@ -1868,6 +1870,12 @@ def build_parser() -> argparse.ArgumentParser:
     )
     ctrl_evidence_parser.add_argument("--json", action="store_true", help="Output as JSON")
     ctrl_evidence_parser.set_defaults(func=cmd_controls_evidence)
+
+    # Embedded systems commands
+    build_embedded_parser(subparsers)
+
+    # Firmware commands
+    build_firmware_parser(subparsers)
 
     return parser
 
