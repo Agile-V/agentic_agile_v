@@ -10,8 +10,11 @@ from agilev.firmware.contract import (
     FirmwareSoftwareContract,
     HardwareFirmwareContract,
 )
+from agilev.firmware.hil import HILRunner
 from agilev.firmware.pcb_import import generate_contract_from_pcb_export
 from agilev.firmware.platformio_backend import PlatformIOBackend
+from agilev.firmware.simulation import RenodeSimulator
+from agilev.firmware.software_contract import FirmwareSoftwareContractGenerator
 
 
 def cmd_firmware_contract_generate(args: argparse.Namespace) -> int:
@@ -323,6 +326,228 @@ def cmd_firmware_test(args: argparse.Namespace) -> int:
         return 1
 
 
+def cmd_firmware_software_contract_generate(args: argparse.Namespace) -> int:
+    """Generate firmware-software contract from firmware project.
+
+    Args:
+        args: Command arguments
+
+    Returns:
+        Exit code
+    """
+    project_dir = Path(args.project)
+    output_path = Path(args.output)
+
+    if not project_dir.exists():
+        print(f"✗ Project directory not found: {project_dir}", file=sys.stderr)
+        return 1
+
+    try:
+        generator = FirmwareSoftwareContractGenerator(project_dir)
+
+        print(f"Generating firmware-software contract...")
+        print(f"  Project: {project_dir}")
+        print(f"  Contract ID: {args.contract_id}")
+
+        contract = generator.generate_contract(
+            contract_id=args.contract_id,
+            firmware_task_id=args.task_id,
+            transport=args.transport,
+        )
+
+        generator.save_contract(contract, output_path)
+
+        print(f"✓ Generated firmware-software contract: {output_path}")
+        print(f"\nContract summary:")
+        print(f"  Contract ID: {contract['contract_id']}")
+        print(f"  Transport: {contract['transport']}")
+        print(f"  Protocol version: {contract['protocol_version']}")
+        print(f"  Commands: {len(contract.get('commands', []))}")
+        print(f"  Error codes: {len(contract.get('error_codes', []))}")
+
+        print(f"\nNext steps:")
+        print(f"  1. Review contract: {output_path}")
+        print(f"  2. Validate: agilev firmware contract validate {output_path}")
+        print(f"  3. Implement software against this contract")
+
+        return 0
+
+    except Exception as e:
+        print(f"✗ Error generating contract: {e}", file=sys.stderr)
+        import traceback
+
+        if args.verbose:
+            traceback.print_exc()
+        return 1
+
+
+def cmd_firmware_simulate(args: argparse.Namespace) -> int:
+    """Run firmware in Renode simulator.
+
+    Args:
+        args: Command arguments
+
+    Returns:
+        Exit code
+    """
+    project_dir = Path(args.project)
+
+    if not project_dir.exists():
+        print(f"✗ Project directory not found: {project_dir}", file=sys.stderr)
+        return 1
+
+    try:
+        simulator = RenodeSimulator(project_dir)
+
+        # Check if Renode is installed
+        if not simulator.check_renode_installed():
+            print(f"✗ Renode not installed", file=sys.stderr)
+            print(f"\nInstall Renode:", file=sys.stderr)
+            print(f"  macOS: brew install renode", file=sys.stderr)
+            print(f"  Linux: https://renode.io", file=sys.stderr)
+            return 1
+
+        print(f"Running simulation...")
+        print(f"  Project: {project_dir}")
+
+        # Find firmware ELF
+        build_dir = project_dir / ".pio" / "build"
+        elf_files = list(build_dir.rglob("*.elf")) if build_dir.exists() else []
+
+        if not elf_files:
+            print(f"✗ No firmware ELF found. Run 'agilev firmware build' first.", file=sys.stderr)
+            return 1
+
+        firmware_elf = elf_files[0]
+        print(f"  Firmware: {firmware_elf}")
+
+        # Create simulation config
+        mcu = args.mcu or "STM32F401"
+        print(f"  MCU: {mcu}")
+
+        config_files = simulator.create_simulation_config(
+            mcu=mcu,
+            firmware_elf=firmware_elf,
+        )
+
+        print(f"  Platform script: {config_files['platform']}")
+
+        # Run simulation
+        success, output = simulator.run_simulation(
+            script_path=config_files['platform'],
+            timeout=args.timeout,
+        )
+
+        if success or args.verbose:
+            print(f"\nSimulation output:")
+            print(output)
+
+        # Extract and save results
+        results = simulator.extract_test_results(output)
+
+        results_path = project_dir / "renode" / "results.json"
+        simulator.save_results(results, results_path)
+
+        if results["passed"]:
+            print(f"\n✓ Simulation passed")
+            print(f"  Tests run: {results['tests_run']}")
+            print(f"  Tests passed: {results['tests_passed']}")
+            print(f"  Results: {results_path}")
+            return 0
+        else:
+            print(f"\n✗ Simulation failed", file=sys.stderr)
+            print(f"  Tests run: {results['tests_run']}", file=sys.stderr)
+            print(f"  Tests passed: {results['tests_passed']}", file=sys.stderr)
+            print(f"  Tests failed: {results['tests_failed']}", file=sys.stderr)
+            print(f"  Results: {results_path}", file=sys.stderr)
+            return 1
+
+    except Exception as e:
+        print(f"✗ Error running simulation: {e}", file=sys.stderr)
+        import traceback
+
+        if args.verbose:
+            traceback.print_exc()
+        return 1
+
+
+def cmd_firmware_hil_test(args: argparse.Namespace) -> int:
+    """Run Hardware-in-the-Loop tests.
+
+    Args:
+        args: Command arguments
+
+    Returns:
+        Exit code
+    """
+    project_dir = Path(args.project)
+
+    if not project_dir.exists():
+        print(f"✗ Project directory not found: {project_dir}", file=sys.stderr)
+        return 1
+
+    try:
+        runner = HILRunner(project_dir)
+
+        print(f"Running HIL tests...")
+        print(f"  Project: {project_dir}")
+        print(f"  Port: {args.port}")
+
+        if args.flash:
+            print(f"  Flashing firmware first...")
+
+        # Run HIL test
+        success, results = runner.run_hil_test(
+            port=args.port,
+            config_path=Path(args.config) if args.config else None,
+            flash_first=args.flash,
+        )
+
+        # Save results
+        results_path = project_dir / "hil" / "results.json"
+        if "results" in results:
+            runner.save_results(results["results"], results_path)
+
+        if success:
+            print(f"\n✓ HIL tests passed")
+            print(f"  Total: {results.get('total', 0)}")
+            print(f"  Results: {results_path}")
+
+            if args.verbose and "results" in results:
+                print(f"\nTest details:")
+                for result in results["results"]:
+                    status = "✓" if result["passed"] else "✗"
+                    print(f"  {status} {result['name']}: {result['response']}")
+
+            return 0
+        else:
+            print(f"\n✗ HIL tests failed", file=sys.stderr)
+
+            if "error" in results:
+                print(f"  Error: {results['error']}", file=sys.stderr)
+            else:
+                passed = sum(1 for r in results.get("results", []) if r["passed"])
+                total = results.get("total", 0)
+                print(f"  Passed: {passed}/{total}", file=sys.stderr)
+                print(f"  Results: {results_path}", file=sys.stderr)
+
+                if args.verbose and "results" in results:
+                    print(f"\nTest details:", file=sys.stderr)
+                    for result in results["results"]:
+                        status = "✓" if result["passed"] else "✗"
+                        print(f"  {status} {result['name']}: {result['response']}", file=sys.stderr)
+
+            return 1
+
+    except Exception as e:
+        print(f"✗ Error running HIL tests: {e}", file=sys.stderr)
+        import traceback
+
+        if args.verbose:
+            traceback.print_exc()
+        return 1
+
+
 def build_firmware_parser(subparsers: argparse._SubParsersAction) -> None:
     """Build firmware CLI parser.
 
@@ -369,6 +594,28 @@ def build_firmware_parser(subparsers: argparse._SubParsersAction) -> None:
     )
     validate_parser.set_defaults(func=cmd_firmware_contract_validate)
 
+    # firmware software-contract generate
+    sw_contract_parser = contract_subparsers.add_parser(
+        "generate-software", help="Generate firmware-software contract from firmware"
+    )
+    sw_contract_parser.add_argument("--project", required=True, help="Firmware project directory")
+    sw_contract_parser.add_argument(
+        "--contract-id", required=True, help="Contract ID (e.g., FSC-001)"
+    )
+    sw_contract_parser.add_argument("--task-id", required=True, help="Firmware task ID")
+    sw_contract_parser.add_argument(
+        "--transport", default="usb_cdc_serial", help="Communication transport"
+    )
+    sw_contract_parser.add_argument(
+        "--output",
+        default=".agentic-agile-v/contracts/firmware_software_contract.yaml",
+        help="Output contract path",
+    )
+    sw_contract_parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
+    sw_contract_parser.set_defaults(func=cmd_firmware_software_contract_generate)
+
     # firmware generate
     gen_firmware_parser = firmware_subparsers.add_parser(
         "generate", help="Generate firmware project from contract"
@@ -402,3 +649,20 @@ def build_firmware_parser(subparsers: argparse._SubParsersAction) -> None:
     )
     test_parser.add_argument("--verbose", "-v", action="store_true", help="Show test output")
     test_parser.set_defaults(func=cmd_firmware_test)
+
+    # firmware simulate
+    simulate_parser = firmware_subparsers.add_parser("simulate", help="Run firmware in Renode simulator")
+    simulate_parser.add_argument("--project", required=True, help="Firmware project directory")
+    simulate_parser.add_argument("--mcu", help="MCU model (e.g., STM32F401, STM32F103)")
+    simulate_parser.add_argument("--timeout", type=int, default=30, help="Simulation timeout in seconds")
+    simulate_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    simulate_parser.set_defaults(func=cmd_firmware_simulate)
+
+    # firmware hil-test
+    hil_parser = firmware_subparsers.add_parser("hil-test", help="Run Hardware-in-the-Loop tests")
+    hil_parser.add_argument("--project", required=True, help="Firmware project directory")
+    hil_parser.add_argument("--port", required=True, help="Serial port (e.g., /dev/ttyUSB0, COM3)")
+    hil_parser.add_argument("--config", help="HIL test config path")
+    hil_parser.add_argument("--flash", action="store_true", help="Flash firmware before testing")
+    hil_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    hil_parser.set_defaults(func=cmd_firmware_hil_test)
