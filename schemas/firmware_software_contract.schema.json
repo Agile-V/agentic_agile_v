@@ -1,0 +1,191 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/firmware_software_contract.schema.json",
+  "title": "Firmware-Software Contract",
+  "description": "Contract defining firmware API/protocol exposed to application software",
+  "type": "object",
+  "required": ["contract_id", "source_firmware_task", "transport", "protocol_version", "commands"],
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "pattern": "^FSC-[A-Z0-9-]+$",
+      "description": "Firmware-software contract identifier"
+    },
+    "source_firmware_task": {
+      "type": "string",
+      "pattern": "^AAV-FW-[0-9]+$",
+      "description": "Source firmware task"
+    },
+    "transport": {
+      "type": "string",
+      "enum": ["usb_cdc_serial", "uart", "tcp", "websocket", "ble", "custom"],
+      "description": "Communication transport"
+    },
+    "protocol_version": {
+      "type": "integer",
+      "minimum": 1,
+      "description": "Protocol version number"
+    },
+    "commands": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["name", "response"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Command name"
+          },
+          "request": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["object", "string", "number", "boolean", "null"]
+              },
+              "fields": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/definitions/field"
+                }
+              }
+            }
+          },
+          "response": {
+            "type": "object",
+            "required": ["type"],
+            "properties": {
+              "type": {
+                "type": "string",
+                "enum": ["object", "string", "number", "boolean", "array"]
+              },
+              "fields": {
+                "type": "object",
+                "additionalProperties": {
+                  "$ref": "#/definitions/field"
+                }
+              }
+            }
+          },
+          "max_response_time_ms": {
+            "type": "integer",
+            "description": "Maximum expected response time in milliseconds"
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Possible error codes for this command"
+          }
+        }
+      }
+    },
+    "error_codes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["code", "meaning"],
+        "properties": {
+          "code": {
+            "type": "string",
+            "description": "Error code identifier"
+          },
+          "meaning": {
+            "type": "string",
+            "description": "Human-readable error description"
+          },
+          "recoverable": {
+            "type": "boolean",
+            "description": "Whether error is recoverable with retry"
+          }
+        }
+      }
+    },
+    "software_expectations": {
+      "type": "object",
+      "properties": {
+        "retries": {
+          "type": "object",
+          "properties": {
+            "max_attempts": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "backoff_ms": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "backoff_strategy": {
+              "type": "string",
+              "enum": ["linear", "exponential", "constant"]
+            }
+          }
+        },
+        "data_freshness_max_ms": {
+          "type": "integer",
+          "description": "Maximum age of data before considered stale"
+        },
+        "connection_timeout_ms": {
+          "type": "integer"
+        },
+        "heartbeat_interval_ms": {
+          "type": "integer"
+        }
+      }
+    },
+    "required_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "firmware_protocol_tests",
+          "software_api_tests",
+          "end_to_end_protocol_test",
+          "error_handling_tests",
+          "timeout_tests",
+          "retry_tests"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "field": {
+      "type": "object",
+      "required": ["type"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "integer", "boolean", "array", "object"]
+        },
+        "unit": {
+          "type": "string",
+          "description": "Physical unit (e.g., celsius, meters, volts)"
+        },
+        "enum": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Allowed values"
+        },
+        "minimum": {
+          "type": "number"
+        },
+        "maximum": {
+          "type": "number"
+        },
+        "minLength": {
+          "type": "integer"
+        },
+        "maxLength": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

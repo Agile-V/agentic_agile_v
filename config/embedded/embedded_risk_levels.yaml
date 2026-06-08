@@ -1,0 +1,284 @@
+# Embedded Systems Risk Levels
+
+# This file defines risk classification for embedded systems work
+# that touches PCB, firmware, and/or software.
+
+risk_levels:
+  L0:
+    name: "Documentation or non-executable scaffolding"
+    description: "No hardware behavior change"
+    examples:
+      - "Generate documentation"
+      - "Create placeholder contract"
+      - "Add comments"
+      - "Update README"
+    required_evidence:
+      - "schema_validation"
+      - "review_checklist"
+    human_approval_required: false
+    independent_verification_required: false
+
+  L1:
+    name: "Low-risk firmware/software logic"
+    description: "Pure logic without hardware access"
+    examples:
+      - "Pure utility function"
+      - "Protocol parser without hardware access"
+      - "Host-only test improvement"
+      - "Data structure refactoring"
+    required_evidence:
+      - "schema_validation"
+      - "build_passed"
+      - "host_unit_tests_passed"
+      - "static_analysis_passed"
+    human_approval_required: false
+    independent_verification_required: false
+
+  L2:
+    name: "Peripheral-facing behavior"
+    description: "Interacts with I2C/SPI/UART/ADC peripherals"
+    examples:
+      - "I2C sensor driver"
+      - "SPI display driver"
+      - "ADC conversion logic"
+      - "UART protocol handler"
+      - "GPIO pin control"
+    required_evidence:
+      - "schema_validation"
+      - "target_build_passed"
+      - "host_tests_passed"
+      - "simulation_or_mock_passed"
+      - "contract_validation_passed"
+    human_approval_required: false
+    independent_verification_required: true
+    independent_verification_type: "recommended"
+
+  L3:
+    name: "Hardware behavior or product behavior"
+    description: "Affects boot, power, communication, or product functionality"
+    examples:
+      - "Power modes"
+      - "Watchdog behavior"
+      - "Boot sequence"
+      - "Firmware update behavior"
+      - "Sensor acquisition path"
+      - "Communication with host software"
+      - "Protocol implementation"
+      - "PCB pinout changes"
+    required_evidence:
+      - "schema_validation"
+      - "target_build_passed"
+      - "host_tests_passed"
+      - "target_tests_passed"
+      - "simulation_passed"
+      - "hil_tests_passed"
+      - "contract_validation_passed"
+      - "independent_verification_passed"
+      - "rollback_plan_documented"
+    human_approval_required: true
+    human_approval_roles:
+      - "firmware_engineer"
+      - "electrical_engineer"  # if PCB changes
+      - "software_owner"  # if protocol changes
+    independent_verification_required: true
+    independent_verification_type: "required"
+
+  L4:
+    name: "Safety, security, regulatory, or release-critical behavior"
+    description: "Affects safety, security, compliance, or production release"
+    examples:
+      - "Secure boot"
+      - "Signed firmware update"
+      - "Failsafe behavior"
+      - "Safety interlock"
+      - "Medical, pharma, or regulated product behavior"
+      - "Production release package"
+      - "Cryptographic operations"
+      - "Authentication/authorization"
+    required_evidence:
+      - "all_L3_evidence"
+      - "security_review_passed"
+      - "formal_release_checklist_completed"
+      - "independent_verification_fresh_context"
+      - "signed_evidence_bundle"
+      - "regulatory_compliance_check"  # if applicable
+    human_approval_required: true
+    human_approval_roles:
+      - "firmware_engineer"
+      - "electrical_engineer"
+      - "security_reviewer"  # for security changes
+      - "qa_owner"
+      - "release_owner"
+      - "domain_expert"  # for safety/regulatory
+    independent_verification_required: true
+    independent_verification_type: "required_fresh_context"
+
+# Cross-domain risk triggers
+# These conditions automatically elevate risk level
+
+risk_triggers:
+  pcb_pinout_change:
+    description: "Any change to MCU pin assignments, net routing, or component connections"
+    minimum_risk_level: "L3"
+    reason: "Invalidates firmware config and may require board rework"
+    required_actions:
+      - "Regenerate hardware-firmware contract"
+      - "Mark firmware evidence stale"
+      - "Mark software evidence stale"
+      - "Require hardware-firmware verification"
+
+  power_domain_change:
+    description: "Change to voltage rails, regulators, or power sequencing"
+    minimum_risk_level: "L3"
+    reason: "May damage hardware or violate component specs"
+    required_actions:
+      - "Electrical engineer approval"
+      - "Update hardware-firmware contract"
+      - "Verify component voltage compatibility"
+
+  protocol_change:
+    description: "Change to firmware-software protocol (commands, payloads, error codes)"
+    minimum_risk_level: "L3"
+    reason: "Breaks software integration"
+    required_actions:
+      - "Update firmware-software contract"
+      - "Mark software evidence stale"
+      - "Require protocol integration tests"
+
+  boot_behavior_change:
+    description: "Change to boot sequence, initialization, or recovery behavior"
+    minimum_risk_level: "L3"
+    reason: "May brick devices or prevent recovery"
+    required_actions:
+      - "Rollback plan required"
+      - "HIL test required"
+      - "Firmware engineer approval"
+
+  watchdog_change:
+    description: "Change to watchdog configuration or handling"
+    minimum_risk_level: "L3"
+    reason: "May cause unexpected resets or disable fail-safe"
+    required_actions:
+      - "HIL test required"
+      - "Firmware engineer approval"
+
+  security_change:
+    description: "Change to authentication, encryption, or secure boot"
+    minimum_risk_level: "L4"
+    reason: "Security vulnerability"
+    required_actions:
+      - "Security review required"
+      - "Penetration testing recommended"
+      - "Security reviewer approval"
+
+  safety_change:
+    description: "Change affecting safety-critical behavior (medical, industrial, automotive)"
+    minimum_risk_level: "L4"
+    reason: "Regulatory compliance and safety"
+    required_actions:
+      - "Domain expert approval"
+      - "Regulatory compliance check"
+      - "Formal verification recommended"
+
+  release_package:
+    description: "Creating production release artifacts"
+    minimum_risk_level: "L4"
+    reason: "Production deployment"
+    required_actions:
+      - "All evidence complete"
+      - "Release checklist complete"
+      - "Release owner approval"
+      - "Signed evidence bundle"
+
+# Evidence requirements by type
+
+evidence_types:
+  schema_validation:
+    command: "agilev embedded contract validate --task {task_id}"
+    description: "Validate contract schemas"
+    risk_levels: ["L0", "L1", "L2", "L3", "L4"]
+
+  build_passed:
+    command: "agilev firmware build --task {task_id}"
+    description: "Firmware builds successfully"
+    risk_levels: ["L1", "L2", "L3", "L4"]
+
+  host_unit_tests_passed:
+    command: "agilev firmware test --host --task {task_id}"
+    description: "Host-based unit tests pass"
+    risk_levels: ["L1", "L2", "L3", "L4"]
+
+  static_analysis_passed:
+    command: "agilev firmware analyze --task {task_id}"
+    description: "Static analysis checks pass"
+    risk_levels: ["L1", "L2", "L3", "L4"]
+
+  target_build_passed:
+    command: "agilev firmware build --target --task {task_id}"
+    description: "Cross-compile for target succeeds"
+    risk_levels: ["L2", "L3", "L4"]
+
+  simulation_passed:
+    command: "agilev firmware simulate --task {task_id}"
+    description: "Simulation or emulation tests pass"
+    risk_levels: ["L3", "L4"]
+
+  hil_tests_passed:
+    command: "agilev firmware hil-test --task {task_id}"
+    description: "Hardware-in-the-loop tests pass on real hardware"
+    risk_levels: ["L3", "L4"]
+
+  contract_validation_passed:
+    command: "agilev firmware contract validate --task {task_id}"
+    description: "Hardware-firmware and firmware-software contracts are valid"
+    risk_levels: ["L2", "L3", "L4"]
+
+  independent_verification_passed:
+    command: "agilev embedded verify --task {task_id}"
+    description: "Independent verifier checks all evidence"
+    risk_levels: ["L3", "L4"]
+
+  security_review_passed:
+    command: "manual"
+    description: "Security reviewer has approved changes"
+    risk_levels: ["L4"]
+
+  release_checklist_completed:
+    command: "agilev embedded release-check --task {task_id}"
+    description: "All release criteria satisfied"
+    risk_levels: ["L4"]
+
+# Stale evidence rules
+
+stale_evidence_rules:
+  pcb_candidate_changed:
+    description: "Source PCB candidate has changed"
+    marks_stale:
+      - "firmware_evidence_bundle"
+      - "software_evidence_bundle"
+      - "embedded_system_evidence_bundle"
+    required_action: "Regenerate hardware-firmware contract and re-run firmware validation"
+
+  hardware_firmware_contract_changed:
+    description: "Hardware-firmware contract has been updated"
+    marks_stale:
+      - "firmware_build"
+      - "firmware_tests"
+      - "firmware_evidence_bundle"
+      - "software_evidence_bundle"
+    required_action: "Rebuild firmware and re-run tests"
+
+  firmware_software_contract_changed:
+    description: "Firmware-software contract has been updated"
+    marks_stale:
+      - "software_tests"
+      - "software_evidence_bundle"
+      - "embedded_system_evidence_bundle"
+    required_action: "Re-run software tests against new contract"
+
+  firmware_binary_changed:
+    description: "Firmware binary hash has changed"
+    marks_stale:
+      - "hil_test_results"
+      - "simulation_results"
+    required_action: "Re-run simulation and HIL tests with new binary"
