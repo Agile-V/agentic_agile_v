@@ -13,8 +13,6 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
-import pytest
-
 # ---------------------------------------------------------------------------
 # Paths
 # ---------------------------------------------------------------------------
@@ -226,18 +224,6 @@ class TestTraceabilityRealGraph:
         result = build_traceability(g, impact, requirements)
         assert result.decision in ("pass", "pass_with_findings"), (
             f"Unexpected gate decision: {result.decision}"
-        )
-
-    def test_orphan_detected_for_unlinked_component(self):
-        from agilev.graph.traceability import build_traceability
-
-        g = _graph()
-        impact = _impact("CR-DB-001", "Change database session pool size in db.py get_session")
-        requirements = [("REQ-999", "UI tooltip color button widget")]
-        # Provide changed_files so orphan detection has something to compare
-        result = build_traceability(g, impact, requirements, changed_files=["src/db.py"])
-        assert result.decision in ("pass_with_findings", "fail"), (
-            f"Expected pass_with_findings or fail for unlinked db change. Got: {result.decision}"
         )
 
     def test_orphan_detected_for_unlinked_component(self):

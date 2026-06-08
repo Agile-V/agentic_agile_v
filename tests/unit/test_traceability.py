@@ -10,19 +10,15 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
 from agilev.graph.model import (
     AffectedComponent,
     GraphTraceabilityLink,
     ImpactMap,
-    ImpactRisk,
     SystemEdge,
     SystemGraph,
     SystemNode,
 )
-from agilev.graph.traceability import build_traceability, TraceabilityResult
-
+from agilev.graph.traceability import TraceabilityResult, build_traceability
 
 # ---------------------------------------------------------------------------
 # Fixtures
@@ -248,8 +244,8 @@ class TestBuildTraceability:
         links = result.req_to_component_links
 
         assert len(links) > 0
-        assert all("requirement_id" in l for l in links)
-        assert all("component_id" in l for l in links)
+        assert all("requirement_id" in link for link in links)
+        assert all("component_id" in link for link in links)
 
     def test_pass_with_findings_when_orphan_changes(self):
         graph = make_small_graph()

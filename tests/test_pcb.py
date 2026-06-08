@@ -1,30 +1,16 @@
 """Tests for PCB development modules."""
-import pytest
-from pathlib import Path
-import json
 
-from agilev.pcb.circuit_ir import (
-    CircuitIR,
-    Pin,
-    PinType,
-    Component,
-    Net,
-    PowerDomain,
-    Interface
-)
+from agilev.pcb.circuit_ir import CircuitIR, Component, Interface, Net, Pin, PinType, PowerDomain
 from agilev.pcb.component_index import (
-    ComponentIndex,
     ComponentEntry,
-    DatasheetExtract,
-    create_resistor_entry,
+    ComponentIndex,
     create_capacitor_entry,
-    create_ic_entry
+    create_resistor_entry,
 )
 from agilev.pcb.validators import (
-    ValidationResult,
-    VoltageDomainValidator,
+    I2CInterfaceValidator,
     PowerBudgetValidator,
-    I2CInterfaceValidator
+    VoltageDomainValidator,
 )
 
 
@@ -418,7 +404,12 @@ class TestValidators:
             value="MCU",
             footprint="QFN-32",
             pins=[
-                Pin(number="10", name="SDA", type=PinType.BIDIRECTIONAL, electrical_type="bidirectional"),
+                Pin(
+                    number="10",
+                    name="SDA",
+                    type=PinType.BIDIRECTIONAL,
+                    electrical_type="bidirectional"
+                ),
                 Pin(number="11", name="SCL", type=PinType.OUTPUT, electrical_type="output")
             ]
         )

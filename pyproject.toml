@@ -75,6 +75,7 @@ ignore = []
 "src/agilev/graph/impact.py" = ["E501"]
 "src/agilev/state.py" = ["E501"]
 "src/agilev/task_context.py" = ["E501"]
+"tests/test_pcb.py" = ["E501"]  # Pin constructors
 
 [tool.mypy]
 python_version = "3.11"

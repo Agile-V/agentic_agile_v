@@ -143,13 +143,13 @@ jobs:
       
       - name: Install ajv-cli
         run: |
-          npm install -g ajv-cli
+          npm install -g ajv-cli ajv-formats
       
       - name: Validate JSON schemas
         run: |
           for schema in .agentic-agile-v/schemas/*.json; do
             echo "Validating $schema"
-            ajv compile -s "$schema" || exit 1
+            ajv compile -s "$schema" -c ajv-formats || exit 1
           done
           echo "✅ All schemas are valid"
 

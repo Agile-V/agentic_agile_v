@@ -10,9 +10,8 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
-from agilev.graph.model import SystemGraph, SystemNode, SystemEdge, ImpactMap
+from agilev.graph.impact import analyze_impact
+from agilev.graph.model import ImpactMap, SystemEdge, SystemGraph, SystemNode
 from agilev.graph.queries import (
     extract_keywords_from_change_request,
     find_nodes_by_keyword,
@@ -20,8 +19,6 @@ from agilev.graph.queries import (
     get_neighbors,
     get_test_nodes_for,
 )
-from agilev.graph.impact import analyze_impact
-
 
 # ---------------------------------------------------------------------------
 # Sample graph fixture
