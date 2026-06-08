@@ -1,0 +1,197 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/system_contract.schema.json",
+  "title": "System Contract",
+  "description": "Top-level contract linking product requirements to PCB, firmware, and software tasks",
+  "type": "object",
+  "required": ["contract_id", "product", "revision", "risk_level", "requirements"],
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "pattern": "^SYS-[A-Z0-9-]+$",
+      "description": "Unique system contract identifier (e.g., SYS-001)"
+    },
+    "product": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Product name or identifier"
+    },
+    "revision": {
+      "type": "string",
+      "description": "Hardware/system revision (e.g., rev_a, v1.0)"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4"],
+      "description": "System-level risk classification"
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["id", "text"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^REQ-[A-Z0-9-]+$",
+            "description": "Requirement identifier (e.g., REQ-TEMP-001)"
+          },
+          "text": {
+            "type": "string",
+            "minLength": 1,
+            "description": "Requirement description"
+          },
+          "risk_level": {
+            "type": "string",
+            "enum": ["L0", "L1", "L2", "L3", "L4"],
+            "description": "Requirement-specific risk level"
+          }
+        }
+      }
+    },
+    "pcb": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^AAV-PCB-[0-9]+$",
+          "description": "PCB task identifier"
+        },
+        "candidate_id": {
+          "type": "string",
+          "description": "Selected PCB candidate identifier"
+        },
+        "kicad_project": {
+          "type": "string",
+          "description": "Path to KiCad project directory"
+        },
+        "evidence_bundle": {
+          "type": "string",
+          "description": "Path to PCB evidence bundle"
+        }
+      }
+    },
+    "firmware": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^AAV-FW-[0-9]+$",
+          "description": "Firmware task identifier"
+        },
+        "backend": {
+          "type": "string",
+          "enum": ["platformio", "zephyr", "cmake", "esp-idf"],
+          "description": "Firmware build backend"
+        },
+        "board": {
+          "type": "string",
+          "description": "Board identifier/name"
+        },
+        "evidence_bundle": {
+          "type": "string",
+          "description": "Path to firmware evidence bundle"
+        }
+      }
+    },
+    "software": {
+      "type": "object",
+      "properties": {
+        "task_id": {
+          "type": "string",
+          "pattern": "^AAV-SW-[0-9]+$",
+          "description": "Software task identifier"
+        },
+        "backend": {
+          "type": "string",
+          "enum": ["openhands", "manual"],
+          "description": "Software implementation backend"
+        },
+        "api_contract": {
+          "type": "string",
+          "description": "Path to firmware-software contract"
+        },
+        "evidence_bundle": {
+          "type": "string",
+          "description": "Path to software evidence bundle"
+        }
+      }
+    },
+    "integration": {
+      "type": "object",
+      "properties": {
+        "required_evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "pcb_erc_passed",
+              "hardware_firmware_contract_valid",
+              "firmware_build_passed",
+              "firmware_unit_tests_passed",
+              "simulation_passed",
+              "hardware_in_loop_passed",
+              "software_api_tests_passed",
+              "end_to_end_test_passed",
+              "independent_verification_passed",
+              "human_approval_recorded"
+            ]
+          },
+          "description": "Required evidence for system integration"
+        },
+        "human_approvals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "approved"],
+            "properties": {
+              "role": {
+                "type": "string",
+                "enum": [
+                  "electrical_engineer",
+                  "firmware_engineer",
+                  "software_owner",
+                  "qa_owner",
+                  "release_owner",
+                  "security_reviewer",
+                  "domain_expert"
+                ]
+              },
+              "approved": {
+                "type": "boolean"
+              },
+              "approved_by": {
+                "type": "string",
+                "description": "Name or identifier of approver"
+              },
+              "approved_at": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "comments": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated_at": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "created_by": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

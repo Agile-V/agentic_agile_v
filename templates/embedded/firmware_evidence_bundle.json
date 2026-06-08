@@ -1,0 +1,50 @@
+{
+  "task_id": "AAV-FW-001",
+  "artifact_type": "firmware",
+  "risk_level": "L3",
+  "board": "example_board_rev_a",
+  "pcb_task_id": "AAV-PCB-001",
+  "pcb_candidate_id": "pcb-candidate-001",
+  "hardware_firmware_contract": ".agentic-agile-v/contracts/hardware_firmware_contract.yaml",
+  "firmware_software_contract": ".agentic-agile-v/contracts/firmware_software_contract.yaml",
+  "backend": "platformio",
+  "build": {
+    "status": "not_run",
+    "log": null,
+    "image_hash": null
+  },
+  "static_analysis": {
+    "status": "not_run"
+  },
+  "tests": {
+    "host_unit_tests": "not_run",
+    "target_tests": "not_run",
+    "simulation_tests": "not_run",
+    "hil_tests": "not_run",
+    "test_logs": []
+  },
+  "diagnostics": {},
+  "traceability": {
+    "requirements": [],
+    "pcb_nets": [],
+    "firmware_files": []
+  },
+  "verification": {
+    "independent_verifier": "not_run",
+    "verifier_report": null,
+    "residual_risks": []
+  },
+  "human_approval_required": true,
+  "human_approval": "pending",
+  "approvals": [
+    {
+      "role": "firmware_engineer",
+      "status": "pending"
+    },
+    {
+      "role": "electrical_engineer",
+      "status": "pending"
+    }
+  ],
+  "stale": false
+}

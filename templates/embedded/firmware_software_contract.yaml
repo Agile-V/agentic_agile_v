@@ -1,0 +1,71 @@
+contract_id: FSC-001
+source_firmware_task: AAV-FW-001
+transport: usb_cdc_serial
+protocol_version: 1
+
+commands:
+  - name: get_temperature
+    request:
+      type: object
+      fields: []
+    response:
+      type: object
+      fields:
+        temperature_c:
+          type: number
+          unit: celsius
+        timestamp_ms:
+          type: integer
+        status:
+          type: string
+          enum:
+            - ok
+            - sensor_missing
+            - bus_error
+            - not_ready
+    max_response_time_ms: 50
+
+  - name: run_diagnostics
+    request:
+      type: object
+      fields: []
+    response:
+      type: object
+      fields:
+        i2c_scan:
+          type: string
+          enum:
+            - passed
+            - failed
+        sensor_self_test:
+          type: string
+          enum:
+            - passed
+            - failed
+        firmware_version:
+          type: string
+    max_response_time_ms: 200
+
+error_codes:
+  - code: SENSOR_MISSING
+    meaning: "Temperature sensor did not respond at expected I2C address"
+    recoverable: false
+  - code: BUS_ERROR
+    meaning: "I2C transaction failed"
+    recoverable: true
+  - code: NOT_READY
+    meaning: "Firmware not yet initialized"
+    recoverable: true
+
+software_expectations:
+  retries:
+    max_attempts: 3
+    backoff_ms: 100
+    backoff_strategy: linear
+  data_freshness_max_ms: 500
+  connection_timeout_ms: 1000
+
+required_evidence:
+  - firmware_protocol_tests
+  - software_api_tests
+  - end_to_end_protocol_test
