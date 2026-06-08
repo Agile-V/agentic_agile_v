@@ -5,7 +5,6 @@ Generates Python API classes from firmware-software contracts.
 """
 
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -30,7 +29,7 @@ class FirmwareAPIGenerator:
             Python source code for API class
         """
         contract_id = self.contract["contract_id"]
-        transport = self.contract.get("transport", "usb_cdc_serial")
+        _transport = self.contract.get("transport", "usb_cdc_serial")  # noqa: F841
         commands = self.contract.get("commands", [])
         error_codes = self.contract.get("error_codes", [])
 
@@ -101,7 +100,8 @@ class FirmwareAPIGenerator:
             "            self.serial.close()",
             "            self.serial = None",
             "",
-            "    def _send_command(self, command: str, params: dict[str, Any] = None) -> dict[str, Any]:",
+            "    def _send_command(self, command: str, params: dict[str, Any] = None)",
+            "    -> dict[str, Any]:",
             '        """Send command to firmware.',
             "",
             "        Args:",

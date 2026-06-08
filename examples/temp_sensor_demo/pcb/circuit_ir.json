@@ -1,0 +1,54 @@
+{
+  "version": "1.0",
+  "project_name": "temp_sensor_node",
+  "mcu": {
+    "part_number": "STM32F401RET6",
+    "manufacturer": "STMicroelectronics",
+    "package": "LQFP64"
+  },
+  "interfaces": [
+    {
+      "name": "I2C1",
+      "type": "I2C",
+      "pins": {
+        "SCL": "PB6",
+        "SDA": "PB7"
+      },
+      "config": {
+        "speed": "100kHz",
+        "pull_ups": "4.7k"
+      }
+    },
+    {
+      "name": "USB",
+      "type": "USB",
+      "pins": {
+        "DP": "PA12",
+        "DM": "PA11"
+      },
+      "config": {
+        "speed": "full_speed"
+      }
+    }
+  ],
+  "components": [
+    {
+      "designator": "U2",
+      "part_number": "TMP102",
+      "manufacturer": "Texas Instruments",
+      "description": "I2C Temperature Sensor",
+      "interface": "I2C1",
+      "i2c_address": "0x48"
+    }
+  ],
+  "power": {
+    "input_voltage": "5V",
+    "regulators": [
+      {
+        "designator": "U1",
+        "output_voltage": "3.3V",
+        "max_current": "500mA"
+      }
+    ]
+  }
+}

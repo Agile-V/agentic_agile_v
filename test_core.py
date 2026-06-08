@@ -1,15 +1,13 @@
 #!/usr/bin/env python3
 """Test script for Agentic Agile-V core functionality without external dependencies."""
-import sys
-import json
 import hashlib
+import sys
 from pathlib import Path
-from datetime import datetime, timezone
 
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent / "src"))
 
-from agilev.state import EventLogger, TaskState, LockManager
+from agilev.state import EventLogger, LockManager, TaskState
 
 
 def test_event_logger():
@@ -49,9 +47,9 @@ def test_event_logger():
     # Verify chain
     valid, errors = logger.verify_chain()
     if valid:
-        print(f"✅ Event chain is valid")
+        print("✅ Event chain is valid")
     else:
-        print(f"❌ Event chain validation failed:")
+        print("❌ Event chain validation failed:")
         for error in errors:
             print(f"   {error}")
         return False
@@ -83,17 +81,17 @@ def test_task_state():
     
     # Create tasks
     task_state.create_task("AAV-0001", "Add user authentication", "L2")
-    print(f"✅ Created task AAV-0001")
+    print("✅ Created task AAV-0001")
     
     task_state.create_task("AAV-0002", "Fix login bug", "L1")
-    print(f"✅ Created task AAV-0002")
+    print("✅ Created task AAV-0002")
     
     task_state.create_task("AAV-0003", "Update firmware timing", "L4")
-    print(f"✅ Created task AAV-0003")
+    print("✅ Created task AAV-0003")
     
     # Update status
     task_state.update_task_status("AAV-0001", "in_progress")
-    print(f"✅ Updated AAV-0001 status to in_progress")
+    print("✅ Updated AAV-0001 status to in_progress")
     
     # Get task
     task = task_state.get_task("AAV-0001")
@@ -137,9 +135,9 @@ def test_lock_manager():
     )
     
     if success:
-        print(f"✅ Lock acquired for AAV-0001")
+        print("✅ Lock acquired for AAV-0001")
     else:
-        print(f"❌ Failed to acquire lock")
+        print("❌ Failed to acquire lock")
         return False
     
     # Try to acquire conflicting lock
@@ -152,9 +150,9 @@ def test_lock_manager():
     )
     
     if not conflict:
-        print(f"✅ Correctly blocked conflicting lock on src/auth.ts")
+        print("✅ Correctly blocked conflicting lock on src/auth.ts")
     else:
-        print(f"❌ Should have blocked conflicting lock")
+        print("❌ Should have blocked conflicting lock")
         return False
     
     # Acquire non-conflicting lock
@@ -167,9 +165,9 @@ def test_lock_manager():
     )
     
     if success2:
-        print(f"✅ Lock acquired for AAV-0003 (no conflict)")
+        print("✅ Lock acquired for AAV-0003 (no conflict)")
     else:
-        print(f"❌ Should have acquired non-conflicting lock")
+        print("❌ Should have acquired non-conflicting lock")
         return False
     
     # Get active locks
@@ -180,7 +178,7 @@ def test_lock_manager():
     
     # Release lock
     lock_mgr.release_lock("AAV-0001", "agent:implementation")
-    print(f"✅ Released lock for AAV-0001")
+    print("✅ Released lock for AAV-0001")
     
     # Verify lock was released
     active_after = lock_mgr.get_active_locks()
@@ -223,9 +221,9 @@ def test_file_hashing():
     file_hash2 = f"sha256:{sha256_hash2.hexdigest()}"
     
     if file_hash == file_hash2:
-        print(f"✅ Hash is deterministic (matches on second computation)")
+        print("✅ Hash is deterministic (matches on second computation)")
     else:
-        print(f"❌ Hash is not deterministic")
+        print("❌ Hash is not deterministic")
         return False
     
     print()
@@ -257,7 +255,7 @@ def test_integration():
         task_id=task_id,
         summary="Created integration test task",
     )
-    print(f"✅ Step 1: Task created and event logged")
+    print("✅ Step 1: Task created and event logged")
     
     # 2. Acquire lock
     lock_success = lock_mgr.acquire_lock(
@@ -274,7 +272,7 @@ def test_integration():
         summary="Acquired lock and started implementation",
         artifacts=["src/integration.ts"],
     )
-    print(f"✅ Step 2: Lock acquired and event logged")
+    print("✅ Step 2: Lock acquired and event logged")
     
     # 3. Update task status
     task_state.update_task_status(task_id, "in_progress")
@@ -284,7 +282,7 @@ def test_integration():
         task_id=task_id,
         summary="Started implementation",
     )
-    print(f"✅ Step 3: Status updated and event logged")
+    print("✅ Step 3: Status updated and event logged")
     
     # 4. Add evidence
     logger.log_event(
@@ -294,7 +292,7 @@ def test_integration():
         summary="Added test evidence",
         metadata={"tests_passed": True, "coverage": "95%"},
     )
-    print(f"✅ Step 4: Evidence logged")
+    print("✅ Step 4: Evidence logged")
     
     # 5. Verification
     logger.log_event(
@@ -303,7 +301,7 @@ def test_integration():
         task_id=task_id,
         summary="Independent verification completed",
     )
-    print(f"✅ Step 5: Verification logged")
+    print("✅ Step 5: Verification logged")
     
     # 6. Approval
     logger.log_event(
@@ -312,7 +310,7 @@ def test_integration():
         task_id=task_id,
         summary="Task approved for merge",
     )
-    print(f"✅ Step 6: Approval logged")
+    print("✅ Step 6: Approval logged")
     
     # 7. Release lock
     lock_mgr.release_lock(task_id, "test-agent")
@@ -323,14 +321,14 @@ def test_integration():
         task_id=task_id,
         summary="Task completed and closed",
     )
-    print(f"✅ Step 7: Lock released, task completed")
+    print("✅ Step 7: Lock released, task completed")
     
     # Verify event chain
     valid, errors = logger.verify_chain()
     if valid:
-        print(f"✅ Event chain integrity verified")
+        print("✅ Event chain integrity verified")
     else:
-        print(f"❌ Event chain corrupted")
+        print("❌ Event chain corrupted")
         return False
     
     # Check final state
@@ -338,7 +336,7 @@ def test_integration():
     events = logger.get_events(task_id=task_id)
     locks = lock_mgr.get_active_locks()
     
-    print(f"\nFinal state:")
+    print("\nFinal state:")
     print(f"  Task status: {task['status']}")
     print(f"  Events logged: {len(events)}")
     print(f"  Active locks: {len([l for l in locks if l['task_id'] == task_id])}")

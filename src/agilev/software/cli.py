@@ -28,22 +28,22 @@ def cmd_software_generate_api(args: argparse.Namespace) -> int:
     try:
         generator = FirmwareAPIGenerator(contract_path)
 
-        print(f"Generating software API...")
+        print("Generating software API...")
         print(f"  Contract: {contract_path}")
         print(f"  Output: {output_path}")
 
         generator.save_api(output_path)
 
         print(f"✓ Generated API: {output_path}")
-        print(f"\nNext steps:")
-        print(f"  1. Review generated API")
-        print(f"  2. Install dependencies: pip install pyserial")
-        print(f"  3. Use API in your application:")
-        print(f"")
+        print("\nNext steps:")
+        print("  1. Review generated API")
+        print("  2. Install dependencies: pip install pyserial")
+        print("  3. Use API in your application:")
+        print("")
         print(f"     from {output_path.stem} import *")
-        print(f"     with FSC_001_API('/dev/ttyUSB0') as api:")
-        print(f"         result = api.get_temperature()")
-        print(f"         print(result)")
+        print("     with FSC_001_API('/dev/ttyUSB0') as api:")
+        print("         result = api.get_temperature()")
+        print("         print(result)")
 
         return 0
 

@@ -65,7 +65,11 @@ def cmd_embedded_contract_validate(args: argparse.Namespace) -> int:
         print(f"✓ Loaded contract: {contract.contract_id}")
 
         # Find schema
-        schema_path = Path(__file__).parent.parent.parent.parent / "schemas" / "system_contract.schema.json"
+        schema_path = (
+            Path(__file__).parent.parent.parent.parent
+            / "schemas"
+            / "system_contract.schema.json"
+        )
         if not schema_path.exists():
             print(f"✗ Schema not found: {schema_path}", file=sys.stderr)
             return 1
@@ -86,7 +90,7 @@ def cmd_embedded_contract_validate(args: argparse.Namespace) -> int:
 
             # Show summary
             requirements = contract.get_requirements()
-            print(f"\nContract summary:")
+            print("\nContract summary:")
             print(f"  Product: {contract.product}")
             print(f"  Revision: {contract.revision}")
             print(f"  Risk level: {contract.risk_level}")
@@ -186,13 +190,13 @@ def cmd_embedded_verify(args: argparse.Namespace) -> int:
     try:
         verifier = CrossDomainVerifier(project_root)
 
-        print(f"Verifying cross-domain contracts...")
+        print("Verifying cross-domain contracts...")
         print(f"  Project: {project_root}")
 
         results = verifier.verify_all()
 
         # Print availability
-        print(f"\nArtifact availability:")
+        print("\nArtifact availability:")
         for artifact, available in results["availability"].items():
             status = "✓" if available else "✗"
             print(f"  {status} {artifact}")
@@ -217,10 +221,10 @@ def cmd_embedded_verify(args: argparse.Namespace) -> int:
         print(f"\nResults saved: {results_path}")
 
         if results["passed"]:
-            print(f"\n✓ Cross-domain verification passed")
+            print("\n✓ Cross-domain verification passed")
             return 0
         else:
-            print(f"\n✗ Cross-domain verification failed", file=sys.stderr)
+            print("\n✗ Cross-domain verification failed", file=sys.stderr)
             print(f"  Errors: {results['summary']['errors']}", file=sys.stderr)
             print(f"  Warnings: {results['summary']['warnings']}", file=sys.stderr)
             return 1
@@ -248,7 +252,7 @@ def cmd_embedded_gate(args: argparse.Namespace) -> int:
     try:
         gate = EmbeddedReleaseGate(project_root)
 
-        print(f"Checking release gate...")
+        print("Checking release gate...")
         print(f"  Project: {project_root}")
         print(f"  Task: {args.task_id}")
         print(f"  Risk level: {args.risk_level}")
@@ -260,7 +264,7 @@ def cmd_embedded_gate(args: argparse.Namespace) -> int:
         )
 
         # Print checks
-        print(f"\nGate checks:")
+        print("\nGate checks:")
         for check in results["checks"]:
             status = "✓" if check["passed"] else "✗"
             print(f"  {status} {check['name']}: {check['message']}")
@@ -283,10 +287,10 @@ def cmd_embedded_gate(args: argparse.Namespace) -> int:
         print(f"\nResults saved: {results_path}")
 
         if results["passed"]:
-            print(f"\n✓ Release gate PASSED - task may proceed")
+            print("\n✓ Release gate PASSED - task may proceed")
             return 0
         else:
-            print(f"\n✗ Release gate FAILED - task is BLOCKED", file=sys.stderr)
+            print("\n✗ Release gate FAILED - task is BLOCKED", file=sys.stderr)
             print(f"  Blockers: {len(results['blockers'])}", file=sys.stderr)
             return 1
 
@@ -311,7 +315,9 @@ def build_embedded_parser(subparsers: argparse._SubParsersAction) -> None:
     embedded_subparsers = embedded_parser.add_subparsers(dest="embedded_command")
 
     # embedded init
-    init_parser = embedded_subparsers.add_parser("init", help="Initialize embedded systems structure")
+    init_parser = embedded_subparsers.add_parser(
+        "init", help="Initialize embedded systems structure"
+    )
     init_parser.add_argument(
         "--template", action="store_true", help="Copy contract templates"
     )

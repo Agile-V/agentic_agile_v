@@ -97,7 +97,7 @@ def test_end_to_end_workflow():
         assert contract["board"] == "test_board"
         assert "mcu" in contract
         assert "interfaces" in contract
-        print(f"✓ Contract validation passed")
+        print("✓ Contract validation passed")
         
         # Step 3: Validate contract with schema
         print("\nStep 3: Validating contract against schema...")
@@ -114,13 +114,13 @@ def test_end_to_end_workflow():
         try:
             is_valid, errors = hw_fw_contract.validate(schema_path)
             if is_valid:
-                print(f"✓ Contract schema validation passed")
+                print("✓ Contract schema validation passed")
             else:
-                print(f"⚠ Schema validation failed (jsonschema not available)")
+                print("⚠ Schema validation failed (jsonschema not available)")
                 for error in errors:
                     print(f"  {error}")
         except ImportError:
-            print(f"⚠ Skipping schema validation (jsonschema not installed)")
+            print("⚠ Skipping schema validation (jsonschema not installed)")
         
         # Step 4: Generate firmware project
         print("\nStep 4: Generating firmware project...")
@@ -130,10 +130,10 @@ def test_end_to_end_workflow():
         project_dir = tmp_path / "firmware"
         
         backend.init_project(project_dir)
-        print(f"✓ Initialized project structure")
+        print("✓ Initialized project structure")
         
         backend.generate_from_contract(project_dir)
-        print(f"✓ Generated firmware code")
+        print("✓ Generated firmware code")
         
         # Step 5: Verify generated files
         print("\nStep 5: Verifying generated files...")
@@ -184,9 +184,9 @@ def test_end_to_end_workflow():
         platformio_ini = (project_dir / "platformio.ini").read_text()
         
         if "genericSTM32F411CE" in platformio_ini or "board" in platformio_ini:
-            print(f"✓ platformio.ini contains board configuration")
+            print("✓ platformio.ini contains board configuration")
         else:
-            print(f"✗ platformio.ini missing board configuration")
+            print("✗ platformio.ini missing board configuration")
             return False
         
         # Step 8: Show evidence collection
@@ -197,7 +197,7 @@ def test_end_to_end_workflow():
         assert evidence["artifact_type"] == "firmware"
         assert evidence["board"] == "test_board"
         assert evidence["backend"] == "platformio"
-        print(f"✓ Evidence bundle created")
+        print("✓ Evidence bundle created")
         print(f"  Task ID: {evidence['task_id']}")
         print(f"  Board: {evidence['board']}")
         print(f"  Backend: {evidence['backend']}")

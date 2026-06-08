@@ -177,9 +177,9 @@ def main():
     
     print(f"  Python modules: {len(python_files)}")
     print(f"  Total lines: ~{total_lines}")
-    print(f"  Schemas: 4")
-    print(f"  Templates: 4")
-    print(f"  Documentation: 3 files")
+    print("  Schemas: 4")
+    print("  Templates: 4")
+    print("  Documentation: 3 files")
     
     # Show key features
     print("\n✨ Key Features:")

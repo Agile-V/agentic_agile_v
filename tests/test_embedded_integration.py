@@ -164,9 +164,9 @@ def test_template_validation():
         with open(json_path) as f:
             data = json.load(f)
         if "task_id" in data and "artifact_type" in data:
-            print(f"✓ firmware_evidence_bundle.json is valid JSON")
+            print("✓ firmware_evidence_bundle.json is valid JSON")
         else:
-            print(f"✗ firmware_evidence_bundle.json missing required fields")
+            print("✗ firmware_evidence_bundle.json missing required fields")
             all_valid = False
     except Exception as e:
         print(f"✗ firmware_evidence_bundle.json error: {e}")

@@ -4,8 +4,6 @@ Tests for firmware OpenHands integration.
 
 from pathlib import Path
 
-import pytest
-
 
 def test_firmware_hooks_exist():
     """Test that firmware hooks exist and are executable."""
@@ -69,4 +67,6 @@ def test_hooks_json_updated():
                     all_hooks.extend([h["command"] for h in entry["hooks"]])
 
     firmware_hooks = [h for h in all_hooks if "firmware" in h]
-    assert len(firmware_hooks) >= 3, f"Expected at least 3 firmware hooks, found {len(firmware_hooks)}"
+    assert len(firmware_hooks) >= 3, (
+        f"Expected at least 3 firmware hooks, found {len(firmware_hooks)}"
+    )

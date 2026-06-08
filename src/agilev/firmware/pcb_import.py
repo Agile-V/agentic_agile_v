@@ -6,7 +6,6 @@ Imports hardware-firmware contract data from PCB backend.
 
 import json
 from pathlib import Path
-from typing import Any
 
 import yaml
 
@@ -112,11 +111,11 @@ def validate_hardware_firmware_contract_against_pcb(
     # Load PCB circuit
     # TODO: Use actual circuit IR loader when available
     with open(pcb_circuit_path) as f:
-        circuit_data = json.load(f)
+        _circuit_data = json.load(f)  # noqa: F841
 
     # Validate MCU
     if "mcu" in contract:
-        mcu = contract["mcu"]
+        _mcu = contract["mcu"]  # noqa: F841
         # Check if MCU exists in circuit
         # TODO: Implement MCU validation
 

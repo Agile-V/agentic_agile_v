@@ -20,6 +20,8 @@ from agilev.control_enforcer import (
     check_tool,
 )
 from agilev.control_matrix import ControlMatrix, ControlMatrixError, RiskLevel
+from agilev.embedded.cli import build_embedded_parser
+from agilev.firmware.cli import build_firmware_parser
 from agilev.openhands.control_hooks import append_control_event, classify_tool, find_matrix_path
 from agilev.openhands.event_ledger import EventLedger, EventType
 from agilev.openhands.evidence_adapter import EvidenceAdapter
@@ -32,8 +34,6 @@ from agilev.openhands.session_manager import (
     OpenHandsSessionManager,
     SessionConfig,
 )
-from agilev.embedded.cli import build_embedded_parser
-from agilev.firmware.cli import build_firmware_parser
 from agilev.pcb.cli import build_pcb_parser
 from agilev.software.cli import build_software_parser
 from agilev.state import EventLogger, LockManager, TaskState

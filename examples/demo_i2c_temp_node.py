@@ -32,12 +32,12 @@ def run_command(cmd: list[str], description: str):
     result = subprocess.run(cmd, capture_output=True, text=True)
 
     if result.returncode == 0:
-        print(f"✓ Success")
+        print("✓ Success")
         if result.stdout:
             print(f"Output:\n{result.stdout}")
         return True
     else:
-        print(f"✗ Failed")
+        print("✗ Failed")
         print(f"Error:\n{result.stderr}")
         return False
 
@@ -407,28 +407,28 @@ if __name__ == "__main__":
     print_step(8, "Summary")
 
     print("✓ End-to-end workflow complete!")
-    print(f"\nGenerated files:")
-    print(f"  PCB:")
+    print("\nGenerated files:")
+    print("  PCB:")
     print(f"    - {circuit_ir_path}")
-    print(f"  Contracts:")
+    print("  Contracts:")
     print(f"    - {hw_fw_contract_path}")
     print(f"    - {fw_sw_contract_path}")
-    print(f"  Firmware:")
+    print("  Firmware:")
     print(f"    - {firmware_dir / 'platformio.ini'}")
     print(f"    - {src_dir / 'board_contract.h'}")
-    print(f"  Software:")
+    print("  Software:")
     print(f"    - {software_dir / 'temp_sensor_api.py'}")
     print(f"    - {software_dir / 'monitor.py'}")
 
-    print(f"\nNext steps:")
-    print(f"  1. Review generated contracts and code")
+    print("\nNext steps:")
+    print("  1. Review generated contracts and code")
     print(f"  2. Run: cd {demo_dir}")
-    print(f"  3. Build firmware: agilev firmware build --project firmware/temp_sensor")
-    print(f"  4. Test firmware: agilev firmware test --project firmware/temp_sensor --host")
+    print("  3. Build firmware: agilev firmware build --project firmware/temp_sensor")
+    print("  4. Test firmware: agilev firmware test --project firmware/temp_sensor --host")
     print(f"  5. Verify contracts: agilev embedded verify --root {demo_dir}")
 
     print(f"\n{'='*70}")
-    print(f"DEMO COMPLETE")
+    print("DEMO COMPLETE")
     print(f"{'='*70}\n")
 
 

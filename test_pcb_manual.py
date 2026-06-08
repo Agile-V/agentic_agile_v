@@ -2,19 +2,23 @@
 """Manual test script for PCB modules."""
 
 import sys
+
 sys.path.insert(0, 'src')
 
-from agilev.pcb.circuit_ir import (
-    CircuitIR, Component, Pin, PinType, Net, NetType, PowerDomain, Interface
-)
+from agilev.pcb.circuit_ir import CircuitIR, Component, Net, NetType, Pin, PinType, PowerDomain
 from agilev.pcb.component_index import (
-    ComponentIndex, ComponentEntry, create_resistor_entry, create_capacitor_entry, create_ic_entry
+    ComponentIndex,
+    create_capacitor_entry,
+    create_ic_entry,
+    create_resistor_entry,
 )
 from agilev.pcb.validators import (
-    VoltageDomainValidator, PowerBudgetValidator, I2CInterfaceValidator,
-    SPIInterfaceValidator, USBInterfaceValidator, ProtectionCircuitValidator,
-    validate_circuit, generate_validation_report
+    PowerBudgetValidator,
+    VoltageDomainValidator,
+    generate_validation_report,
+    validate_circuit,
 )
+
 
 def test_circuit_ir():
     """Test Circuit IR functionality."""
@@ -86,11 +90,11 @@ def test_circuit_ir():
         print(f"❌ Validation errors: {errors}")
         return False
     else:
-        print(f"✅ Connection validation passed (0 errors)")
+        print("✅ Connection validation passed (0 errors)")
     
     # Test save/load
-    import tempfile
     import os
+    import tempfile
     
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         temp_file = f.name
@@ -106,7 +110,7 @@ def test_circuit_ir():
         assert loaded.name == circuit.name
         assert len(loaded.components) == len(circuit.components)
         assert len(loaded.nets) == len(circuit.nets)
-        print(f"✅ Save/load verification passed")
+        print("✅ Save/load verification passed")
         
     finally:
         os.unlink(temp_file)
@@ -119,7 +123,7 @@ def test_component_index():
     print("\n=== Testing Component Index ===")
     
     index = ComponentIndex()
-    print(f"✅ Created empty index")
+    print("✅ Created empty index")
     
     # Add components using helper functions
     r1 = create_resistor_entry("RC0603FR-0710KL", "10k", approved=True)
@@ -154,8 +158,8 @@ def test_component_index():
     print(f"✅ Find approved: {len(approved)} found")
     
     # Test save/load
-    import tempfile
     import os
+    import tempfile
     
     with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
         temp_file = f.name
@@ -169,7 +173,7 @@ def test_component_index():
         print(f"✅ Loaded index: {len(loaded.components)} components")
         
         assert len(loaded.components) == len(index.components)
-        print(f"✅ Save/load verification passed")
+        print("✅ Save/load verification passed")
         
     finally:
         os.unlink(temp_file)
@@ -218,9 +222,9 @@ def test_validators():
     result = validator.validate(circuit)
     
     if result.passed:
-        print(f"✅ VoltageDomainValidator: PASSED")
+        print("✅ VoltageDomainValidator: PASSED")
     else:
-        print(f"❌ VoltageDomainValidator: FAILED")
+        print("❌ VoltageDomainValidator: FAILED")
         for error in result.errors:
             print(f"   Error: {error}")
         return False
@@ -230,11 +234,11 @@ def test_validators():
     result = validator.validate(circuit)
     
     if result.passed:
-        print(f"✅ PowerBudgetValidator: PASSED")
+        print("✅ PowerBudgetValidator: PASSED")
         if result.warnings:
             print(f"   Warnings: {len(result.warnings)}")
     else:
-        print(f"❌ PowerBudgetValidator: FAILED")
+        print("❌ PowerBudgetValidator: FAILED")
         for error in result.errors:
             print(f"   Error: {error}")
         return False

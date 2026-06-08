@@ -4,8 +4,6 @@ Tests for system contract validation.
 
 from pathlib import Path
 
-import pytest
-
 
 def test_system_contract_schema_exists():
     """Test that system contract schema exists."""

@@ -7,7 +7,7 @@ Provides virtual hardware testing before deploying to physical devices.
 import json
 import subprocess
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 
 class RenodeSimulator:
@@ -117,7 +117,7 @@ quit
         self,
         mcu: str,
         firmware_elf: Path,
-        test_commands: Optional[list[str]] = None,
+        test_commands: list[str] | None = None,
     ) -> dict[str, Path]:
         """Create simulation configuration files.
 
