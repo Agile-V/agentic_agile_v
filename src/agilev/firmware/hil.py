@@ -8,7 +8,7 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import serial
 
@@ -28,7 +28,7 @@ class HILRunner:
     def flash_firmware(
         self,
         port: str,
-        firmware_path: Optional[Path] = None,
+        firmware_path: Path | None = None,
     ) -> tuple[bool, str]:
         """Flash firmware to hardware.
 
@@ -126,7 +126,7 @@ class HILRunner:
         ser: serial.Serial,
         command: str,
         timeout: float = 1.0,
-    ) -> Optional[str]:
+    ) -> str | None:
         """Send command to firmware.
 
         Args:
@@ -246,7 +246,7 @@ class HILRunner:
     def run_hil_test(
         self,
         port: str,
-        config_path: Optional[Path] = None,
+        config_path: Path | None = None,
         flash_first: bool = True,
     ) -> tuple[bool, dict[str, Any]]:
         """Run complete HIL test.

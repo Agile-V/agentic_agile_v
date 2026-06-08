@@ -4,20 +4,24 @@ Tests for PlatformIO backend.
 
 from pathlib import Path
 
-import pytest
-
 
 def test_platformio_backend_exists():
     """Test that PlatformIO backend module exists."""
     backend_path = (
-        Path(__file__).parent.parent.parent / "src" / "agilev" / "firmware" / "platformio_backend.py"
+        Path(__file__).parent.parent.parent
+        / "src"
+        / "agilev"
+        / "firmware"
+        / "platformio_backend.py"
     )
     assert backend_path.exists(), f"Backend not found: {backend_path}"
 
 
 def test_firmware_backend_base_exists():
     """Test that firmware backend base class exists."""
-    backend_path = Path(__file__).parent.parent.parent / "src" / "agilev" / "firmware" / "backend.py"
+    backend_path = (
+        Path(__file__).parent.parent.parent / "src" / "agilev" / "firmware" / "backend.py"
+    )
     assert backend_path.exists(), f"Backend base not found: {backend_path}"
 
 

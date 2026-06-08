@@ -29,13 +29,12 @@ Exit codes:
 Inspired by: Agile-V Skills quality-gates (Test Quality Gate)
 """
 
-import sys
 import argparse
 import ast
 import re
+import sys
 from pathlib import Path
-from typing import List, Dict, Any
-
+from typing import Any
 
 # Patterns that indicate external behavior checking
 EXTERNAL_PATTERNS = [
@@ -69,7 +68,7 @@ INTERNAL_PATTERNS = [
 ]
 
 
-def parse_test_file(test_path: Path) -> List[Dict[str, Any]]:
+def parse_test_file(test_path: Path) -> list[dict[str, Any]]:
     """
     Parse test file to extract test functions and their assertions.
     
@@ -86,7 +85,7 @@ def parse_test_file(test_path: Path) -> List[Dict[str, Any]]:
     if not test_path.exists():
         raise FileNotFoundError(f"Test file not found: {test_path}")
     
-    with open(test_path, 'r') as f:
+    with open(test_path) as f:
         content = f.read()
     
     try:
@@ -129,7 +128,7 @@ def parse_test_file(test_path: Path) -> List[Dict[str, Any]]:
                     if isinstance(subnode, ast.Assert):
                         asserts.append(ast.unparse(subnode.test))
             
-            except Exception as e:
+            except Exception:
                 # If we can't parse, mark as unknown
                 pass
             
@@ -152,7 +151,7 @@ def validate_test_quality(test_path: Path) -> bool:
         bool: True if tests are adequate quality
     """
     print(f"\n{'='*70}")
-    print(f"Test Quality Validation")
+    print("Test Quality Validation")
     print(f"{'='*70}")
     print(f"Test File: {test_path}")
     print(f"{'─'*70}\n")
@@ -166,8 +165,8 @@ def validate_test_quality(test_path: Path) -> bool:
         return False
     
     if not tests:
-        print(f"⚠️  WARNING: No test functions found (no functions starting with 'test_')")
-        print(f"   Cannot validate test quality\n")
+        print("⚠️  WARNING: No test functions found (no functions starting with 'test_')")
+        print("   Cannot validate test quality\n")
         return True  # Don't fail if no tests found
     
     # Analyze each test
@@ -194,7 +193,7 @@ def validate_test_quality(test_path: Path) -> bool:
         print(f"{status:40} {test['name']}")
     
     print(f"\n{'─'*70}")
-    print(f"Test Quality Summary:")
+    print("Test Quality Summary:")
     print(f"  ✅ External behavior: {external_count}/{len(tests)}")
     print(f"  ⚠️  Internal state only: {internal_only_count}/{len(tests)}")
     print(f"  ❓ Unclear: {neither_count}/{len(tests)}")
@@ -213,30 +212,30 @@ def validate_test_quality(test_path: Path) -> bool:
         return True
     else:
         print(f"❌ FAIL: Test quality is inadequate ({quality_percentage:.0f}% check external behavior)")
-        print(f"\n⚠️  CRITICAL: Tests that only check internal state create false confidence.")
-        print(f"   Your tests may pass while hidden tests fail.")
-        print(f"\n📊 Evidence from Agentic Agile-V v2.0:")
-        print(f"   - Self tests: 100% pass (tests checked queue sizes)")
-        print(f"   - Hidden tests: 68% pass (tests checked actual message delivery)")
-        print(f"   - Gap: -32% self-assessment error")
-        print(f"\n🔧 Problematic Tests:")
+        print("\n⚠️  CRITICAL: Tests that only check internal state create false confidence.")
+        print("   Your tests may pass while hidden tests fail.")
+        print("\n📊 Evidence from Agentic Agile-V v2.0:")
+        print("   - Self tests: 100% pass (tests checked queue sizes)")
+        print("   - Hidden tests: 68% pass (tests checked actual message delivery)")
+        print("   - Gap: -32% self-assessment error")
+        print("\n🔧 Problematic Tests:")
         
         for test in problematic_tests:
             print(f"   - {test['name']} (line {test['line']})")
-            print(f"     Issue: Checking internal state (queues, buffers, private attrs)")
-            print(f"     Fix: Verify external calls like connection.send(), callbacks, etc.")
+            print("     Issue: Checking internal state (queues, buffers, private attrs)")
+            print("     Fix: Verify external calls like connection.send(), callbacks, etc.")
         
-        print(f"\n💡 How to Fix:")
-        print(f"   1. Replace internal checks with external behavior verification")
-        print(f"   2. Use mocks to verify method calls: mock_conn.send.assert_called()")
-        print(f"   3. Check observable outputs, not internal queues")
-        print(f"   4. Test what the USER sees, not what the CODE stores")
-        print(f"\n✅ Good Example:")
-        print(f"   # Instead of:")
-        print(f"   assert len(router._message_queues[client_id]) == 1  # ❌ internal")
-        print(f"   ")
-        print(f"   # Do this:")
-        print(f"   mock_connection.send.assert_called_once_with(message)  # ✅ external")
+        print("\n💡 How to Fix:")
+        print("   1. Replace internal checks with external behavior verification")
+        print("   2. Use mocks to verify method calls: mock_conn.send.assert_called()")
+        print("   3. Check observable outputs, not internal queues")
+        print("   4. Test what the USER sees, not what the CODE stores")
+        print("\n✅ Good Example:")
+        print("   # Instead of:")
+        print("   assert len(router._message_queues[client_id]) == 1  # ❌ internal")
+        print("   ")
+        print("   # Do this:")
+        print("   mock_connection.send.assert_called_once_with(message)  # ✅ external")
         print(f"{'='*70}\n")
         return False
 
@@ -251,8 +250,8 @@ def find_test_file(task_id: str, search_root: Path = Path('.')) -> Optional[Path
     test_patterns = [
         search_root / f"tasks/{task_id}/test_*.py",
         search_root / f"tasks/{task_id}/*_test.py",
-        search_root / f"tests/test_*.py",
-        search_root / f"test_*.py",
+        search_root / "tests/test_*.py",
+        search_root / "test_*.py",
     ]
     
     for pattern in test_patterns:

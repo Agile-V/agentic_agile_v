@@ -47,10 +47,10 @@ def cmd_firmware_contract_generate(args: argparse.Namespace) -> int:
         print(f"  Contract ID: {args.contract_id}")
         print(f"  Board: {args.board}")
         print(f"  PCB revision: {args.revision}")
-        print(f"\nNext steps:")
+        print("\nNext steps:")
         print(f"  1. Review contract: {output_path}")
         print(f"  2. Validate: agilev firmware contract validate {output_path}")
-        print(f"  3. Generate firmware: agilev firmware generate --task AAV-FW-XXX")
+        print("  3. Generate firmware: agilev firmware generate --task AAV-FW-XXX")
 
         return 0
 
@@ -89,7 +89,7 @@ def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
             schema_name = "firmware_software_contract.schema.json"
             print(f"✓ Loaded firmware-software contract: {contract.contract_id}")
         else:
-            print(f"✗ Cannot determine contract type. Use --type option.", file=sys.stderr)
+            print("✗ Cannot determine contract type. Use --type option.", file=sys.stderr)
             return 1
 
         # Find schema
@@ -110,7 +110,7 @@ def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
                 interfaces = contract.get_interfaces()
                 rails = contract.get_power_rails()
 
-                print(f"\nContract summary:")
+                print("\nContract summary:")
                 print(f"  Board: {contract.board}")
                 print(f"  PCB revision: {contract.pcb_revision}")
                 print(f"  MCU: {mcu.get('part_number', 'N/A')}")
@@ -127,14 +127,14 @@ def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
                 commands = contract.get_commands()
                 errors = contract.get_error_codes()
 
-                print(f"\nContract summary:")
+                print("\nContract summary:")
                 print(f"  Transport: {contract.transport}")
                 print(f"  Protocol version: {contract.protocol_version}")
                 print(f"  Commands: {len(commands)}")
                 print(f"  Error codes: {len(errors)}")
 
                 if args.verbose:
-                    print(f"\n  Command list:")
+                    print("\n  Command list:")
                     for cmd in commands:
                         print(f"    - {cmd['name']}")
 
@@ -174,28 +174,28 @@ def cmd_firmware_generate(args: argparse.Namespace) -> int:
         # Create backend
         backend = PlatformIOBackend(contract_path)
 
-        print(f"Generating firmware project...")
+        print("Generating firmware project...")
         print(f"  Contract: {contract_path}")
         print(f"  Output: {project_dir}")
-        print(f"  Backend: PlatformIO")
+        print("  Backend: PlatformIO")
 
         # Initialize project
         backend.init_project(project_dir)
-        print(f"✓ Initialized project structure")
+        print("✓ Initialized project structure")
 
         # Generate from contract
         backend.generate_from_contract(project_dir)
-        print(f"✓ Generated firmware code from contract")
+        print("✓ Generated firmware code from contract")
 
         print(f"\n✓ Firmware project created: {project_dir}")
-        print(f"\nGenerated files:")
-        print(f"  - platformio.ini")
-        print(f"  - include/board_contract.h")
-        print(f"  - src/main.cpp")
-        print(f"  - src/diagnostics.cpp")
+        print("\nGenerated files:")
+        print("  - platformio.ini")
+        print("  - include/board_contract.h")
+        print("  - src/main.cpp")
+        print("  - src/diagnostics.cpp")
 
-        print(f"\nNext steps:")
-        print(f"  1. Review generated code")
+        print("\nNext steps:")
+        print("  1. Review generated code")
         print(f"  2. Build: agilev firmware build --project {project_dir}")
         print(f"  3. Test: agilev firmware test --project {project_dir}")
 
@@ -233,27 +233,27 @@ def cmd_firmware_build(args: argparse.Namespace) -> int:
             contract_path = Path(".agentic-agile-v/contracts/hardware_firmware_contract.yaml")
 
     if not contract_path.exists():
-        print(f"✗ Contract not found. Specify with --contract", file=sys.stderr)
+        print("✗ Contract not found. Specify with --contract", file=sys.stderr)
         return 1
 
     try:
         backend = PlatformIOBackend(contract_path)
 
-        print(f"Building firmware...")
+        print("Building firmware...")
         print(f"  Project: {project_dir}")
         print(f"  Contract: {contract_path}")
 
         success, output = backend.build(project_dir)
 
         if success:
-            print(f"✓ Build succeeded")
+            print("✓ Build succeeded")
             if args.verbose:
-                print(f"\nBuild output:")
+                print("\nBuild output:")
                 print(output)
             return 0
         else:
-            print(f"✗ Build failed", file=sys.stderr)
-            print(f"\nBuild output:", file=sys.stderr)
+            print("✗ Build failed", file=sys.stderr)
+            print("\nBuild output:", file=sys.stderr)
             print(output, file=sys.stderr)
             return 1
 
@@ -289,31 +289,31 @@ def cmd_firmware_test(args: argparse.Namespace) -> int:
             contract_path = Path(".agentic-agile-v/contracts/hardware_firmware_contract.yaml")
 
     if not contract_path.exists():
-        print(f"✗ Contract not found. Specify with --contract", file=sys.stderr)
+        print("✗ Contract not found. Specify with --contract", file=sys.stderr)
         return 1
 
     try:
         backend = PlatformIOBackend(contract_path)
 
-        print(f"Running firmware tests...")
+        print("Running firmware tests...")
         print(f"  Project: {project_dir}")
         print(f"  Test type: {'host' if args.host else 'target'}")
 
         if args.host:
             success, output = backend.run_host_tests(project_dir)
         else:
-            print(f"✗ Target tests not yet implemented", file=sys.stderr)
+            print("✗ Target tests not yet implemented", file=sys.stderr)
             return 1
 
         if success:
-            print(f"✓ Tests passed")
+            print("✓ Tests passed")
             if args.verbose:
-                print(f"\nTest output:")
+                print("\nTest output:")
                 print(output)
             return 0
         else:
-            print(f"✗ Tests failed", file=sys.stderr)
-            print(f"\nTest output:", file=sys.stderr)
+            print("✗ Tests failed", file=sys.stderr)
+            print("\nTest output:", file=sys.stderr)
             print(output, file=sys.stderr)
             return 1
 
@@ -345,7 +345,7 @@ def cmd_firmware_software_contract_generate(args: argparse.Namespace) -> int:
     try:
         generator = FirmwareSoftwareContractGenerator(project_dir)
 
-        print(f"Generating firmware-software contract...")
+        print("Generating firmware-software contract...")
         print(f"  Project: {project_dir}")
         print(f"  Contract ID: {args.contract_id}")
 
@@ -358,17 +358,17 @@ def cmd_firmware_software_contract_generate(args: argparse.Namespace) -> int:
         generator.save_contract(contract, output_path)
 
         print(f"✓ Generated firmware-software contract: {output_path}")
-        print(f"\nContract summary:")
+        print("\nContract summary:")
         print(f"  Contract ID: {contract['contract_id']}")
         print(f"  Transport: {contract['transport']}")
         print(f"  Protocol version: {contract['protocol_version']}")
         print(f"  Commands: {len(contract.get('commands', []))}")
         print(f"  Error codes: {len(contract.get('error_codes', []))}")
 
-        print(f"\nNext steps:")
+        print("\nNext steps:")
         print(f"  1. Review contract: {output_path}")
         print(f"  2. Validate: agilev firmware contract validate {output_path}")
-        print(f"  3. Implement software against this contract")
+        print("  3. Implement software against this contract")
 
         return 0
 
@@ -401,13 +401,13 @@ def cmd_firmware_simulate(args: argparse.Namespace) -> int:
 
         # Check if Renode is installed
         if not simulator.check_renode_installed():
-            print(f"✗ Renode not installed", file=sys.stderr)
-            print(f"\nInstall Renode:", file=sys.stderr)
-            print(f"  macOS: brew install renode", file=sys.stderr)
-            print(f"  Linux: https://renode.io", file=sys.stderr)
+            print("✗ Renode not installed", file=sys.stderr)
+            print("\nInstall Renode:", file=sys.stderr)
+            print("  macOS: brew install renode", file=sys.stderr)
+            print("  Linux: https://renode.io", file=sys.stderr)
             return 1
 
-        print(f"Running simulation...")
+        print("Running simulation...")
         print(f"  Project: {project_dir}")
 
         # Find firmware ELF
@@ -415,7 +415,7 @@ def cmd_firmware_simulate(args: argparse.Namespace) -> int:
         elf_files = list(build_dir.rglob("*.elf")) if build_dir.exists() else []
 
         if not elf_files:
-            print(f"✗ No firmware ELF found. Run 'agilev firmware build' first.", file=sys.stderr)
+            print("✗ No firmware ELF found. Run 'agilev firmware build' first.", file=sys.stderr)
             return 1
 
         firmware_elf = elf_files[0]
@@ -439,7 +439,7 @@ def cmd_firmware_simulate(args: argparse.Namespace) -> int:
         )
 
         if success or args.verbose:
-            print(f"\nSimulation output:")
+            print("\nSimulation output:")
             print(output)
 
         # Extract and save results
@@ -449,13 +449,13 @@ def cmd_firmware_simulate(args: argparse.Namespace) -> int:
         simulator.save_results(results, results_path)
 
         if results["passed"]:
-            print(f"\n✓ Simulation passed")
+            print("\n✓ Simulation passed")
             print(f"  Tests run: {results['tests_run']}")
             print(f"  Tests passed: {results['tests_passed']}")
             print(f"  Results: {results_path}")
             return 0
         else:
-            print(f"\n✗ Simulation failed", file=sys.stderr)
+            print("\n✗ Simulation failed", file=sys.stderr)
             print(f"  Tests run: {results['tests_run']}", file=sys.stderr)
             print(f"  Tests passed: {results['tests_passed']}", file=sys.stderr)
             print(f"  Tests failed: {results['tests_failed']}", file=sys.stderr)
@@ -489,12 +489,12 @@ def cmd_firmware_hil_test(args: argparse.Namespace) -> int:
     try:
         runner = HILRunner(project_dir)
 
-        print(f"Running HIL tests...")
+        print("Running HIL tests...")
         print(f"  Project: {project_dir}")
         print(f"  Port: {args.port}")
 
         if args.flash:
-            print(f"  Flashing firmware first...")
+            print("  Flashing firmware first...")
 
         # Run HIL test
         success, results = runner.run_hil_test(
@@ -509,19 +509,19 @@ def cmd_firmware_hil_test(args: argparse.Namespace) -> int:
             runner.save_results(results["results"], results_path)
 
         if success:
-            print(f"\n✓ HIL tests passed")
+            print("\n✓ HIL tests passed")
             print(f"  Total: {results.get('total', 0)}")
             print(f"  Results: {results_path}")
 
             if args.verbose and "results" in results:
-                print(f"\nTest details:")
+                print("\nTest details:")
                 for result in results["results"]:
                     status = "✓" if result["passed"] else "✗"
                     print(f"  {status} {result['name']}: {result['response']}")
 
             return 0
         else:
-            print(f"\n✗ HIL tests failed", file=sys.stderr)
+            print("\n✗ HIL tests failed", file=sys.stderr)
 
             if "error" in results:
                 print(f"  Error: {results['error']}", file=sys.stderr)
@@ -532,7 +532,7 @@ def cmd_firmware_hil_test(args: argparse.Namespace) -> int:
                 print(f"  Results: {results_path}", file=sys.stderr)
 
                 if args.verbose and "results" in results:
-                    print(f"\nTest details:", file=sys.stderr)
+                    print("\nTest details:", file=sys.stderr)
                     for result in results["results"]:
                         status = "✓" if result["passed"] else "✗"
                         print(f"  {status} {result['name']}: {result['response']}", file=sys.stderr)
@@ -651,11 +651,17 @@ def build_firmware_parser(subparsers: argparse._SubParsersAction) -> None:
     test_parser.set_defaults(func=cmd_firmware_test)
 
     # firmware simulate
-    simulate_parser = firmware_subparsers.add_parser("simulate", help="Run firmware in Renode simulator")
+    simulate_parser = firmware_subparsers.add_parser(
+        "simulate", help="Run firmware in Renode simulator"
+    )
     simulate_parser.add_argument("--project", required=True, help="Firmware project directory")
     simulate_parser.add_argument("--mcu", help="MCU model (e.g., STM32F401, STM32F103)")
-    simulate_parser.add_argument("--timeout", type=int, default=30, help="Simulation timeout in seconds")
-    simulate_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
+    simulate_parser.add_argument(
+        "--timeout", type=int, default=30, help="Simulation timeout in seconds"
+    )
+    simulate_parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
     simulate_parser.set_defaults(func=cmd_firmware_simulate)
 
     # firmware hil-test

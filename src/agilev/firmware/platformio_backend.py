@@ -4,9 +4,7 @@ PlatformIO firmware backend.
 Generates and builds firmware projects using PlatformIO.
 """
 
-import json
 import subprocess
-from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -63,7 +61,7 @@ class PlatformIOBackend(FirmwareBackend):
             contract: Hardware-firmware contract
         """
         mcu = contract.get("mcu", {})
-        board_name = contract.get("board", "genericSTM32F411CE")
+        _board_name = contract.get("board", "genericSTM32F411CE")  # noqa: F841
 
         # Map MCU to PlatformIO board
         # This is a simple mapping - real implementation would be more sophisticated
@@ -133,8 +131,14 @@ test_framework = unity
                 if sda and scl:
                     sda_pin = sda.get("mcu_pin", "")
                     scl_pin = scl.get("mcu_pin", "")
-                    lines.append(f"#define {bus_id}_SDA {self._pin_to_arduino(sda_pin)}  // {sda.get('net', '')}")
-                    lines.append(f"#define {bus_id}_SCL {self._pin_to_arduino(scl_pin)}  // {scl.get('net', '')}")
+                    lines.append(
+                        f"#define {bus_id}_SDA {self._pin_to_arduino(sda_pin)}  "
+                        f"// {sda.get('net', '')}"
+                    )
+                    lines.append(
+                        f"#define {bus_id}_SCL {self._pin_to_arduino(scl_pin)}  "
+                        f"// {scl.get('net', '')}"
+                    )
                     lines.append("")
 
                 # Add device addresses

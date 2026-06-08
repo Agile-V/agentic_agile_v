@@ -4,10 +4,9 @@ PCB to firmware export utilities.
 Exports hardware-firmware contract data from PCB circuit IR.
 """
 
-from pathlib import Path
 from typing import Any
 
-from agilev.pcb.circuit_ir import Circuit, Component, Interface, Net, Pin, PowerDomain
+from agilev.pcb.circuit_ir import Circuit, Component, Interface, Pin
 
 
 class PCBFirmwareExporter:
@@ -22,7 +21,12 @@ class PCBFirmwareExporter:
         self.circuit = circuit
 
     def export_hardware_firmware_contract(
-        self, contract_id: str, board_name: str, pcb_revision: str, pcb_task_id: str, pcb_candidate_id: str
+        self,
+        contract_id: str,
+        board_name: str,
+        pcb_revision: str,
+        pcb_task_id: str,
+        pcb_candidate_id: str,
     ) -> dict[str, Any]:
         """Export hardware-firmware contract from circuit.
 

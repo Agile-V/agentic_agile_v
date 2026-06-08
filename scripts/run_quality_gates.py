@@ -25,17 +25,16 @@ Exit codes:
     2: Invalid input or configuration error
 """
 
-import sys
 import argparse
 import subprocess
+import sys
 from pathlib import Path
-from typing import List, Tuple, Optional
 
 
 class QualityGate:
     """Represents a single quality gate validation."""
     
-    def __init__(self, name: str, script: str, args: List[str], description: str):
+    def __init__(self, name: str, script: str, args: list[str], description: str):
         self.name = name
         self.script = script
         self.args = args
@@ -54,7 +53,7 @@ class QualityGate:
         
         if not script_path.exists():
             print(f"❌ ERROR: {self.name} script not found: {script_path}")
-            print(f"   Quality gates fail closed - missing gate scripts are errors\n")
+            print("   Quality gates fail closed - missing gate scripts are errors\n")
             self.passed = False
             self.exit_code = 2
             return False  # Fail closed: missing script is an error
@@ -156,11 +155,11 @@ def auto_discover_paths(task_id: str, search_root: Path = Path('.')) -> dict:
     return paths
 
 
-def run_quality_gates(task_desc: Optional[Path] = None,
-                     agent_plan: Optional[Path] = None,
-                     implementation: Optional[Path] = None,
-                     tests: Optional[Path] = None,
-                     skip_gates: List[str] = None) -> bool:
+def run_quality_gates(task_desc: Path | None = None,
+                     agent_plan: Path | None = None,
+                     implementation: Path | None = None,
+                     tests: Path | None = None,
+                     skip_gates: list[str] = None) -> bool:
     """
     Run all quality gates.
     
@@ -201,14 +200,14 @@ def run_quality_gates(task_desc: Optional[Path] = None,
         ))
     
     if not gates:
-        print(f"\n❌ ERROR: No quality gates configured or all inputs missing")
-        print(f"   Quality gates fail closed - cannot validate without gates")
-        print(f"   This prevents silently passing without validation\n")
+        print("\n❌ ERROR: No quality gates configured or all inputs missing")
+        print("   Quality gates fail closed - cannot validate without gates")
+        print("   This prevents silently passing without validation\n")
         return False  # Fail closed: no gates configured is an error
     
     # Run all gates
     print(f"\n{'#'*70}")
-    print(f"# Agentic Agile-V v2.2 - Quality Gate Validation")
+    print("# Agentic Agile-V v2.2 - Quality Gate Validation")
     print(f"{'#'*70}")
     print(f"\nRunning {len(gates)} quality gate(s)...\n")
     
@@ -223,7 +222,7 @@ def run_quality_gates(task_desc: Optional[Path] = None,
     
     # Summary
     print(f"\n{'#'*70}")
-    print(f"# Quality Gate Summary")
+    print("# Quality Gate Summary")
     print(f"{'#'*70}\n")
     
     for gate in passed_gates:
@@ -236,20 +235,20 @@ def run_quality_gates(task_desc: Optional[Path] = None,
     print(f"Results: {len(passed_gates)}/{len(gates)} gates passed")
     
     if failed_gates:
-        print(f"\n❌ QUALITY GATES FAILED")
-        print(f"\n⚠️  Your implementation cannot be submitted until all gates pass.")
-        print(f"   Review the failures above and fix the issues.")
-        print(f"\n📊 Evidence:")
-        print(f"   - v2.1 without active gates: 54.5% quality (REGRESSION)")
-        print(f"   - Quality-gates skill with active validation: 100% quality")
-        print(f"\n🎯 These gates prevent the bugs that cause quality failures.")
-        print(f"   Fix them now, or they'll cause test failures later.")
+        print("\n❌ QUALITY GATES FAILED")
+        print("\n⚠️  Your implementation cannot be submitted until all gates pass.")
+        print("   Review the failures above and fix the issues.")
+        print("\n📊 Evidence:")
+        print("   - v2.1 without active gates: 54.5% quality (REGRESSION)")
+        print("   - Quality-gates skill with active validation: 100% quality")
+        print("\n🎯 These gates prevent the bugs that cause quality failures.")
+        print("   Fix them now, or they'll cause test failures later.")
         print(f"{'#'*70}\n")
         return False
     else:
-        print(f"\n✅ ALL QUALITY GATES PASSED")
-        print(f"\n🎉 Your implementation meets quality standards!")
-        print(f"   You may proceed with testing and submission.")
+        print("\n✅ ALL QUALITY GATES PASSED")
+        print("\n🎉 Your implementation meets quality standards!")
+        print("   You may proceed with testing and submission.")
         print(f"{'#'*70}\n")
         return True
 
@@ -297,7 +296,7 @@ def main():
             print(f"Auto-discovering files for task: {args.task_id}")
             paths = auto_discover_paths(args.task_id)
             
-            print(f"\nDiscovered files:")
+            print("\nDiscovered files:")
             print(f"  Task description: {paths['task_desc'] or 'NOT FOUND'}")
             print(f"  Agent plan: {paths['agent_plan'] or 'NOT FOUND'}")
             print(f"  Implementation: {paths['implementation'] or 'NOT FOUND'}")

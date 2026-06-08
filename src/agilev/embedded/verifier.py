@@ -6,7 +6,7 @@ Validates consistency across PCB, firmware, and software domains.
 
 import json
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -24,7 +24,7 @@ class CrossDomainVerifier:
         self.contracts_dir = project_root / ".agentic-agile-v" / "contracts"
         self.pcb_dir = project_root / "pcb"
 
-    def load_circuit_ir(self) -> Optional[dict[str, Any]]:
+    def load_circuit_ir(self) -> dict[str, Any] | None:
         """Load PCB circuit IR.
 
         Returns:
@@ -38,7 +38,7 @@ class CrossDomainVerifier:
         with open(circuit_ir_path) as f:
             return json.load(f)
 
-    def load_hw_fw_contract(self) -> Optional[dict[str, Any]]:
+    def load_hw_fw_contract(self) -> dict[str, Any] | None:
         """Load hardware-firmware contract.
 
         Returns:
@@ -52,7 +52,7 @@ class CrossDomainVerifier:
         with open(contract_path) as f:
             return yaml.safe_load(f)
 
-    def load_fw_sw_contract(self) -> Optional[dict[str, Any]]:
+    def load_fw_sw_contract(self) -> dict[str, Any] | None:
         """Load firmware-software contract.
 
         Returns:
@@ -97,7 +97,9 @@ class CrossDomainVerifier:
 
         # Check interfaces
         pcb_interfaces = {iface["name"]: iface for iface in circuit_ir.get("interfaces", [])}
-        contract_interfaces = {iface["name"]: iface for iface in hw_fw_contract.get("interfaces", [])}
+        contract_interfaces = {
+            iface["name"]: iface for iface in hw_fw_contract.get("interfaces", [])
+        }
 
         # Check for missing interfaces in contract
         for iface_name, pcb_iface in pcb_interfaces.items():
@@ -131,7 +133,10 @@ class CrossDomainVerifier:
                         violations.append({
                             "domain": "pcb_to_firmware",
                             "severity": "warning",
-                            "message": f"Pin '{pin_name}' in interface '{iface_name}' missing from contract",
+                            "message": (
+                                f"Pin '{pin_name}' in interface '{iface_name}' "
+                                "missing from contract"
+                            ),
                             "interface": iface_name,
                             "pin": pin_name,
                         })
@@ -147,12 +152,15 @@ class CrossDomainVerifier:
         # Check for contract interfaces not in PCB
         for iface_name in contract_interfaces:
             if iface_name not in pcb_interfaces:
-                violations.append({
-                    "domain": "pcb_to_firmware",
-                    "severity": "error",
-                    "message": f"Interface '{iface_name}' in contract but not in PCB (firmware invented hardware!)",
-                    "interface": iface_name,
-                })
+            violations.append({
+                "domain": "pcb_to_firmware",
+                "severity": "error",
+                "message": (
+                    f"Interface '{iface_name}' in contract but not in PCB "
+                    "(firmware invented hardware!)"
+                ),
+                "interface": iface_name,
+            })
 
         return violations
 
@@ -180,22 +188,28 @@ class CrossDomainVerifier:
 
         if "usb" in transport.lower():
             if "USB" not in fw_interfaces:
-                violations.append({
-                    "domain": "firmware_to_software",
-                    "severity": "error",
-                    "message": f"Software contract requires {transport} but firmware has no USB interface",
-                    "transport": transport,
-                })
+            violations.append({
+                "domain": "firmware_to_software",
+                "severity": "error",
+                "message": (
+                    f"Software contract requires {transport} but firmware has "
+                    "no USB interface"
+                ),
+                "transport": transport,
+            })
 
         elif "uart" in transport.lower() or "serial" in transport.lower():
             uart_found = any("UART" in name or "USART" in name for name in fw_interfaces)
             if not uart_found:
-                violations.append({
-                    "domain": "firmware_to_software",
-                    "severity": "error",
-                    "message": f"Software contract requires {transport} but firmware has no UART interface",
-                    "transport": transport,
-                })
+            violations.append({
+                "domain": "firmware_to_software",
+                "severity": "error",
+                "message": (
+                    f"Software contract requires {transport} but firmware has "
+                    "no UART interface"
+                ),
+                "transport": transport,
+            })
 
         # Check if commands reference valid sensors/peripherals
         commands = fw_sw_contract.get("commands", [])
@@ -207,12 +221,15 @@ class CrossDomainVerifier:
             if "temperature" in cmd_name.lower():
                 i2c_interfaces = [name for name in fw_interfaces if "I2C" in name]
                 if not i2c_interfaces:
-                    violations.append({
-                        "domain": "firmware_to_software",
-                        "severity": "warning",
-                        "message": f"Command '{cmd_name}' implies temperature sensor but no I2C interface found",
-                        "command": cmd_name,
-                    })
+                violations.append({
+                    "domain": "firmware_to_software",
+                    "severity": "warning",
+                    "message": (
+                        f"Command '{cmd_name}' implies temperature sensor but "
+                        "no I2C interface found"
+                    ),
+                    "command": cmd_name,
+                })
 
         return violations
 

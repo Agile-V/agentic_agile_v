@@ -27,7 +27,9 @@ class FirmwareEvidenceAdapter:
         self.project_dir = project_dir
         self.contract_path = contract_path
 
-    def collect_firmware_evidence(self, session_id: str, backend: str = "platformio") -> dict[str, Any]:
+    def collect_firmware_evidence(
+        self, session_id: str, backend: str = "platformio"
+    ) -> dict[str, Any]:
         """Collect firmware evidence from session.
 
         Args:

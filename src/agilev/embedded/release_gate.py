@@ -8,7 +8,7 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 import yaml
 
@@ -40,15 +40,25 @@ class EmbeddedReleaseGate:
                     "L0": {"evidence_required": ["documentation"]},
                     "L1": {"evidence_required": ["tests", "build_artifacts"]},
                     "L2": {"evidence_required": ["tests", "build_artifacts", "simulation"]},
-                    "L3": {"evidence_required": ["tests", "build_artifacts", "simulation", "hil"]},
-                    "L4": {"evidence_required": ["tests", "build_artifacts", "simulation", "hil", "human_ee_approval"]},
+                    "L3": {
+                        "evidence_required": ["tests", "build_artifacts", "simulation", "hil"]
+                    },
+                    "L4": {
+                        "evidence_required": [
+                            "tests",
+                            "build_artifacts",
+                            "simulation",
+                            "hil",
+                            "human_ee_approval",
+                        ]
+                    },
                 }
             }
 
         with open(self.config_path) as f:
             return yaml.safe_load(f)
 
-    def load_evidence_bundle(self, task_id: str) -> Optional[dict[str, Any]]:
+    def load_evidence_bundle(self, task_id: str) -> dict[str, Any] | None:
         """Load evidence bundle for task.
 
         Args:
@@ -65,7 +75,7 @@ class EmbeddedReleaseGate:
         with open(evidence_path) as f:
             return json.load(f)
 
-    def load_firmware_evidence(self, firmware_task_id: str) -> Optional[dict[str, Any]]:
+    def load_firmware_evidence(self, firmware_task_id: str) -> dict[str, Any] | None:
         """Load firmware evidence bundle.
 
         Args:
@@ -198,7 +208,7 @@ class EmbeddedReleaseGate:
         self,
         task_id: str,
         risk_level: str,
-        firmware_task_id: Optional[str] = None,
+        firmware_task_id: str | None = None,
     ) -> dict[str, Any]:
         """Check release gate for task.
 
@@ -252,7 +262,11 @@ class EmbeddedReleaseGate:
         results["checks"].append({
             "name": f"Risk level {risk_level} requirements",
             "passed": not missing_evidence,
-            "message": f"All evidence present" if not missing_evidence else f"Missing: {', '.join(missing_evidence)}",
+            "message": (
+                "All evidence present"
+                if not missing_evidence
+                else f"Missing: {', '.join(missing_evidence)}"
+            ),
         })
 
         # Check firmware evidence if provided
