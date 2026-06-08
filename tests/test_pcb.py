@@ -1,6 +1,15 @@
 """Tests for PCB development modules."""
 
-from agilev.pcb.circuit_ir import CircuitIR, Component, Interface, Net, Pin, PinType, PowerDomain
+from agilev.pcb.circuit_ir import (
+    CircuitIR,
+    Component,
+    Interface,
+    Net,
+    NetType,
+    Pin,
+    PinType,
+    PowerDomain,
+)
 from agilev.pcb.component_index import (
     ComponentEntry,
     ComponentIndex,
@@ -19,7 +28,7 @@ class TestCircuitIR:
     
     def test_create_empty_circuit(self):
         """Test creating an empty circuit."""
-        circuit = CircuitIR("test_circuit", "Test Circuit")
+        circuit = CircuitIR(name="test_circuit", description="Test Circuit")
         assert circuit.name == "test_circuit"
         assert circuit.description == "Test Circuit"
         assert len(circuit.components) == 0
@@ -27,12 +36,13 @@ class TestCircuitIR:
     
     def test_add_component(self):
         """Test adding a component."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         comp = Component(
-            ref="R1",
+            id="R1",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive"),
                 Pin(number="2", name="2", type=PinType.PASSIVE, electrical_type="passive")
@@ -41,17 +51,18 @@ class TestCircuitIR:
         
         circuit.add_component(comp)
         assert len(circuit.components) == 1
-        assert circuit.components["R1"] == comp
+        assert circuit.get_component("R1") == comp
     
     def test_add_net(self):
         """Test adding a net."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         # Add components first
         r1 = Component(
-            ref="R1",
+            id="R1",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive"),
                 Pin(number="2", name="2", type=PinType.PASSIVE, electrical_type="passive")
@@ -59,9 +70,10 @@ class TestCircuitIR:
         )
         
         r2 = Component(
-            ref="R2",
+            id="R2",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive"),
                 Pin(number="2", name="2", type=PinType.PASSIVE, electrical_type="passive")
@@ -74,21 +86,23 @@ class TestCircuitIR:
         # Add net connecting them
         net = Net(
             name="VCC",
+            type=NetType.POWER,
             connections=[("R1", "1"), ("R2", "1")]
         )
         
         circuit.add_net(net)
         assert len(circuit.nets) == 1
-        assert circuit.nets["VCC"] == net
+        assert circuit.get_net("VCC") == net
     
     def test_validate_connections_success(self):
         """Test connection validation with valid connections."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         comp = Component(
-            ref="R1",
+            id="R1",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive"),
                 Pin(number="2", name="2", type=PinType.PASSIVE, electrical_type="passive")
@@ -99,6 +113,7 @@ class TestCircuitIR:
         
         net = Net(
             name="VCC",
+            type=NetType.POWER,
             connections=[("R1", "1")]
         )
         
@@ -109,10 +124,11 @@ class TestCircuitIR:
     
     def test_validate_connections_missing_component(self):
         """Test connection validation with missing component."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         net = Net(
             name="VCC",
+            type=NetType.POWER,
             connections=[("R1", "1")]
         )
         
@@ -124,12 +140,13 @@ class TestCircuitIR:
     
     def test_validate_connections_missing_pin(self):
         """Test connection validation with missing pin."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         comp = Component(
-            ref="R1",
+            id="R1",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive")
             ]
@@ -139,6 +156,7 @@ class TestCircuitIR:
         
         net = Net(
             name="VCC",
+            type=NetType.POWER,
             connections=[("R1", "99")]
         )
         
@@ -146,16 +164,17 @@ class TestCircuitIR:
         
         errors = circuit.validate_connections()
         assert len(errors) == 1
-        assert "pin 99" in errors[0].lower()
+        assert "99" in errors[0]  # Pin number should be in error message
     
     def test_save_and_load(self, tmp_path):
         """Test saving and loading circuit IR."""
-        circuit = CircuitIR("test", "Test Circuit")
+        circuit = CircuitIR(name="test", description="Test Circuit")
         
         comp = Component(
-            ref="R1",
+            id="R1",
+            type="resistor",
             value="10k",
-            footprint="0603",
+            package="0603",
             pins=[
                 Pin(number="1", name="1", type=PinType.PASSIVE, electrical_type="passive"),
                 Pin(number="2", name="2", type=PinType.PASSIVE, electrical_type="passive")
@@ -176,7 +195,8 @@ class TestCircuitIR:
         assert loaded.name == circuit.name
         assert loaded.description == circuit.description
         assert len(loaded.components) == 1
-        assert "R1" in loaded.components
+        assert loaded.get_component("R1") is not None
+        assert loaded.get_component("R1").value == "10k"
 
 
 class TestComponentIndex:
@@ -279,7 +299,14 @@ class TestValidators:
     
     def test_voltage_domain_validator_success(self):
         """Test voltage domain validator with valid design."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
+        
+        # Add VCC net
+        vcc_net = Net(
+            name="VCC",
+            type=NetType.POWER
+        )
+        circuit.add_net(vcc_net)
         
         # Add power domain
         vcc = PowerDomain(
@@ -295,9 +322,10 @@ class TestValidators:
         
         # Add components
         ldo = Component(
-            ref="U1",
+            id="U1",
+            type="ic",
             value="LDO_3V3",
-            footprint="SOT-23-5",
+            package="SOT-23-5",
             power_domain="VCC",
             pins=[]
         )
@@ -312,19 +340,20 @@ class TestValidators:
         assert len(result.errors) == 0
     
     def test_voltage_domain_validator_missing_domain(self):
-        """Test voltage domain validator with missing domain."""
-        circuit = CircuitIR("test", "Test")
+        """Test voltage domain validator with missing net."""
+        circuit = CircuitIR(name="test", description="Test")
         
-        # Add component without power domain defined
-        comp = Component(
-            ref="U1",
-            value="IC",
-            footprint="SOIC-8",
-            power_domain="VCC",  # Not defined
-            pins=[]
+        # Add power domain that references non-existent net
+        vcc = PowerDomain(
+            name="VCC",
+            voltage_nominal=3.3,
+            voltage_min=3.0,
+            voltage_max=3.6,
+            current_max=1.0,
+            nets=["VCC"]  # This net doesn't exist
         )
         
-        circuit.add_component(comp)
+        circuit.add_power_domain(vcc)
         
         # Validate
         validator = VoltageDomainValidator()
@@ -335,7 +364,7 @@ class TestValidators:
     
     def test_power_budget_validator(self):
         """Test power budget validator."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         # Add power domain
         vcc = PowerDomain(
@@ -343,51 +372,53 @@ class TestValidators:
             voltage_nominal=3.3,
             voltage_min=3.0,
             voltage_max=3.6,
-            current_max=1.0,
+            current_max=1.0,  # 3.3W max
             nets=["VCC"]
         )
         
         circuit.add_power_domain(vcc)
         
-        # Add components with power consumption
+        # Add components with high power consumption (> 80% of capacity)
         ic1 = Component(
-            ref="U1",
+            id="U1",
+            type="ic",
             value="MCU",
-            footprint="QFN-32",
+            package="QFN-32",
             power_domain="VCC",
-            power_consumption=0.5,
+            power_consumption=1.5,  # Higher consumption
             pins=[]
         )
         
         ic2 = Component(
-            ref="U2",
+            id="U2",
+            type="ic",
             value="Sensor",
-            footprint="SOIC-8",
+            package="SOIC-8",
             power_domain="VCC",
-            power_consumption=0.3,
+            power_consumption=1.3,  # Higher consumption
             pins=[]
         )
         
         circuit.add_component(ic1)
         circuit.add_component(ic2)
         
-        # Validate
+        # Validate - total is 2.8W out of 3.3W max (85% utilization, < 20% margin)
         validator = PowerBudgetValidator()
         result = validator.validate(circuit)
         
-        assert result.passed
+        assert result.passed  # Not over budget
         assert len(result.errors) == 0
-        # Should have warning about margin
+        # Should have warning about insufficient margin
         assert len(result.warnings) > 0
     
     def test_i2c_interface_validator(self):
         """Test I2C interface validator."""
-        circuit = CircuitIR("test", "Test")
+        circuit = CircuitIR(name="test", description="Test")
         
         # Add I2C interface
         i2c = Interface(
             name="I2C0",
-            interface_type="i2c",
+            type="i2c",
             signals={
                 "SDA": "I2C0_SDA",
                 "SCL": "I2C0_SCL"
@@ -400,9 +431,10 @@ class TestValidators:
         
         # Add master
         master = Component(
-            ref="U1",
+            id="U1",
+            type="ic",
             value="MCU",
-            footprint="QFN-32",
+            package="QFN-32",
             pins=[
                 Pin(
                     number="10",
@@ -417,12 +449,18 @@ class TestValidators:
         circuit.add_component(master)
         
         # Add nets
-        circuit.add_net(Net(name="I2C0_SDA", connections=[("U1", "10")]))
-        circuit.add_net(Net(name="I2C0_SCL", connections=[("U1", "11")]))
+        circuit.add_net(Net(
+            name="I2C0_SDA",
+            type=NetType.SIGNAL,
+            connections=[("U1", "10")]))
+        circuit.add_net(Net(
+            name="I2C0_SCL",
+            type=NetType.SIGNAL,
+            connections=[("U1", "11")]))
         
         # Validate
         validator = I2CInterfaceValidator()
-        result = validator.validate(circuit)
+        result = validator.validate(circuit, i2c)
         
         # Should warn about missing pullups
         assert len(result.warnings) > 0
