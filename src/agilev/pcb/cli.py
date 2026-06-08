@@ -6,16 +6,12 @@ Extends the main agilev CLI with PCB-specific commands.
 """
 
 import argparse
-import json
-import sys
-from datetime import datetime
 from pathlib import Path
-from typing import Optional
 
 from .circuit_ir import CircuitIR
-from .kicad_cli import KiCadCLI, validate_schematic
-from .validators import validate_circuit, generate_validation_report
 from .component_index import ComponentIndex
+from .kicad_cli import KiCadCLI
+from .validators import generate_validation_report, validate_circuit
 
 
 def cmd_pcb_validate(args: argparse.Namespace) -> int:
@@ -34,7 +30,7 @@ def cmd_pcb_validate(args: argparse.Namespace) -> int:
     circuit = CircuitIR.load(circuit_path)
     
     # Validate circuit structure
-    print(f"\n🔍 Validating circuit structure...")
+    print("\n🔍 Validating circuit structure...")
     connection_errors = circuit.validate_connections()
     
     if connection_errors:
@@ -43,10 +39,10 @@ def cmd_pcb_validate(args: argparse.Namespace) -> int:
             print(f"  - {error}")
         return 1
     else:
-        print(f"✅ Circuit structure valid")
+        print("✅ Circuit structure valid")
     
     # Run semantic validators
-    print(f"\n🔍 Running semantic validators...")
+    print("\n🔍 Running semantic validators...")
     validation_results = validate_circuit(circuit)
     
     # Generate report
@@ -67,7 +63,7 @@ def cmd_pcb_validate(args: argparse.Namespace) -> int:
         print(f"\n❌ Validation failed with {total_errors} errors")
         return 1
     else:
-        print(f"\n✅ Validation passed")
+        print("\n✅ Validation passed")
         return 0
 
 
@@ -84,16 +80,16 @@ def cmd_pcb_export_kicad(args: argparse.Namespace) -> int:
         return 1
     
     print(f"📋 Loading circuit IR from {circuit_path}")
-    circuit = CircuitIR.load(circuit_path)
+    CircuitIR.load(circuit_path)
     
     # Export to KiCad
     # This is a placeholder - actual implementation would convert Circuit IR to KiCad format
-    print(f"\n⚠️  KiCad export not yet implemented")
-    print(f"   Circuit IR → KiCad conversion requires:")
-    print(f"   - Symbol library mapping")
-    print(f"   - Footprint assignment")
-    print(f"   - .kicad_sch file generation")
-    print(f"\n   For now, use KiCad manually with the circuit IR as reference")
+    print("\n⚠️  KiCad export not yet implemented")
+    print("   Circuit IR → KiCad conversion requires:")
+    print("   - Symbol library mapping")
+    print("   - Footprint assignment")
+    print("   - .kicad_sch file generation")
+    print("\n   For now, use KiCad manually with the circuit IR as reference")
     
     return 1
 

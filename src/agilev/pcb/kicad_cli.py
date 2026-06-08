@@ -15,8 +15,7 @@ Requires KiCad 8.0+ with kicad-cli installed.
 import subprocess
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Optional, List, Dict, Any
-import json
+from typing import Any
 
 
 @dataclass
@@ -75,7 +74,7 @@ class KiCadCLI:
     def run_erc(
         self,
         schematic_path: Path,
-        output_path: Optional[Path] = None
+        output_path: Path | None = None
     ) -> ERCResult:
         """
         Run Electrical Rule Check on schematic.
@@ -158,7 +157,7 @@ class KiCadCLI:
         schematic_path: Path,
         output_path: Path,
         format: str = "csv",
-        fields: Optional[List[str]] = None
+        fields: list[str] | None = None
     ) -> bool:
         """
         Export Bill of Materials.
@@ -279,7 +278,7 @@ class KiCadCLI:
     def run_drc(
         self,
         pcb_path: Path,
-        output_path: Optional[Path] = None
+        output_path: Path | None = None
     ) -> DRCResult:
         """
         Run Design Rule Check on PCB layout.
@@ -327,7 +326,7 @@ class KiCadCLI:
         self,
         pcb_path: Path,
         output_dir: Path,
-        layers: Optional[List[str]] = None
+        layers: list[str] | None = None
     ) -> bool:
         """
         Export Gerber files for manufacturing.
@@ -409,7 +408,7 @@ class KiCadCLI:
 
 # Convenience functions
 
-def validate_schematic(schematic_path: Path) -> Dict[str, Any]:
+def validate_schematic(schematic_path: Path) -> dict[str, Any]:
     """
     Run all schematic validations.
     

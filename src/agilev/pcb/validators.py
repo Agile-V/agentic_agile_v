@@ -10,10 +10,9 @@ Hardware-specific validation functions for:
 """
 
 from dataclasses import dataclass
-from typing import List, Dict, Optional, Any
-from pathlib import Path
+from typing import Any
 
-from .circuit_ir import CircuitIR, Component, Net, PowerDomain, Interface, PinType, NetType
+from .circuit_ir import CircuitIR, Interface, Net, NetType
 
 
 @dataclass
@@ -22,18 +21,18 @@ class ValidationIssue:
     severity: str  # "error", "warning", "info"
     category: str
     message: str
-    component: Optional[str] = None
-    net: Optional[str] = None
-    details: Optional[Dict[str, Any]] = None
+    component: str | None = None
+    net: str | None = None
+    details: dict[str, Any] | None = None
 
 
 @dataclass
 class ValidationResult:
     """Result from validation."""
     passed: bool
-    errors: List[ValidationIssue]
-    warnings: List[ValidationIssue]
-    info: List[ValidationIssue]
+    errors: list[ValidationIssue]
+    warnings: list[ValidationIssue]
+    info: list[ValidationIssue]
     
     def has_errors(self) -> bool:
         """Check if there are any errors."""
@@ -211,7 +210,7 @@ class I2CInterfaceValidator:
         # Check voltage compatibility
         if interface.voltage:
             for slave_id in interface.slaves:
-                slave = circuit.get_component(slave_id)
+                circuit.get_component(slave_id)
                 # Would need to check slave's I2C voltage tolerance
                 # This is a placeholder for datasheet-based validation
         
@@ -361,7 +360,7 @@ class InterfaceValidator:
             'usb': USBInterfaceValidator()
         }
     
-    def validate(self, circuit: CircuitIR) -> Dict[str, ValidationResult]:
+    def validate(self, circuit: CircuitIR) -> dict[str, ValidationResult]:
         """Validate all interfaces in circuit."""
         results = {}
         
@@ -388,7 +387,7 @@ class InterfaceValidator:
         return results
 
 
-def validate_circuit(circuit: CircuitIR) -> Dict[str, ValidationResult]:
+def validate_circuit(circuit: CircuitIR) -> dict[str, ValidationResult]:
     """
     Run all validations on a circuit.
     
@@ -416,7 +415,7 @@ def validate_circuit(circuit: CircuitIR) -> Dict[str, ValidationResult]:
     return results
 
 
-def generate_validation_report(results: Dict[str, ValidationResult]) -> str:
+def generate_validation_report(results: dict[str, ValidationResult]) -> str:
     """Generate a human-readable validation report."""
     lines = ["# Circuit Validation Report\n"]
     

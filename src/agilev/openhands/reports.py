@@ -12,8 +12,7 @@ Generates comprehensive reports and handoff documents with:
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Any, Optional
-import json
+from typing import Any
 
 from ..task_context import TaskContextResolver
 from .event_ledger import EventLedger
@@ -29,39 +28,39 @@ class HandoffReport:
     
     # Overview
     summary: str
-    objectives: List[str]
-    acceptance_criteria: List[str]
+    objectives: list[str]
+    acceptance_criteria: list[str]
     
     # Implementation
-    files_changed: List[str]
+    files_changed: list[str]
     lines_added: int
     lines_deleted: int
     
     # Evidence
     tests_run: int
     tests_passed: int
-    test_failures: List[Dict[str, Any]]
+    test_failures: list[dict[str, Any]]
     
     checks_run: int
     checks_passed: int
-    check_failures: List[Dict[str, Any]]
+    check_failures: list[dict[str, Any]]
     
     # Agent execution
-    sessions: List[Dict[str, Any]]
+    sessions: list[dict[str, Any]]
     total_iterations: int
     total_tool_calls: int
     
     # Scope compliance
-    scope_violations: List[str]
-    dependency_changes: List[str]
+    scope_violations: list[str]
+    dependency_changes: list[str]
     public_api_changes: bool
     
     # Timeline
-    events: List[Dict[str, Any]]
+    events: list[dict[str, Any]]
     
     # Recommendations
-    recommendations: List[str]
-    residual_risks: List[str]
+    recommendations: list[str]
+    residual_risks: list[str]
     
     # Metadata
     generated_at: datetime
@@ -285,7 +284,7 @@ class ReportGenerator:
             md += "\n"
         
         # Next steps
-        md += f"""## Next Steps
+        md += """## Next Steps
 
 1. **Review this handoff** - Ensure all changes are understood
 2. **Run tests locally** - Verify everything works in your environment
@@ -386,7 +385,7 @@ class ReportGenerator:
                 md += f"- **{check.get('type', 'unknown')}**: {check.get('message', 'No message')}\n"
             md += "\n"
         
-        md += f"""### Scope and Impact Analysis
+        md += """### Scope and Impact Analysis
 
 #### Dependency Changes
 """
@@ -488,7 +487,7 @@ For L{report.risk_level[-1]} changes, the following approvals are required:
         
         return md
     
-    def _load_task_brief(self, task_id: str) -> Dict[str, Any]:
+    def _load_task_brief(self, task_id: str) -> dict[str, Any]:
         """Load and parse task brief."""
         task_brief_path = self.agilev_dir / "tasks" / task_id / "task_brief.md"
         
@@ -508,13 +507,13 @@ For L{report.risk_level[-1]} changes, the following approvals are required:
         
         return brief
     
-    def _get_git_stats(self, task_id: str) -> Dict[str, int]:
+    def _get_git_stats(self, task_id: str) -> dict[str, int]:
         """Get git statistics for task changes."""
         # This would use git diff to get real stats
         # Placeholder for now
         return {'insertions': 0, 'deletions': 0}
     
-    def _extract_sessions(self, events: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+    def _extract_sessions(self, events: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Extract session information from events."""
         sessions = []
         session_map = {}
@@ -545,12 +544,12 @@ For L{report.risk_level[-1]} changes, the following approvals are required:
     
     def _generate_recommendations(
         self,
-        task_brief: Dict[str, Any],
-        evidence: Dict[str, Any],
-        tests: List[Dict[str, Any]],
-        checks: List[Dict[str, Any]],
-        scope: Dict[str, Any]
-    ) -> List[str]:
+        task_brief: dict[str, Any],
+        evidence: dict[str, Any],
+        tests: list[dict[str, Any]],
+        checks: list[dict[str, Any]],
+        scope: dict[str, Any]
+    ) -> list[str]:
         """Generate actionable recommendations."""
         recommendations = []
         
@@ -599,11 +598,11 @@ For L{report.risk_level[-1]} changes, the following approvals are required:
     
     def _identify_residual_risks(
         self,
-        task_brief: Dict[str, Any],
-        evidence: Dict[str, Any],
-        tests: List[Dict[str, Any]],
-        checks: List[Dict[str, Any]]
-    ) -> List[str]:
+        task_brief: dict[str, Any],
+        evidence: dict[str, Any],
+        tests: list[dict[str, Any]],
+        checks: list[dict[str, Any]]
+    ) -> list[str]:
         """Identify residual risks."""
         risks = []
         

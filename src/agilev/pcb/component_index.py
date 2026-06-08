@@ -5,10 +5,10 @@ Manages approved components, alternative parts, and datasheet references.
 Integrates with Understand Anything for datasheet parsing if available.
 """
 
-from dataclasses import dataclass, field, asdict
-from pathlib import Path
-from typing import List, Dict, Optional, Any
 import json
+from dataclasses import asdict, dataclass, field
+from pathlib import Path
+from typing import Any
 
 
 @dataclass
@@ -20,34 +20,34 @@ class DatasheetExtract:
     datasheet_url: str
     
     # Pin information
-    pins: List[Dict[str, Any]] = field(default_factory=list)
+    pins: list[dict[str, Any]] = field(default_factory=list)
     
     # Electrical characteristics
-    voltage_min: Optional[float] = None
-    voltage_max: Optional[float] = None
-    voltage_typ: Optional[float] = None
-    current_max: Optional[float] = None
-    power_max: Optional[float] = None
+    voltage_min: float | None = None
+    voltage_max: float | None = None
+    voltage_typ: float | None = None
+    current_max: float | None = None
+    power_max: float | None = None
     
     # Typical application
-    typical_application_circuit: Optional[str] = None
-    recommended_layout: Optional[str] = None
+    typical_application_circuit: str | None = None
+    recommended_layout: str | None = None
     
     # Additional specs
-    package: Optional[str] = None
-    temperature_min: Optional[float] = None
-    temperature_max: Optional[float] = None
+    package: str | None = None
+    temperature_min: float | None = None
+    temperature_max: float | None = None
     
     # Metadata
-    extracted_date: Optional[str] = None
-    confidence: Optional[str] = "manual"  # manual, auto-high, auto-medium, auto-low
+    extracted_date: str | None = None
+    confidence: str | None = "manual"  # manual, auto-high, auto-medium, auto-low
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return asdict(self)
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'DatasheetExtract':
+    def from_dict(cls, data: dict[str, Any]) -> 'DatasheetExtract':
         """Create from dictionary."""
         return cls(**data)
 
@@ -63,31 +63,31 @@ class ComponentEntry:
     
     # Availability
     available: bool = True
-    preferred_vendor: Optional[str] = None
-    stock_url: Optional[str] = None
+    preferred_vendor: str | None = None
+    stock_url: str | None = None
     lifecycle_status: str = "active"  # active, nrnd, obsolete
     
     # Specifications
-    package: Optional[str] = None
-    datasheet_url: Optional[str] = None
-    datasheet_extract: Optional[DatasheetExtract] = None
+    package: str | None = None
+    datasheet_url: str | None = None
+    datasheet_extract: DatasheetExtract | None = None
     
     # Alternatives
-    alternates: List[str] = field(default_factory=list)
-    compatible_with: List[str] = field(default_factory=list)
+    alternates: list[str] = field(default_factory=list)
+    compatible_with: list[str] = field(default_factory=list)
     
     # Approval status
     approved: bool = False
-    approved_by: Optional[str] = None
-    approved_date: Optional[str] = None
-    restrictions: List[str] = field(default_factory=list)
+    approved_by: str | None = None
+    approved_date: str | None = None
+    restrictions: list[str] = field(default_factory=list)
     
     # Metadata
-    notes: Optional[str] = None
-    created: Optional[str] = None
-    updated: Optional[str] = None
+    notes: str | None = None
+    created: str | None = None
+    updated: str | None = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = asdict(self)
         if self.datasheet_extract:
@@ -95,7 +95,7 @@ class ComponentEntry:
         return d
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'ComponentEntry':
+    def from_dict(cls, data: dict[str, Any]) -> 'ComponentEntry':
         """Create from dictionary."""
         if 'datasheet_extract' in data and data['datasheet_extract']:
             data['datasheet_extract'] = DatasheetExtract.from_dict(data['datasheet_extract'])
@@ -105,7 +105,7 @@ class ComponentEntry:
 class ComponentIndex:
     """Index of approved and known components."""
     
-    def __init__(self, index_file: Optional[Path] = None):
+    def __init__(self, index_file: Path | None = None):
         """
         Initialize component index.
         
@@ -113,7 +113,7 @@ class ComponentIndex:
             index_file: Path to component index JSON file
         """
         self.index_file = index_file
-        self.components: Dict[str, ComponentEntry] = {}
+        self.components: dict[str, ComponentEntry] = {}
         
         if index_file and index_file.exists():
             self.load(index_file)
@@ -122,30 +122,30 @@ class ComponentIndex:
         """Add component to index."""
         self.components[component.id] = component
     
-    def get_component(self, component_id: str) -> Optional[ComponentEntry]:
+    def get_component(self, component_id: str) -> ComponentEntry | None:
         """Get component by ID."""
         return self.components.get(component_id)
     
-    def find_by_part_number(self, part_number: str) -> Optional[ComponentEntry]:
+    def find_by_part_number(self, part_number: str) -> ComponentEntry | None:
         """Find component by part number."""
         for comp in self.components.values():
             if comp.part_number == part_number:
                 return comp
         return None
     
-    def find_by_category(self, category: str) -> List[ComponentEntry]:
+    def find_by_category(self, category: str) -> list[ComponentEntry]:
         """Find all components in a category."""
         return [c for c in self.components.values() if c.category == category]
     
-    def find_approved(self) -> List[ComponentEntry]:
+    def find_approved(self) -> list[ComponentEntry]:
         """Find all approved components."""
         return [c for c in self.components.values() if c.approved]
     
-    def find_available(self) -> List[ComponentEntry]:
+    def find_available(self) -> list[ComponentEntry]:
         """Find all available components."""
         return [c for c in self.components.values() if c.available]
     
-    def get_alternates(self, component_id: str) -> List[ComponentEntry]:
+    def get_alternates(self, component_id: str) -> list[ComponentEntry]:
         """Get alternate components."""
         comp = self.get_component(component_id)
         if not comp:
@@ -159,7 +159,7 @@ class ComponentIndex:
         
         return alternates
     
-    def save(self, filepath: Optional[Path] = None) -> None:
+    def save(self, filepath: Path | None = None) -> None:
         """Save index to JSON file."""
         if filepath is None:
             filepath = self.index_file
@@ -202,7 +202,7 @@ class ComponentIndex:
         # Would parse .kicad_sym or .lib files
         return 0
     
-    def generate_bom_template(self, approved_only: bool = True) -> List[Dict[str, Any]]:
+    def generate_bom_template(self, approved_only: bool = True) -> list[dict[str, Any]]:
         """Generate BOM template with approved components."""
         components = self.find_approved() if approved_only else list(self.components.values())
         
@@ -289,7 +289,7 @@ def create_ic_entry(
 def extract_datasheet_info(
     datasheet_path: Path,
     part_number: str
-) -> Optional[DatasheetExtract]:
+) -> DatasheetExtract | None:
     """
     Extract information from datasheet using Understand Anything.
     

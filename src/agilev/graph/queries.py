@@ -7,9 +7,9 @@ and edges relevant to a change request or query.
 from __future__ import annotations
 
 import re
-from typing import Iterable
+from collections.abc import Iterable
 
-from .model import SystemGraph, SystemNode, SystemEdge
+from .model import SystemGraph, SystemNode
 
 
 def find_nodes_by_keyword(graph: SystemGraph, keywords: Iterable[str]) -> list[SystemNode]:

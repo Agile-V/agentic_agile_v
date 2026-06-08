@@ -9,7 +9,7 @@ Generates GitHub Actions workflows for Agile-V integration:
 """
 
 from pathlib import Path
-from typing import Dict, Any
+
 import yaml
 
 

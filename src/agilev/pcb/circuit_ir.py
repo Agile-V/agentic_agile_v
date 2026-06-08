@@ -11,11 +11,11 @@ in a format that is:
 The IR is inspired by pcbGPT but adapted for Agile-V's evidence-based workflow.
 """
 
-from dataclasses import dataclass, field, asdict
-from enum import Enum
-from typing import List, Dict, Optional, Any
 import json
+from dataclasses import dataclass, field
+from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class PinType(Enum):
@@ -48,11 +48,11 @@ class Pin:
     electrical_type: str  # From datasheet (input, output, power, etc.)
     
     # Optional attributes
-    voltage: Optional[float] = None  # Operating voltage
-    current_max: Optional[float] = None  # Maximum current (mA)
-    description: Optional[str] = None
+    voltage: float | None = None  # Operating voltage
+    current_max: float | None = None  # Maximum current (mA)
+    description: str | None = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = {
             'number': self.number,
@@ -74,33 +74,33 @@ class Component:
     """Represents an electronic component."""
     id: str  # Unique ID (e.g., "U1", "C1", "R1")
     type: str  # Component type (resistor, capacitor, IC, etc.)
-    value: Optional[str] = None  # Value (e.g., "10k", "100nF", "STM32F4")
-    package: Optional[str] = None  # Package (e.g., "0603", "SOIC-8", "QFN-32")
-    manufacturer: Optional[str] = None
-    part_number: Optional[str] = None
-    datasheet_url: Optional[str] = None
-    description: Optional[str] = None
+    value: str | None = None  # Value (e.g., "10k", "100nF", "STM32F4")
+    package: str | None = None  # Package (e.g., "0603", "SOIC-8", "QFN-32")
+    manufacturer: str | None = None
+    part_number: str | None = None
+    datasheet_url: str | None = None
+    description: str | None = None
     
     # Pins
-    pins: List[Pin] = field(default_factory=list)
+    pins: list[Pin] = field(default_factory=list)
     
     # Power information (for validation)
-    power_domain: Optional[str] = None  # Which power domain this component uses
-    power_consumption: Optional[float] = None  # Power consumption in Watts
+    power_domain: str | None = None  # Which power domain this component uses
+    power_consumption: float | None = None  # Power consumption in Watts
     
     # Attributes
-    voltage_rating: Optional[float] = None
-    current_rating: Optional[float] = None
-    power_rating: Optional[float] = None
-    tolerance: Optional[str] = None
-    temperature_coefficient: Optional[str] = None
+    voltage_rating: float | None = None
+    current_rating: float | None = None
+    power_rating: float | None = None
+    tolerance: str | None = None
+    temperature_coefficient: str | None = None
     
     # Metadata
-    footprint: Optional[str] = None
-    symbol: Optional[str] = None
-    alternate_parts: List[str] = field(default_factory=list)
+    footprint: str | None = None
+    symbol: str | None = None
+    alternate_parts: list[str] = field(default_factory=list)
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = {
             'id': self.id,
@@ -126,14 +126,14 @@ class Component:
         
         return d
     
-    def get_pin_by_name(self, name: str) -> Optional[Pin]:
+    def get_pin_by_name(self, name: str) -> Pin | None:
         """Get pin by name."""
         for pin in self.pins:
             if pin.name == name:
                 return pin
         return None
     
-    def get_pin_by_number(self, number: str) -> Optional[Pin]:
+    def get_pin_by_number(self, number: str) -> Pin | None:
         """Get pin by number."""
         for pin in self.pins:
             if pin.number == number:
@@ -148,13 +148,13 @@ class Net:
     type: NetType
     
     # Connected pins (list of tuples: (component_id, pin_number))
-    connections: List[tuple[str, str]] = field(default_factory=list)
+    connections: list[tuple[str, str]] = field(default_factory=list)
     
     # Net attributes
-    voltage: Optional[float] = None  # Operating voltage
-    description: Optional[str] = None
+    voltage: float | None = None  # Operating voltage
+    description: str | None = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = {
             'name': self.name,
@@ -182,17 +182,17 @@ class PowerDomain:
     current_max: float  # Maximum current (A)
     
     # Connected nets
-    nets: List[str] = field(default_factory=list)  # Net names in this domain
+    nets: list[str] = field(default_factory=list)  # Net names in this domain
     
     # Optional source information
-    source_component: Optional[str] = None  # Component providing this voltage
-    source_pin: Optional[str] = None  # Pin providing voltage
+    source_component: str | None = None  # Component providing this voltage
+    source_pin: str | None = None  # Pin providing voltage
     
     # Optional regulation specs
-    tolerance_percent: Optional[float] = None
-    ripple_max_mv: Optional[float] = None
+    tolerance_percent: float | None = None
+    ripple_max_mv: float | None = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = {
             'name': self.name,
@@ -220,19 +220,19 @@ class Interface:
     type: str  # Interface type (i2c, spi, uart, usb, etc.)
     
     # Signals (net names)
-    signals: Dict[str, str] = field(default_factory=dict)
+    signals: dict[str, str] = field(default_factory=dict)
     # e.g., {"SCL": "I2C1_SCL", "SDA": "I2C1_SDA"}
     
     # Attributes
-    voltage: Optional[float] = None
-    frequency: Optional[float] = None  # Hz or bps
-    description: Optional[str] = None
+    voltage: float | None = None
+    frequency: float | None = None  # Hz or bps
+    description: str | None = None
     
     # Components using this interface
-    master: Optional[str] = None  # Component ID
-    slaves: List[str] = field(default_factory=list)  # Component IDs
+    master: str | None = None  # Component ID
+    slaves: list[str] = field(default_factory=list)  # Component IDs
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         d = {
             'name': self.name,
@@ -263,21 +263,21 @@ class CircuitIR:
     name: str
     version: str = "1.0"
     description: str = ""
-    task_id: Optional[str] = None
-    candidate_id: Optional[str] = None
+    task_id: str | None = None
+    candidate_id: str | None = None
     
     # Design elements
-    components: List[Component] = field(default_factory=list)
-    nets: List[Net] = field(default_factory=list)
-    power_domains: List[PowerDomain] = field(default_factory=list)
-    interfaces: List[Interface] = field(default_factory=list)
+    components: list[Component] = field(default_factory=list)
+    nets: list[Net] = field(default_factory=list)
+    power_domains: list[PowerDomain] = field(default_factory=list)
+    interfaces: list[Interface] = field(default_factory=list)
     
     # Design metadata
-    created: Optional[str] = None
-    modified: Optional[str] = None
-    author: Optional[str] = None
+    created: str | None = None
+    modified: str | None = None
+    author: str | None = None
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert entire circuit to dictionary."""
         return {
             'name': self.name,
@@ -304,7 +304,7 @@ class CircuitIR:
             f.write(self.to_json())
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'CircuitIR':
+    def from_dict(cls, data: dict[str, Any]) -> 'CircuitIR':
         """Create CircuitIR from dictionary."""
         circuit = cls(
             name=data['name'],
@@ -427,28 +427,28 @@ class CircuitIR:
     
     # Utility methods
     
-    def get_component(self, component_id: str) -> Optional[Component]:
+    def get_component(self, component_id: str) -> Component | None:
         """Get component by ID."""
         for comp in self.components:
             if comp.id == component_id:
                 return comp
         return None
     
-    def get_net(self, net_name: str) -> Optional[Net]:
+    def get_net(self, net_name: str) -> Net | None:
         """Get net by name."""
         for net in self.nets:
             if net.name == net_name:
                 return net
         return None
     
-    def get_power_domain(self, domain_name: str) -> Optional[PowerDomain]:
+    def get_power_domain(self, domain_name: str) -> PowerDomain | None:
         """Get power domain by name."""
         for pd in self.power_domains:
             if pd.name == domain_name:
                 return pd
         return None
     
-    def validate_connections(self) -> List[str]:
+    def validate_connections(self) -> list[str]:
         """
         Validate circuit connections.
         
@@ -493,7 +493,7 @@ class CircuitIR:
         
         return errors
     
-    def get_stats(self) -> Dict[str, Any]:
+    def get_stats(self) -> dict[str, Any]:
         """Get circuit statistics."""
         return {
             'components': len(self.components),

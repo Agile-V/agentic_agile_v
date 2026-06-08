@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -31,7 +31,7 @@ class EventLogger:
     def _load_last_hash(self) -> None:
         """Load the hash of the last event in the log."""
         try:
-            with open(self.log_path, 'r') as f:
+            with open(self.log_path) as f:
                 lines = f.readlines()
                 if lines:
                     last_event = json.loads(lines[-1])
@@ -44,7 +44,7 @@ class EventLogger:
         # Count existing events
         event_count = 0
         if self.log_path.exists():
-            with open(self.log_path, 'r') as f:
+            with open(self.log_path) as f:
                 event_count = sum(1 for _ in f)
         
         return f"evt_{event_count + 1:06d}"
@@ -84,7 +84,7 @@ class EventLogger:
         """
         event: dict[str, Any] = {
             "event_id": self._generate_event_id(),
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(UTC).isoformat(),
             "event_type": event_type,
             "actor": actor,
         }
@@ -132,7 +132,7 @@ class EventLogger:
             return []
         
         events = []
-        with open(self.log_path, 'r') as f:
+        with open(self.log_path) as f:
             for line in f:
                 try:
                     event = json.loads(line)
@@ -161,7 +161,7 @@ class EventLogger:
         errors = []
         previous_hash = None
         
-        with open(self.log_path, 'r') as f:
+        with open(self.log_path) as f:
             for i, line in enumerate(f, 1):
                 try:
                     event = json.loads(line)
@@ -215,7 +215,7 @@ class TaskState:
     
     def _load_state(self) -> dict[str, Any]:
         """Load the current state."""
-        with open(self.state_path, 'r') as f:
+        with open(self.state_path) as f:
             return json.load(f)
     
     def _save_state(self, state: dict[str, Any]) -> None:
@@ -232,7 +232,7 @@ class TaskState:
             "title": title,
             "risk_level": risk_level,
             "status": "created",
-            "created_at": datetime.now(timezone.utc).isoformat(),
+            "created_at": datetime.now(UTC).isoformat(),
         }
         
         self._save_state(state)
@@ -243,7 +243,7 @@ class TaskState:
         
         if task_id in state["tasks"]:
             state["tasks"][task_id]["status"] = status
-            state["tasks"][task_id]["updated_at"] = datetime.now(timezone.utc).isoformat()
+            state["tasks"][task_id]["updated_at"] = datetime.now(UTC).isoformat()
             self._save_state(state)
     
     def get_task(self, task_id: str) -> dict[str, Any] | None:
@@ -283,7 +283,7 @@ class LockManager:
     
     def _load_locks(self) -> dict[str, Any]:
         """Load current locks."""
-        with open(self.locks_path, 'r') as f:
+        with open(self.locks_path) as f:
             return json.load(f)
     
     def _save_locks(self, locks: dict[str, Any]) -> None:
@@ -317,7 +317,7 @@ class LockManager:
         for lock in locks_data["locks"]:
             # Check if lock is expired
             expires_at = datetime.fromisoformat(lock["expires_at"].replace('Z', '+00:00'))
-            if expires_at < datetime.now(timezone.utc):
+            if expires_at < datetime.now(UTC):
                 continue
             
             # Check for file conflicts
@@ -328,7 +328,7 @@ class LockManager:
                 return False
         
         # No conflicts, create lock
-        created_at = datetime.now(timezone.utc)
+        created_at = datetime.now(UTC)
         expires_at = created_at.replace(hour=created_at.hour + ttl_hours)
         
         new_lock = {
@@ -359,7 +359,7 @@ class LockManager:
     def get_active_locks(self) -> list[dict[str, Any]]:
         """Get all active (non-expired) locks."""
         locks_data = self._load_locks()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         
         active_locks = []
         for lock in locks_data["locks"]:
@@ -372,7 +372,7 @@ class LockManager:
     def clean_expired_locks(self) -> int:
         """Remove expired locks and return count of removed locks."""
         locks_data = self._load_locks()
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         
         initial_count = len(locks_data["locks"])
         

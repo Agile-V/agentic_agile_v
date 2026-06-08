@@ -12,11 +12,11 @@ Features:
 
 import hashlib
 import json
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 
 class EventType(Enum):
@@ -42,16 +42,16 @@ class Event:
     
     # Actor information
     actor: str  # e.g., "openhands", "human:john", "ci:github-actions"
-    actor_session_id: Optional[str] = None
+    actor_session_id: str | None = None
     
     # Event data
-    task_id: Optional[str] = None
+    task_id: str | None = None
     summary: str = ""
-    details: Dict[str, Any] = None
+    details: dict[str, Any] = None
     
     # Hash chain
-    previous_hash: Optional[str] = None
-    event_hash: Optional[str] = None
+    previous_hash: str | None = None
+    event_hash: str | None = None
     
     def __post_init__(self):
         """Initialize fields after dataclass construction."""
@@ -104,7 +104,7 @@ class Event:
         computed = self.compute_hash()
         return computed == self.event_hash
     
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             'event_id': self.event_id,
@@ -120,7 +120,7 @@ class Event:
         }
     
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> 'Event':
+    def from_dict(cls, data: dict[str, Any]) -> 'Event':
         """Create event from dictionary."""
         return cls(
             event_id=data['event_id'],
@@ -163,9 +163,9 @@ class EventLedger:
         event_type: EventType,
         actor: str,
         summary: str,
-        task_id: Optional[str] = None,
-        details: Optional[Dict[str, Any]] = None,
-        actor_session_id: Optional[str] = None
+        task_id: str | None = None,
+        details: dict[str, Any] | None = None,
+        actor_session_id: str | None = None
     ) -> Event:
         """
         Append a new event to the ledger.
@@ -209,11 +209,11 @@ class EventLedger:
     
     def get_events(
         self,
-        task_id: Optional[str] = None,
-        event_type: Optional[EventType] = None,
-        actor: Optional[str] = None,
-        since: Optional[datetime] = None
-    ) -> List[Event]:
+        task_id: str | None = None,
+        event_type: EventType | None = None,
+        actor: str | None = None,
+        since: datetime | None = None
+    ) -> list[Event]:
         """
         Get events from the ledger.
         
@@ -255,7 +255,7 @@ class EventLedger:
         
         return events
     
-    def verify_chain(self) -> tuple[bool, List[str]]:
+    def verify_chain(self) -> tuple[bool, list[str]]:
         """
         Verify the integrity of the entire hash chain.
         
@@ -296,7 +296,7 @@ class EventLedger:
         
         return len(errors) == 0, errors
     
-    def get_chain_summary(self) -> Dict[str, Any]:
+    def get_chain_summary(self) -> dict[str, Any]:
         """
         Get summary of the event chain.
         
@@ -330,7 +330,7 @@ class EventLedger:
             }
         }
     
-    def export_task_timeline(self, task_id: str) -> List[Dict[str, Any]]:
+    def export_task_timeline(self, task_id: str) -> list[dict[str, Any]]:
         """
         Export timeline of events for a specific task.
         
@@ -343,7 +343,7 @@ class EventLedger:
         events = self.get_events(task_id=task_id)
         return [e.to_dict() for e in events]
     
-    def _get_last_hash(self) -> Optional[str]:
+    def _get_last_hash(self) -> str | None:
         """Get hash of the last event in the chain."""
         if not self.ledger_file.exists():
             return None
@@ -380,7 +380,7 @@ def create_session_events(
     status: str,
     iterations: int,
     tool_calls: int,
-    files_modified: List[str]
+    files_modified: list[str]
 ) -> None:
     """
     Create events for an OpenHands session.
