@@ -1,0 +1,29 @@
+# Dangerous Commands Policy
+# Commands that OpenHands must not execute
+
+blocked_patterns:
+  - pattern: "rm -rf /"
+    reason: "Destructive filesystem operation"
+  - pattern: "dd if="
+    reason: "Low-level disk operation"
+  - pattern: "mkfs"
+    reason: "Filesystem creation can destroy data"
+  - pattern: ":(){ :|:& };:"
+    reason: "Fork bomb"
+  - pattern: "chmod 777"
+    reason: "Insecure permission setting"
+  - pattern: "> /dev/sd"
+    reason: "Direct disk write"
+  - pattern: "curl .* | sudo bash"
+    reason: "Execute untrusted remote code as root"
+  - pattern: "wget .* | sudo sh"
+    reason: "Execute untrusted remote code as root"
+  - pattern: "sudo rm"
+    reason: "Elevated destructive operation"
+  - pattern: "git push --force"
+    reason: "Can rewrite shared history"
+
+allowed_exceptions:
+  - pattern: "chmod 777"
+    when: "Explicitly allowed in task brief"
+    requires_approval: true

@@ -1,0 +1,71 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenHands Session Metadata",
+  "description": "Metadata for an OpenHands session",
+  "type": "object",
+  "required": ["task_id", "session_id", "started_at", "engine"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z]+-[0-9]+$",
+      "description": "Associated Agile-V task ID"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Unique session identifier"
+    },
+    "engine": {
+      "type": "string",
+      "enum": ["openhands", "cursor", "continue", "windsurf", "cline", "manual"],
+      "description": "Execution engine"
+    },
+    "mode": {
+      "type": "string",
+      "enum": ["builder", "verifier", "risk_classifier"],
+      "description": "Agent operating mode"
+    },
+    "agent_model": {
+      "type": "string",
+      "description": "LLM model used",
+      "examples": ["claude-3.5-sonnet", "gpt-4", "gpt-4-turbo"]
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Session start timestamp (ISO 8601)"
+    },
+    "ended_at": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Session end timestamp (ISO 8601)"
+    },
+    "repository": {
+      "type": "object",
+      "properties": {
+        "url": {"type": "string", "format": "uri"},
+        "branch": {"type": "string"},
+        "commit": {"type": "string"}
+      }
+    },
+    "environment": {
+      "type": "object",
+      "properties": {
+        "os": {"type": "string"},
+        "python_version": {"type": "string"},
+        "openhands_version": {"type": "string"}
+      }
+    },
+    "tool_count": {
+      "type": "integer",
+      "description": "Number of tool invocations during session"
+    },
+    "success": {
+      "type": "boolean",
+      "description": "Whether session completed successfully"
+    },
+    "error": {
+      "type": "string",
+      "description": "Error message if session failed"
+    }
+  }
+}

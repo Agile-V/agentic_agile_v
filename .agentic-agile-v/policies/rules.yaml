@@ -1,0 +1,249 @@
+# Agentic Agile-V Risk Policy
+# Version: 1.0.0
+# This file defines risk classification rules and evidence requirements
+
+risk_policy_version: 1.0.0
+
+# Risk levels from lowest to highest
+levels:
+  - L0  # Documentation-only or no-risk change
+  - L1  # Low-risk internal change
+  - L2  # Normal product change
+  - L3  # High-impact change (security, data, interfaces, hardware, release)
+  - L4  # Critical, regulated, safety, production, compliance-relevant
+
+# Risk classification rules
+rules:
+  # Security-related changes
+  - id: RISK-SECURITY
+    when_any_keyword:
+      - auth
+      - authorization
+      - authentication
+      - token
+      - secret
+      - crypto
+      - password
+      - jwt
+      - session
+      - permission
+    min_level: L3
+    evidence_required:
+      - security_review
+      - regression_tests
+      - rollback_path
+      - threat_model
+    description: "Security-sensitive changes require heightened scrutiny"
+
+  # Data handling changes
+  - id: RISK-DATA
+    when_any_keyword:
+      - database
+      - migration
+      - schema
+      - personal
+      - pii
+      - gdpr
+      - hipaa
+    min_level: L3
+    evidence_required:
+      - data_impact_analysis
+      - migration_plan
+      - rollback_path
+      - compliance_review
+    description: "Data changes affect privacy and compliance"
+
+  # Hardware or firmware changes
+  - id: RISK-HARDWARE
+    when_path_matches:
+      - "firmware/**"
+      - "hardware/**"
+      - "*.kicad_*"
+      - "*.ioc"
+      - "embedded/**"
+    min_level: L4
+    evidence_required:
+      - simulation_or_hil
+      - timing_or_memory_evidence
+      - independent_verification
+      - safety_analysis
+    description: "Hardware changes can have physical safety implications"
+
+  # Public API changes
+  - id: RISK-API
+    when_any_keyword:
+      - "public api"
+      - "breaking change"
+      - "api version"
+    when_path_matches:
+      - "**/api/**"
+      - "**/*.api.ts"
+    min_level: L2
+    evidence_required:
+      - api_compatibility_check
+      - migration_guide
+      - version_bump
+    description: "Public API changes affect external consumers"
+
+  # Production infrastructure
+  - id: RISK-INFRA
+    when_path_matches:
+      - "infrastructure/**"
+      - "terraform/**"
+      - "k8s/**"
+      - "kubernetes/**"
+      - "docker/**"
+    min_level: L2
+    evidence_required:
+      - deployment_plan
+      - rollback_plan
+      - monitoring_plan
+    description: "Infrastructure changes affect production availability"
+
+  # Compliance-related code
+  - id: RISK-COMPLIANCE
+    when_any_keyword:
+      - iso13485
+      - iso14971
+      - iec62304
+      - fda
+      - gxp
+      - sox
+      - pci
+    min_level: L4
+    evidence_required:
+      - regulatory_impact_analysis
+      - validation_summary
+      - independent_verification
+      - document_traceability
+    description: "Compliance-relevant changes require full documentation"
+
+# Evidence requirements by risk level
+evidence_by_level:
+  L0:
+    required:
+      - task_brief
+    optional:
+      - reviewer_note
+    gates: []
+    approval: false
+    verification_mode: none
+
+  L1:
+    required:
+      - task_brief
+      - at_least_one_test_or_rationale
+      - static_analysis
+    optional:
+      - peer_review
+    gates:
+      - evidence_schema
+    approval: false
+    verification_mode: self-check
+
+  L2:
+    required:
+      - task_brief
+      - impact_analysis
+      - unit_tests
+      - integration_tests
+      - interface_contract_check
+      - changed_file_traceability
+      - evidence_bundle
+    optional:
+      - performance_tests
+    gates:
+      - evidence_schema
+      - test_quality
+      - interface_contracts
+    approval: recommended
+    verification_mode: peer-check
+
+  L3:
+    required:
+      - task_brief
+      - impact_analysis
+      - comprehensive_tests
+      - interface_contract_check
+      - rollback_plan
+      - security_review
+      - regression_tests
+      - evidence_bundle
+      - independent_verification
+    gates:
+      - evidence_schema
+      - test_quality
+      - interface_contracts
+      - security_check
+      - rollback_path
+      - traceability
+    approval: required
+    verification_mode: independent
+
+  L4:
+    required:
+      - task_brief
+      - impact_analysis
+      - comprehensive_tests
+      - interface_contract_check
+      - rollback_plan
+      - security_review
+      - regression_tests
+      - evidence_bundle
+      - independent_verification
+      - formal_validation_summary
+      - full_traceability
+      - release_approval
+    gates:
+      - evidence_schema
+      - test_quality
+      - interface_contracts
+      - security_check
+      - rollback_path
+      - traceability
+      - independent_verification
+      - compliance_check
+    approval: required
+    verification_mode: red-team
+
+# Gate definitions
+gates:
+  evidence_schema:
+    description: "Evidence bundle validates against schema"
+    script: "scripts/validate_evidence.py"
+    fail_closed: true
+
+  test_quality:
+    description: "Tests meet quality standards"
+    script: "scripts/validate_test_quality.py"
+    fail_closed: true
+
+  interface_contracts:
+    description: "Interface contracts are maintained"
+    script: "scripts/validate_interface_contracts.py"
+    fail_closed: true
+
+  security_check:
+    description: "Security review completed"
+    script: "scripts/validate_security.py"
+    fail_closed: true
+
+  rollback_path:
+    description: "Rollback procedure documented and validated"
+    script: "scripts/validate_rollback.py"
+    fail_closed: true
+
+  traceability:
+    description: "Requirements trace to tests and code"
+    script: "scripts/validate_traceability.py"
+    fail_closed: true
+
+  independent_verification:
+    description: "Independent verifier has reviewed"
+    script: "scripts/validate_independent_verification.py"
+    fail_closed: true
+
+  compliance_check:
+    description: "Compliance requirements satisfied"
+    script: "scripts/validate_compliance.py"
+    fail_closed: true

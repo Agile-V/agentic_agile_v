@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agile-v.org/schemas/approval.schema.json",
+  "title": "Agentic Agile-V Approval Record",
+  "description": "Human approval record for AI-assisted work",
+  "type": "object",
+  "required": [
+    "task_id",
+    "decision",
+    "approver",
+    "timestamp"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-[0-9]{4}$",
+      "description": "Associated task ID"
+    },
+    "decision": {
+      "type": "string",
+      "enum": ["approved", "rejected", "conditional"],
+      "description": "Approval decision"
+    },
+    "approver": {
+      "type": "string",
+      "description": "Name or ID of approver"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Approval timestamp"
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Conditions that must be met (for conditional approvals)"
+    },
+    "rationale": {
+      "type": "string",
+      "description": "Reason for the decision"
+    },
+    "evidence_reviewed": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of evidence artifacts reviewed"
+    },
+    "residual_risks": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Known residual risks after approval"
+    }
+  }
+}

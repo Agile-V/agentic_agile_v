@@ -1,0 +1,134 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agile-v.org/schemas/task-brief.schema.json",
+  "title": "Agentic Agile-V Task Brief",
+  "description": "Complete specification for an AI-assisted engineering task",
+  "type": "object",
+  "required": [
+    "task_id",
+    "title",
+    "problem_statement",
+    "intended_outcome",
+    "scope",
+    "non_goals",
+    "requirements",
+    "constraints",
+    "acceptance_criteria",
+    "risk_level",
+    "affected_components",
+    "required_evidence",
+    "human_approval_required"
+  ],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-[0-9]{4}$",
+      "description": "Unique task identifier"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 5,
+      "maxLength": 200,
+      "description": "Brief task title"
+    },
+    "problem_statement": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Clear description of the problem to solve"
+    },
+    "intended_outcome": {
+      "type": "string",
+      "minLength": 10,
+      "description": "Expected result after completion"
+    },
+    "scope": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "What is included in this task"
+    },
+    "non_goals": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "What is explicitly out of scope"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "description"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^REQ-[0-9]{4}$"
+          },
+          "description": {
+            "type": "string"
+          },
+          "priority": {
+            "type": "string",
+            "enum": ["must", "should", "may"]
+          }
+        }
+      },
+      "minItems": 1,
+      "description": "Testable requirements"
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Technical or business constraints"
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "description": "Criteria that must be met for acceptance"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4"],
+      "description": "Risk classification (L0=docs only, L4=critical/regulated)"
+    },
+    "affected_components": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "System components that will be changed"
+    },
+    "required_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Types of evidence required for acceptance"
+    },
+    "human_approval_required": {
+      "type": "boolean",
+      "description": "Whether human approval is required before implementation"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string"
+    },
+    "approved_by": {
+      "type": "string"
+    },
+    "approved_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  }
+}

@@ -1,130 +1,397 @@
-name: Agentic Agile-V Gates
+name: Agentic Agile-V Quality Gates
 
 on:
   pull_request:
+    branches: [main, develop]
   push:
     branches: [main]
 
 permissions:
   contents: read
+  pull-requests: read
 
 jobs:
-  validate:
+  validate-structure:
+    name: Validate Repository Structure
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install package
+      
+      - name: Check for .agentic-agile-v structure
         run: |
-          pip install --upgrade pip
-          pip install -e .[dev]
-
-      - name: Run doctor check
-        run: |
-          agilev doctor
-
-      - name: Validate all evidence bundles
-        run: |
-          if [ -d evidence ]; then
-            python scripts/validate_evidence.py --root evidence || exit 1
-          else
-            echo "No evidence directory found, skipping validation"
-          fi
-
-      - name: Check for required files
-        run: |
-          required_files=(
-            "schemas/evidence_bundle.schema.json"
-            "templates/evidence_bundle.json"
-            "scripts/validate_evidence.py"
-            "scripts/new_task.py"
-            "README.md"
-          )
-          
-          missing=0
-          for file in "${required_files[@]}"; do
-            if [ ! -f "$file" ]; then
-              echo "❌ Missing required file: $file"
-              missing=1
-            fi
-          done
-          
-          if [ $missing -eq 1 ]; then
+          if [ ! -d ".agentic-agile-v" ]; then
+            echo "::error::Repository not initialized with Agentic Agile-V"
+            echo "Run 'agilev init' to initialize the structure"
             exit 1
           fi
           
-          echo "✅ All required files present"
+          required_dirs=(
+            ".agentic-agile-v/state"
+            ".agentic-agile-v/tasks"
+            ".agentic-agile-v/policies"
+            ".agentic-agile-v/schemas"
+          )
+          
+          for dir in "${required_dirs[@]}"; do
+            if [ ! -d "$dir" ]; then
+              echo "::error::Required directory missing: $dir"
+              exit 1
+            fi
+          done
+          
+          echo "✅ Repository structure validated"
 
-  lint:
+  validate-events:
+    name: Validate Event Chain
     runs-on: ubuntu-latest
+    needs: validate-structure
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
+      
+      - name: Install agilev
+        run: |
+          pip install -e .
+      
+      - name: Verify event chain integrity
+        run: |
+          python -c "
+          from agilev.state import EventLogger
+          logger = EventLogger()
+          valid, errors = logger.verify_chain()
+          if not valid:
+              print('::error::Event chain validation failed')
+              for error in errors:
+                  print(f'::error::{error}')
+              exit(1)
+          print('✅ Event chain integrity verified')
+          "
 
+  lint-and-typecheck:
+    name: Lint and Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -e .[dev]
-
+          pip install -e ".[dev]"
+      
       - name: Run ruff lint
         run: |
-          ruff check src/ || true
-
+          ruff check src/ tests/
+      
       - name: Run ruff format check
         run: |
-          ruff format --check src/ || true
-
-  typecheck:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.11"
-
-      - name: Install dependencies
-        run: |
-          pip install --upgrade pip
-          pip install -e .[dev]
-
+          ruff format --check src/ tests/
+      
       - name: Run mypy
         run: |
-          mypy src/ || true
+          mypy src/
 
   test:
+    name: Run Tests
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
-
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
-
+          python-version: '3.11'
+      
       - name: Install dependencies
         run: |
-          pip install --upgrade pip
-          pip install -e .[dev]
-
-      - name: Run tests
+          pip install -e ".[dev]"
+      
+      - name: Run tests with coverage
         run: |
-          if [ -d tests ]; then
-            pytest tests/ || true
-          else
-            echo "No tests directory found, skipping tests"
+          pytest --cov=agilev --cov-report=term --cov-report=xml
+      
+      - name: Upload coverage
+        uses: codecov/codecov-action@v4
+        if: always()
+        with:
+          files: ./coverage.xml
+          fail_ci_if_error: false
+
+  validate-schemas:
+    name: Validate Schemas
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js for ajv
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install ajv-cli
+        run: |
+          npm install -g ajv-cli
+      
+      - name: Validate JSON schemas
+        run: |
+          for schema in .agentic-agile-v/schemas/*.json; do
+            echo "Validating $schema"
+            ajv compile -s "$schema" || exit 1
+          done
+          echo "✅ All schemas are valid"
+
+  check-changed-files:
+    name: Check Changed Files Have Tasks
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Check for orphan changes
+        run: |
+          # Get changed files (excluding infrastructure files)
+          changed_files=$(git diff --name-only origin/main...HEAD | \
+            grep -v -E '^\.github/|^\.agentic-agile-v/|^docs/|^README|^LICENSE' || true)
+          
+          if [ -z "$changed_files" ]; then
+            echo "No source files changed"
+            exit 0
           fi
+          
+          # Check if there are any task directories with evidence bundles
+          task_count=$(find .agentic-agile-v/tasks -name "evidence.json" 2>/dev/null | wc -l || echo "0")
+          
+          if [ "$task_count" -eq 0 ]; then
+            echo "::error::Source files changed but no task evidence found"
+            echo "::error::Create a task with: agilev new --title 'Your change' --risk L1"
+            echo ""
+            echo "Changed files:"
+            echo "$changed_files"
+            exit 1
+          fi
+          
+          echo "✅ Found $task_count task(s) with evidence"
+
+  validate-risk-levels:
+    name: Validate Risk Levels
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install pyyaml
+      
+      - name: Check task risk levels
+        run: |
+          python -c "
+          import json
+          from pathlib import Path
+          import yaml
+          
+          tasks_file = Path('.agentic-agile-v/state/tasks.json')
+          if not tasks_file.exists():
+              print('No tasks found')
+              exit(0)
+          
+          with open(tasks_file) as f:
+              tasks_data = json.load(f)
+          
+          high_risk_tasks = []
+          for task_id, task in tasks_data.get('tasks', {}).items():
+              if task.get('risk_level') in ['L3', 'L4']:
+                  high_risk_tasks.append((task_id, task.get('risk_level')))
+          
+          if high_risk_tasks:
+              print(f'⚠️  Found {len(high_risk_tasks)} high-risk task(s):')
+              for task_id, risk in high_risk_tasks:
+                  print(f'  - {task_id}: {risk}')
+                  
+                  # Check for required evidence
+                  evidence_file = Path(f'.agentic-agile-v/tasks/{task_id}/evidence.json')
+                  if evidence_file.exists():
+                      with open(evidence_file) as ef:
+                          evidence = json.load(ef)
+                          
+                      # For L3/L4, require independent verification
+                      verification = evidence.get('verification', {})
+                      if not verification.get('status') == 'passed':
+                          print(f'::error::{task_id} requires independent verification')
+                          exit(1)
+                      
+                      # Check for approval
+                      approval = evidence.get('approval', {})
+                      if not approval.get('status') == 'approved':
+                          print(f'::error::{task_id} requires human approval')
+                          exit(1)
+          
+          print('✅ Risk level validation passed')
+          "
+
+  validate-evidence-bundles:
+    name: Validate Evidence Bundles
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install dependencies
+        run: |
+          pip install -e .
+          pip install jsonschema
+      
+      - name: Validate all evidence bundles
+        run: |
+          python -c "
+          import json
+          from pathlib import Path
+          from jsonschema import Draft202012Validator, ValidationError
+          
+          schema_file = Path('.agentic-agile-v/schemas/evidence-bundle.schema.json')
+          if not schema_file.exists():
+              print('⚠️  Evidence bundle schema not found')
+              exit(0)
+          
+          with open(schema_file) as f:
+              schema = json.load(f)
+          
+          validator = Draft202012Validator(schema)
+          
+          evidence_files = list(Path('.agentic-agile-v/tasks').rglob('evidence.json'))
+          
+          if not evidence_files:
+              print('No evidence bundles found')
+              exit(0)
+          
+          errors_found = False
+          for evidence_file in evidence_files:
+              with open(evidence_file) as f:
+                  evidence = json.load(f)
+              
+              validation_errors = list(validator.iter_errors(evidence))
+              if validation_errors:
+                  print(f'::error::Validation failed for {evidence_file}')
+                  for error in validation_errors:
+                      print(f'::error::  {error.message}')
+                  errors_found = True
+              else:
+                  print(f'✅ {evidence_file.parent.name}: Valid')
+          
+          if errors_found:
+              exit(1)
+          
+          print(f'✅ All {len(evidence_files)} evidence bundles validated')
+          "
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Run secret scan
+        uses: trufflesecurity/trufflehog@main
+        with:
+          extra_args: --only-verified
+      
+      - name: Check for sensitive patterns
+        run: |
+          # Check for common sensitive patterns
+          if grep -r -E "(password|secret|token|api_key|private_key)\s*=\s*['\"][^'\"]+['\"]" \
+             --include="*.py" --include="*.ts" --include="*.js" src/ 2>/dev/null; then
+            echo "::warning::Potential hardcoded secrets found"
+          fi
+          
+          # Check evidence bundles don't contain secrets
+          if grep -r -E "(password|secret|token|api_key)" .agentic-agile-v/tasks/ 2>/dev/null; then
+            echo "::error::Evidence bundles contain potential secrets"
+            exit 1
+          fi
+
+  clean-expired-locks:
+    name: Clean Expired Locks
+    runs-on: ubuntu-latest
+    needs: validate-structure
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      
+      - name: Install agilev
+        run: |
+          pip install -e .
+      
+      - name: Clean expired locks
+        run: |
+          python -c "
+          from agilev.state import LockManager
+          lock_manager = LockManager()
+          cleaned = lock_manager.clean_expired_locks()
+          print(f'🧹 Cleaned {cleaned} expired lock(s)')
+          "
+
+  summary:
+    name: Quality Gate Summary
+    runs-on: ubuntu-latest
+    needs: 
+      - validate-structure
+      - validate-events
+      - lint-and-typecheck
+      - test
+      - validate-schemas
+      - validate-evidence-bundles
+    if: always()
+    steps:
+      - name: Check all gates passed
+        run: |
+          if [ "${{ needs.validate-structure.result }}" != "success" ] || \
+             [ "${{ needs.validate-events.result }}" != "success" ] || \
+             [ "${{ needs.lint-and-typecheck.result }}" != "success" ] || \
+             [ "${{ needs.test.result }}" != "success" ] || \
+             [ "${{ needs.validate-schemas.result }}" != "success" ] || \
+             [ "${{ needs.validate-evidence-bundles.result }}" != "success" ]; then
+            echo "::error::One or more quality gates failed"
+            exit 1
+          fi
+          
+          echo "✅ All Agentic Agile-V quality gates passed"

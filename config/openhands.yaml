@@ -1,0 +1,174 @@
+# OpenHands Integration Configuration for Agentic Agile-V
+# This file configures how OpenHands interacts with Agile-V evidence gates,
+# scope control, and verification workflows.
+
+# Integration metadata
+integration:
+  name: "agentic-agile-v"
+  version: "0.1.0"
+  enabled: true
+
+# Skill loading configuration
+skills:
+  enabled: true
+  skills_dir: ".agents/skills"
+  auto_load:
+    - "agile-v-core"  # Always load core rules
+  load_on_mode:
+    builder:
+      - "agile-v-builder"
+      - "agile-v-evidence"
+    verifier:
+      - "agile-v-verifier"
+      - "agile-v-evidence"
+    risk_classifier:
+      - "agile-v-risk-classifier"
+
+# Hook configuration
+hooks:
+  enabled: true
+  config_path: ".openhands/hooks.json"
+  log_dir: ".openhands/logs"
+  timeout_default: 30  # seconds
+  block_on_hook_failure: true
+
+# Task context resolution
+task_context:
+  # Order of precedence for task ID resolution
+  resolution_order:
+    - "cli_option"      # --task AAV-001
+    - "env_variable"    # AGILEV_TASK_ID=AAV-001
+    - "branch_name"     # aav-001-*
+    - "github_metadata" # Issue/PR in CI
+    - "latest_modified" # Only if unambiguous
+  branch_pattern: "aav-{task_number}-*"
+  fail_on_ambiguous: true
+
+# Scope control
+scope:
+  enabled: true
+  policy_file: "config/policies/scope_policy.yaml"
+  enforcement_level: "strict"  # strict|warn|off
+  validate_on_tool_use: true
+  block_out_of_scope: true
+  track_dependency_changes: true
+  supported_ecosystems:
+    - python     # requirements.txt, pyproject.toml, setup.py
+    - node       # package.json, package-lock.json
+    - rust       # Cargo.toml, Cargo.lock
+    - go         # go.mod, go.sum
+    - java       # pom.xml, build.gradle
+
+# Evidence collection
+evidence:
+  enabled: true
+  auto_collect_on_stop: true
+  evidence_dir: "evidence"
+  log_tool_events: true
+  tool_log_file: "logs/openhands_tool_log.jsonl"
+  session_metadata_file: "logs/openhands_session.json"
+  adapter_script: "agilev openhands evidence collect"
+
+# Verification workflow
+verification:
+  enabled: true
+  require_verifier_for_levels: ["L2", "L3", "L4"]
+  verifier_mode: "fresh_context"  # Fresh session, no builder memory
+  verifier_read_only: true
+  verifier_report_file: "verifier_report.md"
+  acceptance_criteria_mapping: true  # Map each criterion to evidence
+
+# Risk-based policies
+risk_policies:
+  L0:
+    require_task_brief: false
+    require_tests: false
+    require_verifier: false
+    require_human_approval: false
+  L1:
+    require_task_brief: true
+    require_tests: true  # Or explicit test rationale
+    require_verifier: false
+    require_human_approval: false
+  L2:
+    require_task_brief: true
+    require_tests: true
+    require_passing_tests: true
+    require_verifier: true
+    require_human_approval: true  # Reviewer gate
+  L3:
+    require_task_brief: true
+    require_tests: true
+    require_passing_tests: true
+    require_rollback_path: true
+    require_verifier: true
+    require_human_approval: true  # Domain owner
+  L4:
+    require_task_brief: true
+    require_tests: true
+    require_passing_tests: true
+    require_rollback_path: true
+    require_verifier: true
+    require_independent_verification: true
+    require_traceability: true
+    require_formal_approval: true
+
+# Dangerous command blocking
+dangerous_commands:
+  enabled: true
+  policy_file: "config/policies/openhands_dangerous_commands.yaml"
+  block_patterns:
+    - "rm -rf /"
+    - "dd if="
+    - "mkfs"
+    - ":(){ :|:& };:"  # Fork bomb
+    - "chmod 777"
+    - "> /dev/sda"
+
+# Session management
+session:
+  log_all_events: true
+  event_log_file: ".openhands/logs/session_events.jsonl"
+  generate_handoff_on_end: true
+  handoff_template: "templates/openhands_handoff.md"
+
+# GitHub integration
+github:
+  enabled: true
+  label_prefix: "agilev-"
+  required_labels_on_pr:
+    - "agilev-risk-{level}"  # e.g., agilev-risk-l2
+  pr_description_include:
+    - task_brief_link
+    - risk_level
+    - evidence_bundle_path
+    - verifier_report_path
+  block_merge_on:
+    - evidence_validation_failure
+    - scope_violation
+    - missing_verifier_report  # for L2+
+    - missing_approval         # for L2+
+
+# Reporting
+reporting:
+  enabled: true
+  formats:
+    - markdown
+    - json
+  include_in_report:
+    - task_summary
+    - risk_level
+    - changed_files
+    - test_results
+    - evidence_summary
+    - verification_result
+    - residual_risks
+    - approval_status
+
+# Logging
+logging:
+  level: "INFO"  # DEBUG|INFO|WARN|ERROR
+  log_file: ".openhands/logs/agilev_integration.log"
+  log_hook_inputs: true
+  log_hook_outputs: true
+  log_policy_decisions: true

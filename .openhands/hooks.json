@@ -1,0 +1,80 @@
+{
+  "user_prompt_submit": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/enforce_task_brief.sh",
+          "timeout": 30
+        }
+      ]
+    }
+  ],
+  "pre_tool_use": [
+    {
+      "matcher": "terminal",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/block_unsafe_commands.sh",
+          "timeout": 10
+        }
+      ]
+    },
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/validate_scope.sh",
+          "timeout": 20
+        }
+      ]
+    }
+  ],
+  "post_tool_use": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/log_tool_usage.sh",
+          "timeout": 10,
+          "async": true
+        }
+      ]
+    }
+  ],
+  "session_start": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/collect_session_metadata.sh",
+          "timeout": 10,
+          "async": true
+        }
+      ]
+    }
+  ],
+  "stop": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/validate_evidence_on_stop.sh",
+          "timeout": 180
+        }
+      ]
+    }
+  ],
+  "session_end": [
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/generate_handoff_on_session_end.sh",
+          "timeout": 60,
+          "async": true
+        }
+      ]
+    }
+  ]
+}

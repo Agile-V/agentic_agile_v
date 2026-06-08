@@ -63,6 +63,54 @@ python scripts/validate_evidence.py --bundle evidence/examples/feature/evidence_
 | L3 | Security, customer-visible, data, APIs, persistent state | Regression tests, security/privacy check, rollback path, approval |
 | L4 | Safety, hardware/firmware, regulated, money movement, critical infrastructure | Independent verification, HIL/simulation/formal evidence, traceability matrix, approval |
 
+## OpenHands Integration
+
+**NEW:** Agentic Agile-V now integrates with [OpenHands](https://github.com/All-Hands-AI/OpenHands) as an execution backend.
+
+OpenHands provides autonomous code implementation while Agile-V maintains control through:
+- **Skills** that teach OpenHands about Agile-V rules
+- **Hooks** that enforce evidence gates and scope control
+- **Policies** that define risk-based requirements
+
+### Quick Start
+
+```bash
+# Initialize OpenHands integration
+agilev openhands init
+
+# Validate setup
+agilev openhands doctor
+
+# Create a task
+agilev new --title "Add retry handling" --risk L2
+
+# Run OpenHands (skills and hooks activate automatically)
+# ...
+
+# Validate the session
+agilev openhands validate --task AAV-0001
+```
+
+### Documentation
+
+- [Quick Start Guide](OPENHANDS_QUICKSTART.md) - Get started in 10 minutes
+- [Implementation Summary](OPENHANDS_INTEGRATION_SUMMARY.md) - Technical details
+- [Integration Guide](docs/integrations/openhands.md) - Full documentation
+- [ADR-0001](docs/adr/ADR-0001-openhands-execution-backend.md) - Architecture decision
+
+### Key Features
+
+- ✅ Task brief enforcement (no implementation without brief)
+- ✅ Dangerous command blocking (rm -rf /, etc.)
+- ✅ Scope validation (warn on out-of-scope changes)
+- ✅ Tool usage logging (audit trail)
+- ✅ Evidence validation (block completion until evidence passes)
+- ✅ Risk-based policies (L0-L4 requirements)
+
+**Status:** MVP complete (Phases 0-4 of 12)
+
+---
+
 ## Understand Anything Integration
 
 Agile V can consume an [Understand Anything](https://github.com/Lum1104/Understand-Anything)

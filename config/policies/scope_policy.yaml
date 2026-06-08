@@ -1,0 +1,50 @@
+# Scope Policy
+# Default scope control behavior for OpenHands
+
+default_behavior: deny_out_of_scope
+
+# Allow changes to task-related files
+allow_task_files: true
+
+# Allow changes to evidence files
+allow_evidence_files: true
+
+# Require explicit permission for public API changes
+require_explicit_public_api_permission: true
+
+# Require approval for dependency changes
+require_dependency_approval: true
+
+# Security-sensitive paths that require L3+ approval
+security_sensitive_paths:
+  - pattern: "**/auth/**"
+    reason: "Authentication code"
+  - pattern: "**/authorization/**"
+    reason: "Authorization code"
+  - pattern: "**/crypto/**"
+    reason: "Cryptography code"
+  - pattern: "**/secrets/**"
+    reason: "Secrets management"
+  - pattern: "**/security/**"
+    reason: "Security controls"
+  - pattern: "**/*password*"
+    reason: "Password handling"
+  - pattern: "**/*token*"
+    reason: "Token handling"
+
+# Infra paths that require approval
+infrastructure_paths:
+  - "infra/**"
+  - "terraform/**"
+  - "ansible/**"
+  - ".github/workflows/**"
+  - "Dockerfile"
+  - "docker-compose.yml"
+  - "k8s/**"
+  - "kubernetes/**"
+
+# Always allowed paths (even without task brief)
+always_allowed:
+  - "evidence/**"
+  - ".agentic-agile-v/**"
+  - "**/*.md"  # Documentation (L0)
