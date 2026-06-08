@@ -244,8 +244,8 @@ class TestBuildTraceability:
         links = result.req_to_component_links
 
         assert len(links) > 0
-        assert all("requirement_id" in l for l in links)
-        assert all("component_id" in l for l in links)
+        assert all("requirement_id" in link for link in links)
+        assert all("component_id" in link for link in links)
 
     def test_pass_with_findings_when_orphan_changes(self):
         graph = make_small_graph()
