@@ -79,6 +79,7 @@ Do not implement from an ambiguous chat history. Before editing files, find or c
 - Do not weaken security checks, authentication, authorization, logging, or validation.
 - Do not change hardware pin mappings, timing assumptions, clock trees, or safety states without explicit evidence and review.
 - Do not embed secrets, tokens, credentials, personal data, or proprietary customer data in code, tests, logs, prompts, or evidence bundles.
+- **PCB/Hardware Manufacturing Red Line:** No AI-generated PCB design may be sent to fabrication, customers, test subjects, or production without explicit human electrical engineering approval and risk-appropriate evidence. This is a BLOCKING GATE.
 
 ## Expected artifacts
 
@@ -109,6 +110,19 @@ For firmware/hardware:
 - simulation or emulator run where available
 - HIL test where applicable
 - timing, memory, protocol, and rollback evidence for high-risk changes
+
+For PCB design:
+
+- circuit IR schema validation
+- component manifest completeness
+- KiCad ERC (Electrical Rule Check)
+- netlist and BOM export
+- datasheet compliance verification
+- voltage domain and power budget checks
+- interface compliance (I2C, SPI, USB, etc.)
+- protection circuit validation
+- independent semantic review
+- named human EE approval for L3+ tasks
 
 ## Acceptance rule
 

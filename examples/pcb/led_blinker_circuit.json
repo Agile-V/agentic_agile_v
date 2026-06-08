@@ -1,0 +1,263 @@
+{
+  "name": "led_blinker",
+  "version": "1.0",
+  "description": "ESP32-C3 LED Blinker with USB-C Power",
+  "task_id": null,
+  "candidate_id": null,
+  "components": [
+    {
+      "id": "U1",
+      "type": "mcu",
+      "pins": [
+        {
+          "number": "1",
+          "name": "GND",
+          "type": "ground",
+          "electrical_type": "ground"
+        },
+        {
+          "number": "2",
+          "name": "3V3",
+          "type": "power",
+          "electrical_type": "power_input"
+        },
+        {
+          "number": "8",
+          "name": "GPIO0",
+          "type": "bidirectional",
+          "electrical_type": "bidirectional"
+        },
+        {
+          "number": "9",
+          "name": "GPIO1",
+          "type": "bidirectional",
+          "electrical_type": "bidirectional"
+        }
+      ],
+      "value": "ESP32-C3-MINI-1-N4",
+      "package": "SMD-53",
+      "manufacturer": "Espressif",
+      "part_number": "ESP32-C3-MINI-1-N4",
+      "power_domain": "VCC_3V3",
+      "power_consumption": 0.35
+    },
+    {
+      "id": "U2",
+      "type": "regulator",
+      "pins": [
+        {
+          "number": "1",
+          "name": "VIN",
+          "type": "power",
+          "electrical_type": "power_input"
+        },
+        {
+          "number": "2",
+          "name": "GND",
+          "type": "ground",
+          "electrical_type": "ground"
+        },
+        {
+          "number": "3",
+          "name": "EN",
+          "type": "input",
+          "electrical_type": "input"
+        },
+        {
+          "number": "5",
+          "name": "VOUT",
+          "type": "power",
+          "electrical_type": "power_output"
+        }
+      ],
+      "value": "AP2112K-3.3",
+      "package": "SOT-23-5",
+      "manufacturer": "Diodes Inc",
+      "part_number": "AP2112K-3.3TRG1",
+      "current_rating": 0.6
+    },
+    {
+      "id": "D1",
+      "type": "led",
+      "pins": [
+        {
+          "number": "1",
+          "name": "A",
+          "type": "passive",
+          "electrical_type": "passive"
+        },
+        {
+          "number": "2",
+          "name": "K",
+          "type": "passive",
+          "electrical_type": "passive"
+        }
+      ],
+      "value": "Red",
+      "package": "0603",
+      "manufacturer": "Wurth",
+      "part_number": "150060RS75000"
+    },
+    {
+      "id": "R1",
+      "type": "resistor",
+      "pins": [
+        {
+          "number": "1",
+          "name": "1",
+          "type": "passive",
+          "electrical_type": "passive"
+        },
+        {
+          "number": "2",
+          "name": "2",
+          "type": "passive",
+          "electrical_type": "passive"
+        }
+      ],
+      "value": "330R",
+      "package": "0603",
+      "power_rating": 0.1,
+      "tolerance": "1%"
+    },
+    {
+      "id": "C1",
+      "type": "capacitor",
+      "pins": [
+        {
+          "number": "1",
+          "name": "1",
+          "type": "passive",
+          "electrical_type": "passive"
+        },
+        {
+          "number": "2",
+          "name": "2",
+          "type": "passive",
+          "electrical_type": "passive"
+        }
+      ],
+      "value": "100nF",
+      "package": "0603",
+      "voltage_rating": 50
+    },
+    {
+      "id": "C2",
+      "type": "capacitor",
+      "pins": [
+        {
+          "number": "1",
+          "name": "1",
+          "type": "passive",
+          "electrical_type": "passive"
+        },
+        {
+          "number": "2",
+          "name": "2",
+          "type": "passive",
+          "electrical_type": "passive"
+        }
+      ],
+      "value": "10uF",
+      "package": "0805",
+      "voltage_rating": 16
+    }
+  ],
+  "nets": [
+    {
+      "name": "VCC_3V3",
+      "type": "power",
+      "connections": [
+        {
+          "component": "U1",
+          "pin": "2"
+        },
+        {
+          "component": "U2",
+          "pin": "5"
+        },
+        {
+          "component": "C1",
+          "pin": "1"
+        },
+        {
+          "component": "C2",
+          "pin": "1"
+        }
+      ],
+      "voltage": 3.3
+    },
+    {
+      "name": "GND",
+      "type": "ground",
+      "connections": [
+        {
+          "component": "U1",
+          "pin": "1"
+        },
+        {
+          "component": "U2",
+          "pin": "2"
+        },
+        {
+          "component": "C1",
+          "pin": "2"
+        },
+        {
+          "component": "C2",
+          "pin": "2"
+        },
+        {
+          "component": "D1",
+          "pin": "2"
+        }
+      ],
+      "voltage": 0.0
+    },
+    {
+      "name": "GPIO0_LED",
+      "type": "signal",
+      "connections": [
+        {
+          "component": "U1",
+          "pin": "8"
+        },
+        {
+          "component": "R1",
+          "pin": "1"
+        }
+      ]
+    },
+    {
+      "name": "LED_ANODE",
+      "type": "signal",
+      "connections": [
+        {
+          "component": "R1",
+          "pin": "2"
+        },
+        {
+          "component": "D1",
+          "pin": "1"
+        }
+      ]
+    }
+  ],
+  "power_domains": [
+    {
+      "name": "VCC_3V3",
+      "voltage_nominal": 3.3,
+      "voltage_min": 3.0,
+      "voltage_max": 3.6,
+      "current_max": 0.5,
+      "nets": [
+        "VCC_3V3"
+      ],
+      "source_component": "U2"
+    }
+  ],
+  "interfaces": [],
+  "created": null,
+  "modified": null,
+  "author": null
+}

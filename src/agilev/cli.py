@@ -24,6 +24,7 @@ from agilev.openhands.github_actions import generate_github_actions
 from agilev.openhands.event_ledger import EventLedger, EventType
 from agilev.openhands.reports import generate_handoff_report
 from agilev.task_context import TaskContextResolver
+from agilev.pcb.cli import build_pcb_parser
 
 
 def compute_file_hash(file_path: Path) -> str:
@@ -1428,6 +1429,9 @@ def build_parser() -> argparse.ArgumentParser:
     oh_timeline_parser = openhands_subparsers.add_parser("timeline", help="Show task timeline")
     oh_timeline_parser.add_argument("--task", help="Task ID")
     oh_timeline_parser.set_defaults(func=cmd_openhands_timeline)
+    
+    # PCB commands
+    build_pcb_parser(subparsers)
     
     return parser
 
