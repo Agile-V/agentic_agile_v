@@ -3,6 +3,7 @@
 Generates integration files for OpenHands including skills, hooks,
 configuration files, and policy templates.
 """
+
 from __future__ import annotations
 
 import json
@@ -12,26 +13,26 @@ from typing import Any
 
 class OpenHandsScaffold:
     """Generator for OpenHands integration files."""
-    
+
     def __init__(self, repo_root: Path | None = None):
         """Initialize scaffold generator.
-        
+
         Args:
             repo_root: Repository root directory (defaults to current directory)
         """
         self.repo_root = repo_root or Path.cwd()
-    
+
     def init(self, force: bool = False) -> dict[str, Path]:
         """Initialize OpenHands integration structure.
-        
+
         Args:
             force: Overwrite existing files if True
-            
+
         Returns:
             Dictionary mapping component names to created file paths
         """
         created_files = {}
-        
+
         # Create directory structure
         dirs = [
             ".agents/skills/agile-v-core",
@@ -43,72 +44,72 @@ class OpenHandsScaffold:
             ".openhands/logs",
             "config/policies",
         ]
-        
+
         for d in dirs:
             (self.repo_root / d).mkdir(parents=True, exist_ok=True)
-        
+
         # Generate skills
         created_files.update(self._generate_skills(force))
-        
+
         # Generate hooks
         created_files.update(self._generate_hooks(force))
-        
+
         # Generate setup script
         created_files.update(self._generate_setup_script(force))
-        
+
         # Generate policy files
         created_files.update(self._generate_policies(force))
-        
+
         return created_files
-    
+
     def _generate_skills(self, force: bool = False) -> dict[str, Path]:
         """Generate skill files."""
         skills_dir = self.repo_root / ".agents/skills"
         created = {}
-        
+
         # agile-v-core skill
         core_skill = skills_dir / "agile-v-core/SKILL.md"
         if force or not core_skill.exists():
             core_skill.write_text(self._get_core_skill_content())
             created["skill_core"] = core_skill
-        
+
         # agile-v-builder skill
         builder_skill = skills_dir / "agile-v-builder/SKILL.md"
         if force or not builder_skill.exists():
             builder_skill.write_text(self._get_builder_skill_content())
             created["skill_builder"] = builder_skill
-        
+
         # agile-v-verifier skill
         verifier_skill = skills_dir / "agile-v-verifier/SKILL.md"
         if force or not verifier_skill.exists():
             verifier_skill.write_text(self._get_verifier_skill_content())
             created["skill_verifier"] = verifier_skill
-        
+
         # agile-v-evidence skill
         evidence_skill = skills_dir / "agile-v-evidence/SKILL.md"
         if force or not evidence_skill.exists():
             evidence_skill.write_text(self._get_evidence_skill_content())
             created["skill_evidence"] = evidence_skill
-        
+
         # agile-v-risk-classifier skill
         risk_skill = skills_dir / "agile-v-risk-classifier/SKILL.md"
         if force or not risk_skill.exists():
             risk_skill.write_text(self._get_risk_classifier_skill_content())
             created["skill_risk"] = risk_skill
-        
+
         return created
-    
+
     def _generate_hooks(self, force: bool = False) -> dict[str, Path]:
         """Generate hook files."""
         hooks_dir = self.repo_root / ".openhands/hooks"
         created = {}
-        
+
         # hooks.json
         hooks_json = self.repo_root / ".openhands/hooks.json"
         if force or not hooks_json.exists():
             hooks_json.write_text(json.dumps(self._get_hooks_config(), indent=2))
             created["hooks_config"] = hooks_json
-        
+
         # Hook scripts
         hook_scripts = {
             "enforce_task_brief.sh": self._get_enforce_task_brief_hook(),
@@ -119,16 +120,16 @@ class OpenHandsScaffold:
             "validate_evidence_on_stop.sh": self._get_validate_evidence_on_stop_hook(),
             "generate_handoff_on_session_end.sh": self._get_generate_handoff_hook(),
         }
-        
+
         for script_name, content in hook_scripts.items():
             script_path = hooks_dir / script_name
             if force or not script_path.exists():
                 script_path.write_text(content)
                 script_path.chmod(0o755)  # Make executable
                 created[f"hook_{script_name.replace('.sh', '')}"] = script_path
-        
+
         return created
-    
+
     def _generate_setup_script(self, force: bool = False) -> dict[str, Path]:
         """Generate setup script."""
         setup_script = self.repo_root / ".openhands/setup.sh"
@@ -137,12 +138,12 @@ class OpenHandsScaffold:
             setup_script.chmod(0o755)
             return {"setup_script": setup_script}
         return {}
-    
+
     def _generate_policies(self, force: bool = False) -> dict[str, Path]:
         """Generate policy files."""
         policies_dir = self.repo_root / "config/policies"
         created = {}
-        
+
         policy_files = {
             "openhands_dangerous_commands.yaml": self._get_dangerous_commands_policy(),
             "scope_policy.yaml": self._get_scope_policy(),
@@ -150,26 +151,26 @@ class OpenHandsScaffold:
             "evidence_policy.yaml": self._get_evidence_policy(),
             "risk_level_policy.yaml": self._get_risk_level_policy(),
         }
-        
+
         for filename, content in policy_files.items():
             policy_path = policies_dir / filename
             if force or not policy_path.exists():
                 policy_path.write_text(content)
                 created[f"policy_{filename.replace('.yaml', '')}"] = policy_path
-        
+
         return created
-    
+
     def doctor(self) -> dict[str, bool]:
         """Validate OpenHands integration setup.
-        
+
         Returns:
             Dictionary mapping check names to pass/fail status
         """
         checks = {}
-        
+
         # Check AGENTS.md
         checks["agents_md"] = (self.repo_root / "AGENTS.md").exists()
-        
+
         # Check skills
         skills = [
             "agile-v-core",
@@ -181,14 +182,14 @@ class OpenHandsScaffold:
         for skill in skills:
             skill_path = self.repo_root / f".agents/skills/{skill}/SKILL.md"
             checks[f"skill_{skill}"] = skill_path.exists()
-        
+
         # Check setup script
         setup_script = self.repo_root / ".openhands/setup.sh"
         checks["setup_script"] = setup_script.exists() and setup_script.stat().st_mode & 0o111
-        
+
         # Check hooks.json
         checks["hooks_config"] = (self.repo_root / ".openhands/hooks.json").exists()
-        
+
         # Check hook scripts
         hook_scripts = [
             "enforce_task_brief.sh",
@@ -202,10 +203,10 @@ class OpenHandsScaffold:
         for script in hook_scripts:
             script_path = self.repo_root / f".openhands/hooks/{script}"
             checks[f"hook_{script}"] = script_path.exists() and script_path.stat().st_mode & 0o111
-        
+
         # Check config
         checks["openhands_config"] = (self.repo_root / "config/openhands.yaml").exists()
-        
+
         # Check policies
         policies = [
             "openhands_dangerous_commands.yaml",
@@ -217,11 +218,11 @@ class OpenHandsScaffold:
         for policy in policies:
             policy_path = self.repo_root / f"config/policies/{policy}"
             checks[f"policy_{policy}"] = policy_path.exists()
-        
+
         return checks
-    
+
     # Content generation methods
-    
+
     def _get_core_skill_content(self) -> str:
         return """---
 name: agile-v-core
@@ -288,7 +289,7 @@ On session end, generate a handoff summary:
 - Open risks
 - Next recommended action
 """
-    
+
     def _get_builder_skill_content(self) -> str:
         return """---
 name: agile-v-builder
@@ -358,7 +359,7 @@ Produce `.agentic-agile-v/tasks/AAV-XXXX/implementation_summary.md`:
 - Test results
 - Residual risks
 """
-    
+
     def _get_verifier_skill_content(self) -> str:
         return """---
 name: agile-v-verifier
@@ -442,7 +443,7 @@ If issues found, produce report first. Builder can address issues in a separate 
 - Weaken criteria to make evidence pass
 - Trust builder self-report alone (verify via Git/CI)
 """
-    
+
     def _get_evidence_skill_content(self) -> str:
         return """---
 name: agile-v-evidence
@@ -520,7 +521,7 @@ If using OpenHands, add:
 - Check runs (lint, typecheck, build)
 - Session end
 """
-    
+
     def _get_risk_classifier_skill_content(self) -> str:
         return """---
 name: agile-v-risk-classifier
@@ -580,39 +581,26 @@ Default to higher risk level.
 
 L3/L4 classification requires explicit risk assessment document.
 """
-    
+
     def _get_hooks_config(self) -> dict[str, Any]:
         return {
             "user_prompt_submit": [
                 {
                     "matcher": "*",
-                    "hooks": [
-                        {
-                            "command": ".openhands/hooks/enforce_task_brief.sh",
-                            "timeout": 30
-                        }
-                    ]
+                    "hooks": [{"command": ".openhands/hooks/enforce_task_brief.sh", "timeout": 30}],
                 }
             ],
             "pre_tool_use": [
                 {
                     "matcher": "terminal",
                     "hooks": [
-                        {
-                            "command": ".openhands/hooks/block_unsafe_commands.sh",
-                            "timeout": 10
-                        }
-                    ]
+                        {"command": ".openhands/hooks/block_unsafe_commands.sh", "timeout": 10}
+                    ],
                 },
                 {
                     "matcher": "*",
-                    "hooks": [
-                        {
-                            "command": ".openhands/hooks/validate_scope.sh",
-                            "timeout": 20
-                        }
-                    ]
-                }
+                    "hooks": [{"command": ".openhands/hooks/validate_scope.sh", "timeout": 20}],
+                },
             ],
             "post_tool_use": [
                 {
@@ -621,9 +609,9 @@ L3/L4 classification requires explicit risk assessment document.
                         {
                             "command": ".openhands/hooks/log_tool_usage.sh",
                             "timeout": 10,
-                            "async": True
+                            "async": True,
                         }
-                    ]
+                    ],
                 }
             ],
             "session_start": [
@@ -633,20 +621,17 @@ L3/L4 classification requires explicit risk assessment document.
                         {
                             "command": ".openhands/hooks/collect_session_metadata.sh",
                             "timeout": 10,
-                            "async": True
+                            "async": True,
                         }
-                    ]
+                    ],
                 }
             ],
             "stop": [
                 {
                     "matcher": "*",
                     "hooks": [
-                        {
-                            "command": ".openhands/hooks/validate_evidence_on_stop.sh",
-                            "timeout": 180
-                        }
-                    ]
+                        {"command": ".openhands/hooks/validate_evidence_on_stop.sh", "timeout": 180}
+                    ],
                 }
             ],
             "session_end": [
@@ -656,13 +641,13 @@ L3/L4 classification requires explicit risk assessment document.
                         {
                             "command": ".openhands/hooks/generate_handoff_on_session_end.sh",
                             "timeout": 60,
-                            "async": True
+                            "async": True,
                         }
-                    ]
+                    ],
                 }
-            ]
+            ],
         }
-    
+
     def _get_enforce_task_brief_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: enforce_task_brief
@@ -732,7 +717,7 @@ cat <<EOF
 EOF
 exit 0
 """
-    
+
     def _get_block_unsafe_commands_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: block_unsafe_commands
@@ -780,7 +765,7 @@ cat <<EOF
 EOF
 exit 0
 """
-    
+
     def _get_validate_scope_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: validate_scope
@@ -849,7 +834,7 @@ cat <<EOF
 EOF
 exit 0
 """
-    
+
     def _get_log_tool_usage_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: log_tool_usage
@@ -885,7 +870,7 @@ echo "$INPUT" | jq -c ". + {timestamp: \\"$TIMESTAMP\\"}" >> "$LOG_DIR/openhands
 
 exit 0
 """
-    
+
     def _get_collect_session_metadata_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: collect_session_metadata
@@ -927,7 +912,7 @@ EOF
 
 exit 0
 """
-    
+
     def _get_validate_evidence_on_stop_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: validate_evidence_on_stop
@@ -986,7 +971,7 @@ EOF
     exit 0
 fi
 """
-    
+
     def _get_generate_handoff_hook(self) -> str:
         return """#!/usr/bin/env bash
 # Agile-V Hook: generate_handoff_on_session_end
@@ -1044,7 +1029,7 @@ EOF
 
 exit 0
 """
-    
+
     def _get_setup_script_content(self) -> str:
         return """#!/usr/bin/env bash
 # OpenHands setup script for Agentic Agile-V integration
@@ -1094,7 +1079,7 @@ echo "  1. Create a task: agilev new --title 'Task name' --risk L1"
 echo "  2. Edit task brief in .agentic-agile-v/tasks/AAV-XXXX/"
 echo "  3. Run OpenHands with Agile-V skills and hooks active"
 """
-    
+
     def _get_dangerous_commands_policy(self) -> str:
         return """# Dangerous Commands Policy
 # Commands that OpenHands must not execute
@@ -1126,7 +1111,7 @@ allowed_exceptions:
     when: "Explicitly allowed in task brief"
     requires_approval: true
 """
-    
+
     def _get_scope_policy(self) -> str:
         return """# Scope Policy
 # Default scope control behavior for OpenHands
@@ -1179,7 +1164,7 @@ always_allowed:
   - ".agentic-agile-v/**"
   - "**/*.md"  # Documentation (L0)
 """
-    
+
     def _get_approval_policy(self) -> str:
         return """# Approval Policy
 # Human approval requirements by risk level
@@ -1240,7 +1225,7 @@ github:
     L3: true
     L4: true
 """
-    
+
     def _get_evidence_policy(self) -> str:
         return """# Evidence Policy
 # Evidence requirements by risk level
@@ -1310,7 +1295,7 @@ validation:
   warn_on_missing_optional: true
   allow_override_for_risk_levels: []  # No overrides
 """
-    
+
     def _get_risk_level_policy(self) -> str:
         return """# Risk Level Policy
 # Guidance for risk classification (L0-L4)
