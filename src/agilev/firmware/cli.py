@@ -10,6 +10,53 @@ from agilev.firmware.contract import (
     FirmwareSoftwareContract,
     HardwareFirmwareContract,
 )
+from agilev.firmware.pcb_import import generate_contract_from_pcb_export
+
+
+def cmd_firmware_contract_generate(args: argparse.Namespace) -> int:
+    """Generate hardware-firmware contract from PCB export.
+
+    Args:
+        args: Command arguments
+
+    Returns:
+        Exit code
+    """
+    pcb_export_path = Path(args.from_pcb)
+    output_path = Path(args.output)
+
+    if not pcb_export_path.exists():
+        print(f"✗ PCB export not found: {pcb_export_path}", file=sys.stderr)
+        return 1
+
+    try:
+        # Generate contract
+        generate_contract_from_pcb_export(
+            pcb_export_path=pcb_export_path,
+            contract_id=args.contract_id,
+            board_name=args.board,
+            pcb_revision=args.revision,
+            output_path=output_path,
+        )
+
+        print(f"✓ Generated hardware-firmware contract: {output_path}")
+        print(f"  Contract ID: {args.contract_id}")
+        print(f"  Board: {args.board}")
+        print(f"  PCB revision: {args.revision}")
+        print(f"\nNext steps:")
+        print(f"  1. Review contract: {output_path}")
+        print(f"  2. Validate: agilev firmware contract validate {output_path}")
+        print(f"  3. Generate firmware: agilev firmware generate --task AAV-FW-XXX")
+
+        return 0
+
+    except Exception as e:
+        print(f"✗ Error generating contract: {e}", file=sys.stderr)
+        import traceback
+
+        if args.verbose:
+            traceback.print_exc()
+        return 1
 
 
 def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
@@ -115,6 +162,26 @@ def build_firmware_parser(subparsers: argparse._SubParsersAction) -> None:
     # firmware contract
     contract_parser = firmware_subparsers.add_parser("contract", help="Contract commands")
     contract_subparsers = contract_parser.add_subparsers(dest="contract_command")
+
+    # firmware contract generate
+    generate_parser = contract_subparsers.add_parser(
+        "generate", help="Generate hardware-firmware contract from PCB"
+    )
+    generate_parser.add_argument(
+        "--from-pcb", required=True, help="Path to PCB firmware export JSON"
+    )
+    generate_parser.add_argument("--contract-id", required=True, help="Contract ID (e.g., HFC-001)")
+    generate_parser.add_argument("--board", required=True, help="Board name")
+    generate_parser.add_argument("--revision", required=True, help="PCB revision (e.g., rev_a)")
+    generate_parser.add_argument(
+        "--output",
+        default=".agentic-agile-v/contracts/hardware_firmware_contract.yaml",
+        help="Output contract path",
+    )
+    generate_parser.add_argument(
+        "--verbose", "-v", action="store_true", help="Show detailed output"
+    )
+    generate_parser.set_defaults(func=cmd_firmware_contract_generate)
 
     # firmware contract validate
     validate_parser = contract_subparsers.add_parser("validate", help="Validate firmware contract")
