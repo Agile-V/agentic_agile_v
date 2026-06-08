@@ -22,6 +22,8 @@ from agilev.openhands.session_manager import (
     OpenHandsSessionManager,
     SessionConfig,
 )
+from agilev.embedded.cli import build_embedded_parser
+from agilev.firmware.cli import build_firmware_parser
 from agilev.pcb.cli import build_pcb_parser
 from agilev.state import EventLogger, LockManager, TaskState
 from agilev.task_context import TaskContextResolver
@@ -1455,6 +1457,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     # PCB commands
     build_pcb_parser(subparsers)
+
+    # Embedded systems commands
+    build_embedded_parser(subparsers)
+
+    # Firmware commands
+    build_firmware_parser(subparsers)
 
     return parser
 
