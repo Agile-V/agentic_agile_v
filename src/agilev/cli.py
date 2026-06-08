@@ -22,6 +22,7 @@ from agilev.openhands.session_manager import (
     OpenHandsSessionManager,
     SessionConfig,
 )
+from agilev.pcb.cli import build_pcb_parser
 from agilev.state import EventLogger, LockManager, TaskState
 from agilev.task_context import TaskContextResolver
 
@@ -1451,6 +1452,9 @@ def build_parser() -> argparse.ArgumentParser:
     oh_timeline_parser = openhands_subparsers.add_parser("timeline", help="Show task timeline")
     oh_timeline_parser.add_argument("--task", help="Task ID")
     oh_timeline_parser.set_defaults(func=cmd_openhands_timeline)
+
+    # PCB commands
+    build_pcb_parser(subparsers)
 
     return parser
 

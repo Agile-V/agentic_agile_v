@@ -1,0 +1,165 @@
+{
+  "$schema": "../schemas/pcb_evidence_bundle.schema.json",
+  "task_id": "{{TASK_ID}}",
+  "task_type": "pcb",
+  "title": "{{TITLE}}",
+  "risk_level": "{{RISK_LEVEL}}",
+  "created": "{{ISO8601_TIMESTAMP}}",
+  "updated": "{{ISO8601_TIMESTAMP}}",
+  
+  "task_brief": {
+    "path": "task_brief.md",
+    "sha256": "{{SHA256_HASH}}",
+    "reviewed": true,
+    "reviewer": "{{REVIEWER_NAME}}",
+    "review_date": "{{ISO8601_DATE}}"
+  },
+  
+  "circuit_ir": {
+    "path": "candidates/{{CANDIDATE_ID}}/circuit_ir.json",
+    "schema_version": "1.0",
+    "valid": true,
+    "sha256": "{{SHA256_HASH}}",
+    "components_count": 0,
+    "nets_count": 0,
+    "power_domains": []
+  },
+  
+  "component_manifest": {
+    "path": "candidates/{{CANDIDATE_ID}}/component_manifest.json",
+    "sha256": "{{SHA256_HASH}}",
+    "total_components": 0,
+    "datasheets_linked": 0,
+    "availability_checked": false
+  },
+  
+  "kicad_artifacts": {
+    "schematic": {
+      "path": "candidates/{{CANDIDATE_ID}}/kicad/{{PROJECT}}.kicad_sch",
+      "sha256": "{{SHA256_HASH}}",
+      "kicad_version": "8.0"
+    },
+    "project": {
+      "path": "candidates/{{CANDIDATE_ID}}/kicad/{{PROJECT}}.kicad_pro",
+      "sha256": "{{SHA256_HASH}}"
+    }
+  },
+  
+  "validation_reports": {
+    "erc": {
+      "path": "candidates/{{CANDIDATE_ID}}/validation/erc_report.txt",
+      "sha256": "{{SHA256_HASH}}",
+      "run_date": "{{ISO8601_TIMESTAMP}}",
+      "status": "pass",
+      "errors": 0,
+      "warnings": 0,
+      "command": "kicad-cli sch erc"
+    },
+    "netlist": {
+      "path": "candidates/{{CANDIDATE_ID}}/validation/netlist.net",
+      "sha256": "{{SHA256_HASH}}",
+      "format": "kicad",
+      "exported": true
+    },
+    "bom": {
+      "path": "candidates/{{CANDIDATE_ID}}/validation/bom.csv",
+      "sha256": "{{SHA256_HASH}}",
+      "total_components": 0,
+      "unique_parts": 0
+    },
+    "schematic_pdf": {
+      "path": "candidates/{{CANDIDATE_ID}}/validation/schematic.pdf",
+      "sha256": "{{SHA256_HASH}}",
+      "pages": 1
+    }
+  },
+  
+  "semantic_validation": {
+    "datasheet_compliance": {
+      "checked": false,
+      "components_verified": 0,
+      "issues": []
+    },
+    "voltage_domains": {
+      "checked": false,
+      "domains": [],
+      "issues": []
+    },
+    "power_budget": {
+      "checked": false,
+      "total_current_ma": 0,
+      "margin_percent": 0,
+      "issues": []
+    },
+    "interface_compliance": {
+      "i2c": {"checked": false, "issues": []},
+      "spi": {"checked": false, "issues": []},
+      "usb": {"checked": false, "issues": []},
+      "uart": {"checked": false, "issues": []},
+      "can": {"checked": false, "issues": []}
+    },
+    "protection_circuits": {
+      "reverse_polarity": false,
+      "overcurrent": false,
+      "overvoltage": false,
+      "esd": false,
+      "issues": []
+    }
+  },
+  
+  "reviews": {
+    "semantic_review": {
+      "path": "candidates/{{CANDIDATE_ID}}/validation/semantic_review.md",
+      "sha256": "{{SHA256_HASH}}",
+      "reviewer": "{{AGENT_OR_ENGINEER}}",
+      "review_date": "{{ISO8601_DATE}}",
+      "decision": "pass",
+      "critical_issues": 0,
+      "warnings": 0
+    },
+    "independent_verification": {
+      "path": "evidence/verification_report.md",
+      "sha256": "{{SHA256_HASH}}",
+      "verifier": "{{AGENT_OR_ENGINEER}}",
+      "fresh_context": true,
+      "verification_date": "{{ISO8601_DATE}}",
+      "decision": "approve",
+      "conditions": []
+    },
+    "human_approval": {
+      "required": true,
+      "obtained": false,
+      "engineer_name": "",
+      "engineer_title": "",
+      "approval_date": "",
+      "decision": "",
+      "conditions": [],
+      "residual_risks": []
+    }
+  },
+  
+  "layout_artifacts": {
+    "note": "Layout artifacts only required for L4 or when layout exists",
+    "pcb_file": null,
+    "drc_report": null,
+    "schematic_layout_parity": null,
+    "gerbers": null
+  },
+  
+  "manufacturing": {
+    "allowed": false,
+    "constraints": [],
+    "release_check_passed": false,
+    "release_date": null,
+    "release_approver": null
+  },
+  
+  "metadata": {
+    "generated_by": "agilev-pcb",
+    "version": "1.0",
+    "evidence_complete": false,
+    "gates_passed": [],
+    "gates_failed": [],
+    "gates_pending": []
+  }
+}

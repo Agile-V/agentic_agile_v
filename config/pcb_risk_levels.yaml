@@ -1,0 +1,475 @@
+# PCB Risk Levels Configuration
+
+# PCB tasks have different risk profiles than software due to physical/electrical hazards.
+# This file defines PCB-specific risk levels and their evidence requirements.
+
+levels:
+  L0:
+    name: pcb_documentation_only
+    description: Documentation changes with no electrical or design impact
+    examples:
+      - Update design notes
+      - Add schematic review checklist
+      - Rename internal documentation section
+      - Update component library metadata
+    
+    required_evidence:
+      - task_brief
+      - reviewer_note
+    
+    human_approval_required: false
+    manufacturing_allowed: false
+    
+    gates:
+      - task_brief_exists
+      - reviewer_note_present
+
+  L1:
+    name: non_electrical_artifact_change
+    description: Metadata or reference changes without circuit modification
+    examples:
+      - Add BOM metadata
+      - Add known-good reference schematic link
+      - Add library index entry without using it in a design
+      - Update component datasheet links
+      - Add design reference documentation
+    
+    required_evidence:
+      - task_brief
+      - schema_validation
+      - reviewer_note
+    
+    human_approval_required: false
+    manufacturing_allowed: false
+    
+    gates:
+      - task_brief_exists
+      - schema_validation_passes
+      - reviewer_note_present
+
+  L2:
+    name: early_concept_schematic
+    description: Exploratory schematic not intended for fabrication
+    examples:
+      - Generated draft schematic for exploration
+      - Low-power sensor breakout concept
+      - Reference-only design not intended for fabrication
+      - Proof-of-concept circuit
+      - Design study or comparison
+    
+    required_evidence:
+      - task_brief
+      - circuit_ir
+      - component_manifest
+      - netlist
+      - erc_report
+      - schematic_pdf
+      - semantic_review
+      - human_review_note
+    
+    human_approval_required: true
+    human_approval_level: "engineer_review"
+    manufacturing_allowed: false
+    
+    gates:
+      - task_brief_complete
+      - circuit_ir_valid
+      - component_manifest_complete
+      - netlist_exports
+      - erc_passes
+      - schematic_pdf_generated
+      - semantic_review_passes
+      - human_review_recorded
+
+  L3:
+    name: prototype_candidate
+    description: Board intended for bench prototype and testing
+    examples:
+      - Board intended for bench prototype
+      - Powered circuit with external connectors
+      - Battery, USB, motor, RF, or sensor integration
+      - Development board or breakout
+      - Test fixture or jig
+    
+    required_evidence:
+      - all_L2_evidence
+      - datasheet_extracts
+      - voltage_domain_check
+      - power_budget_check
+      - interface_check
+      - protection_check
+      - independent_verification
+      - rollback_or_rework_plan
+      - named_human_ee_approval
+    
+    human_approval_required: true
+    human_approval_level: "electrical_engineer"
+    manufacturing_allowed: true  # For prototypes only
+    manufacturing_constraints:
+      - must_be_marked_prototype
+      - internal_use_only
+      - no_customer_shipment
+    
+    gates:
+      - all_l2_gates_pass
+      - datasheet_compliance_verified
+      - voltage_domains_validated
+      - power_budget_within_limits
+      - interfaces_validated
+      - protection_circuits_present
+      - independent_verifier_approves
+      - rollback_plan_documented
+      - named_ee_approves
+
+  L4:
+    name: manufacturing_or_safety_relevant_design
+    description: Design intended for production or safety-critical use
+    examples:
+      - Design intended for fabrication and production
+      - Medical, regulated, or safety-critical systems
+      - Mains-powered equipment
+      - Lithium battery charging or high-capacity battery
+      - High-current (>1A) or high-voltage (>50V) circuits
+      - RF compliance required (FCC, CE, etc.)
+      - Customer-facing hardware
+      - Automotive or aerospace applications
+    
+    required_evidence:
+      - all_L3_evidence
+      - layout_drc_if_layout_exists
+      - schematic_layout_parity
+      - manufacturing_output_review
+      - formal_design_review_minutes
+      - second_independent_review
+      - release_signoff
+      - ai_review_statement
+    
+    human_approval_required: true
+    human_approval_level: "senior_electrical_engineer"
+    additional_approvals:
+      - safety_review_if_applicable
+      - regulatory_review_if_applicable
+      - customer_acceptance_if_applicable
+    
+    manufacturing_allowed: true
+    manufacturing_constraints:
+      - formal_release_process_required
+      - design_freeze_required
+      - change_control_required
+      - traceability_required
+    
+    gates:
+      - all_l3_gates_pass
+      - layout_drc_clean_if_layout_exists
+      - schematic_layout_match
+      - gerbers_reviewed_if_generated
+      - formal_design_review_complete
+      - second_review_complete
+      - release_signoff_obtained
+      - ai_review_statement_present
+
+# Evidence artifact definitions
+
+evidence_artifacts:
+  task_brief:
+    description: Structured PCB task brief with requirements
+    template: templates/pcb_brief.md
+    schema: schemas/pcb_task_brief.schema.json
+    required_fields:
+      - title
+      - intent
+      - intended_use
+      - functional_blocks
+      - electrical_requirements
+      - component_constraints
+  
+  circuit_ir:
+    description: Circuit intermediate representation (JSON)
+    schema: schemas/pcb_circuit_ir.schema.json
+    format: json
+    required_fields:
+      - components
+      - nets
+      - power_domains
+      - interfaces
+  
+  component_manifest:
+    description: List of all components with datasheets
+    schema: schemas/pcb_component_manifest.schema.json
+    format: json
+    required_fields:
+      - components
+      - datasheets
+      - availability
+  
+  datasheet_extracts:
+    description: Key specs extracted from component datasheets
+    schema: schemas/pcb_datasheet_extract.schema.json
+    format: json
+    required_fields:
+      - component
+      - pins
+      - electrical_characteristics
+      - typical_application
+  
+  erc_report:
+    description: KiCad Electrical Rule Check output
+    tool: kicad-cli
+    command: kicad-cli sch erc
+    format: text
+    pass_criteria:
+      - exit_code_zero
+      - no_errors
+      - warnings_acceptable
+  
+  netlist:
+    description: KiCad netlist export
+    tool: kicad-cli
+    command: kicad-cli sch export netlist
+    format: kicad_netlist
+  
+  bom:
+    description: Bill of Materials
+    tool: kicad-cli
+    command: kicad-cli sch export bom
+    format: csv
+  
+  schematic_pdf:
+    description: Schematic in PDF format for review
+    tool: kicad-cli
+    command: kicad-cli sch export pdf
+    format: pdf
+  
+  semantic_review:
+    description: AI verifier semantic analysis
+    agent: pcb-semantic-reviewer
+    template: templates/pcb_semantic_review.md
+    required_checks:
+      - datasheet_compliance
+      - voltage_domain_correctness
+      - power_budget
+      - interface_compliance
+      - protection_circuits
+  
+  voltage_domain_check:
+    description: Voltage domain validation
+    validator: pcb.validators.voltage_domains
+    required_checks:
+      - all_domains_sourced
+      - no_domain_conflicts
+      - proper_level_shifting
+      - decoupling_present
+  
+  power_budget_check:
+    description: Power consumption analysis
+    validator: pcb.validators.power_budget
+    required_checks:
+      - total_current_within_limits
+      - per_rail_current_within_limits
+      - margin_adequate
+  
+  interface_check:
+    description: Interface compliance validation
+    validator: pcb.validators.interfaces
+    checks:
+      i2c:
+        - pullup_resistors_present
+        - pullup_values_correct
+        - voltage_compatible
+      spi:
+        - termination_if_needed
+        - voltage_compatible
+      usb:
+        - termination_correct
+        - esd_protection
+        - enumeration_circuit
+      can:
+        - termination_120_ohm
+        - common_mode_choke
+  
+  protection_check:
+    description: Protection circuit validation
+    validator: pcb.validators.protection
+    checks:
+      - esd_protection_on_connectors
+      - reverse_polarity_protection
+      - overcurrent_protection
+      - overvoltage_protection
+  
+  independent_verification:
+    description: Fresh-context independent review
+    agent: pcb-independent-verifier
+    template: templates/pcb_independent_verification.md
+    requirements:
+      - fresh_context
+      - no_builder_influence
+      - comprehensive_checklist
+  
+  human_approval:
+    description: Named human engineer approval
+    template: templates/pcb_expert_review_checklist.md
+    required_fields:
+      - engineer_name
+      - review_date
+      - approval_decision
+      - risk_assessment
+      - residual_risks
+
+  layout_drc:
+    description: PCB layout Design Rule Check
+    tool: kicad-cli
+    command: kicad-cli pcb drc
+    format: text
+    pass_criteria:
+      - exit_code_zero
+      - no_errors
+      - no_unconnected_items
+  
+  ai_review_statement:
+    description: Explicit statement about AI review
+    required_content: >
+      This design was generated with AI assistance and has been
+      thoroughly reviewed by qualified electrical engineers.
+      All AI-generated content has been verified against datasheets,
+      design rules, and engineering best practices.
+
+# Validation rules
+
+validation_rules:
+  manufacturing_red_line:
+    description: No AI-generated PCB may go to fabrication without human EE approval
+    enforcement: blocking
+    applies_to:
+      - L3_with_manufacturing_intent
+      - L4_all_cases
+    
+    checks:
+      - human_ee_approval_present
+      - human_ee_is_qualified
+      - approval_covers_manufacturing
+      - evidence_bundle_complete
+      - all_validation_gates_passed
+    
+    failure_action: block_manufacturing
+    failure_message: >
+      BLOCKED: This PCB design cannot be sent to fabrication without
+      explicit approval from a qualified electrical engineer.
+      
+      Required:
+      - Named EE approval in evidence bundle
+      - All validation gates must pass
+      - Evidence bundle must be complete
+      
+      See docs/pcb-human-review-guide.md for approval process.
+
+  datasheet_compliance:
+    description: All component connections must match datasheets
+    enforcement: blocking_for_L3_and_above
+    
+    checks:
+      - pin_assignments_correct
+      - voltage_ratings_respected
+      - current_ratings_respected
+      - timing_requirements_met
+      - typical_application_followed
+  
+  voltage_domain_safety:
+    description: Voltage domains must be properly isolated and regulated
+    enforcement: blocking_for_L3_and_above
+    
+    checks:
+      - no_mixed_voltage_nets
+      - level_shifters_where_needed
+      - regulators_properly_configured
+      - protection_diodes_where_needed
+
+# Risk escalation triggers
+
+escalation_triggers:
+  high_voltage:
+    threshold: 50V
+    escalate_to: L4
+    reason: "High voltage increases shock and arc hazard"
+  
+  high_current:
+    threshold: 1A
+    escalate_to: L4
+    reason: "High current increases fire and thermal hazard"
+  
+  battery_charging:
+    trigger: lithium_battery_charger
+    escalate_to: L4
+    reason: "Lithium battery charging requires safety controls"
+  
+  mains_power:
+    trigger: ac_mains_connection
+    escalate_to: L4
+    reason: "Mains power requires safety isolation and compliance"
+  
+  rf_transmitter:
+    trigger: intentional_rf_emission
+    escalate_to: L4
+    reason: "RF transmitters require regulatory compliance (FCC, CE)"
+  
+  medical_device:
+    trigger: intended_for_medical_use
+    escalate_to: L4
+    reason: "Medical devices require regulatory approval and safety analysis"
+  
+  customer_facing:
+    trigger: intended_for_customer_shipment
+    escalate_to: L4
+    reason: "Customer-facing hardware requires production-grade validation"
+
+# Manufacturing constraints by risk level
+
+manufacturing_constraints:
+  L0:
+    allowed: false
+    reason: "Documentation only, no design"
+  
+  L1:
+    allowed: false
+    reason: "Metadata only, no circuit"
+  
+  L2:
+    allowed: false
+    reason: "Concept only, not validated for manufacturing"
+  
+  L3:
+    allowed: true
+    constraints:
+      - prototype_only
+      - must_be_marked_PROTOTYPE
+      - internal_use_only
+      - no_customer_shipment
+      - no_regulatory_claims
+      - limited_quantity: 10
+    
+    required_markings:
+      - "PROTOTYPE - NOT FOR PRODUCTION"
+      - "INTERNAL USE ONLY"
+      - Design version/revision
+      - Date of fabrication
+  
+  L4:
+    allowed: true
+    constraints:
+      - formal_release_required
+      - design_freeze_required
+      - change_control_required
+      - full_validation_required
+      - regulatory_compliance_if_applicable
+    
+    required_markings:
+      - Product name/number
+      - Version/revision
+      - Serial number or date code
+      - Regulatory marks (UL, CE, FCC, etc.) if applicable
+      - Manufacturer identification
+
+# Version and metadata
+
+version: "1.0"
+last_updated: "2026-06-08"
+status: "production"
