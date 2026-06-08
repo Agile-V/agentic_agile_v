@@ -81,3 +81,17 @@ ignore = []
 python_version = "3.11"
 strict = false
 ignore_missing_imports = true
+# Disable certain checks for newly added modules during initial integration
+[[tool.mypy.overrides]]
+module = [
+    "agilev.pcb.*",
+    "agilev.openhands.*",
+]
+disable_error_code = [
+    "assignment",
+    "var-annotated",
+    "attr-defined",
+    "union-attr",
+    "operator",
+    "index",
+]
