@@ -10,7 +10,11 @@ import subprocess
 import sys
 from pathlib import Path
 
-import yaml
+try:
+    import yaml
+except ImportError:
+    print("Note: pyyaml not installed, using JSON fallback for contracts")
+    yaml = None
 
 
 def print_step(step_num: int, title: str):
@@ -158,8 +162,14 @@ def main():
     }
 
     contract_dir.mkdir(parents=True, exist_ok=True)
-    with open(hw_fw_contract_path, "w") as f:
-        yaml.dump(hw_fw_contract, f, default_flow_style=False)
+    if yaml:
+        with open(hw_fw_contract_path, "w") as f:
+            yaml.dump(hw_fw_contract, f, default_flow_style=False)
+    else:
+        # Fallback to JSON if yaml not available
+        hw_fw_contract_path = contract_dir / "hardware_firmware_contract.json"
+        with open(hw_fw_contract_path, "w") as f:
+            json.dump(hw_fw_contract, f, indent=2)
 
     print(f"✓ Created hardware-firmware contract: {hw_fw_contract_path}")
 
@@ -262,8 +272,14 @@ lib_deps =
     }
 
     fw_sw_contract_path = contract_dir / "firmware_software_contract.yaml"
-    with open(fw_sw_contract_path, "w") as f:
-        yaml.dump(fw_sw_contract, f, default_flow_style=False)
+    if yaml:
+        with open(fw_sw_contract_path, "w") as f:
+            yaml.dump(fw_sw_contract, f, default_flow_style=False)
+    else:
+        # Fallback to JSON
+        fw_sw_contract_path = contract_dir / "firmware_software_contract.json"
+        with open(fw_sw_contract_path, "w") as f:
+            json.dump(fw_sw_contract, f, indent=2)
 
     print(f"✓ Created firmware-software contract: {fw_sw_contract_path}")
 
