@@ -11,6 +11,8 @@ from pathlib import Path
 
 import yaml
 
+from agilev.embedded.cli import build_embedded_parser
+from agilev.firmware.cli import build_firmware_parser
 from agilev.openhands.event_ledger import EventLedger, EventType
 from agilev.openhands.evidence_adapter import EvidenceAdapter
 from agilev.openhands.github_actions import generate_github_actions
@@ -23,6 +25,7 @@ from agilev.openhands.session_manager import (
     SessionConfig,
 )
 from agilev.pcb.cli import build_pcb_parser
+from agilev.software.cli import build_software_parser
 from agilev.state import EventLogger, LockManager, TaskState
 from agilev.task_context import TaskContextResolver
 
@@ -1455,6 +1458,15 @@ def build_parser() -> argparse.ArgumentParser:
 
     # PCB commands
     build_pcb_parser(subparsers)
+
+    # Embedded systems commands
+    build_embedded_parser(subparsers)
+
+    # Firmware commands
+    build_firmware_parser(subparsers)
+
+    # Software commands
+    build_software_parser(subparsers)
 
     return parser
 

@@ -1,0 +1,38 @@
+{
+  "contract_version": "1.0",
+  "mcu": {
+    "part_number": "STM32F401RET6",
+    "manufacturer": "STMicroelectronics"
+  },
+  "interfaces": [
+    {
+      "name": "I2C1",
+      "type": "I2C",
+      "pins": {
+        "SCL": "PB6",
+        "SDA": "PB7"
+      },
+      "speed": "100kHz"
+    },
+    {
+      "name": "USB",
+      "type": "USB",
+      "pins": {
+        "DP": "PA12",
+        "DM": "PA11"
+      }
+    }
+  ],
+  "peripherals": [
+    {
+      "name": "TMP102",
+      "type": "temperature_sensor",
+      "interface": "I2C1",
+      "address": "0x48"
+    }
+  ],
+  "firmware_constraints": {
+    "max_binary_size_kb": 512,
+    "max_ram_kb": 96
+  }
+}

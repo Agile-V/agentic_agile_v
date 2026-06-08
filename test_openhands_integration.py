@@ -10,6 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent / "src"))
 from agilev.openhands.scaffold import OpenHandsScaffold
 from agilev.task_context import TaskContextResolver
 
+
 def test_scaffold():
     """Test OpenHandsScaffold."""
     print("Testing OpenHandsScaffold...")

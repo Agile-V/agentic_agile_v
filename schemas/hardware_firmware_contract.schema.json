@@ -1,0 +1,338 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/hardware_firmware_contract.schema.json",
+  "title": "Hardware-Firmware Contract",
+  "description": "Contract defining hardware capabilities exported from PCB to firmware",
+  "type": "object",
+  "required": ["contract_id", "board", "pcb_revision", "source_pcb_task", "mcu"],
+  "properties": {
+    "contract_id": {
+      "type": "string",
+      "pattern": "^HFC-[A-Z0-9-]+$",
+      "description": "Hardware-firmware contract identifier"
+    },
+    "board": {
+      "type": "string",
+      "description": "Board name/identifier"
+    },
+    "pcb_revision": {
+      "type": "string",
+      "description": "PCB hardware revision"
+    },
+    "source_pcb_task": {
+      "type": "string",
+      "pattern": "^AAV-PCB-[0-9]+$",
+      "description": "Source PCB task"
+    },
+    "source_pcb_candidate": {
+      "type": "string",
+      "description": "Source PCB candidate identifier"
+    },
+    "mcu": {
+      "type": "object",
+      "required": ["part_number", "package", "voltage_domain"],
+      "properties": {
+        "part_number": {
+          "type": "string",
+          "description": "MCU part number"
+        },
+        "package": {
+          "type": "string",
+          "description": "Package type (e.g., LQFP48, QFN32)"
+        },
+        "voltage_domain": {
+          "type": "string",
+          "description": "Primary voltage domain (e.g., 3V3, 1V8)"
+        },
+        "clock_speed_mhz": {
+          "type": "number",
+          "description": "MCU clock speed in MHz"
+        }
+      }
+    },
+    "interfaces": {
+      "type": "object",
+      "properties": {
+        "i2c": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "sda", "scl"],
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "I2C bus identifier (e.g., I2C1)"
+              },
+              "sda": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "scl": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "speed_hz": {
+                "type": "integer",
+                "description": "Bus speed in Hz (e.g., 100000, 400000)"
+              },
+              "devices": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "part_number", "address"],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "part_number": {
+                      "type": "string"
+                    },
+                    "address": {
+                      "type": "string",
+                      "pattern": "^0x[0-9A-Fa-f]{2}$"
+                    },
+                    "interrupt": {
+                      "$ref": "#/definitions/interrupt_config"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "spi": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "sck", "miso", "mosi"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "sck": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "miso": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "mosi": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "chip_selects": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["name", "mcu_pin", "net"],
+                  "properties": {
+                    "name": {
+                      "type": "string"
+                    },
+                    "mcu_pin": {
+                      "type": "string"
+                    },
+                    "net": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "uart": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "tx", "rx"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "tx": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "rx": {
+                "$ref": "#/definitions/pin_config"
+              },
+              "baudrate": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        "adc": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "channel", "mcu_pin", "net"],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "channel": {
+                "type": "string"
+              },
+              "mcu_pin": {
+                "type": "string"
+              },
+              "net": {
+                "type": "string"
+              },
+              "scaling": {
+                "type": "object",
+                "properties": {
+                  "r_high_ohm": {
+                    "type": "number"
+                  },
+                  "r_low_ohm": {
+                    "type": "number"
+                  },
+                  "tolerance_percent": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "gpio": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "mcu_pin", "net", "direction"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "mcu_pin": {
+                "type": "string"
+              },
+              "net": {
+                "type": "string"
+              },
+              "direction": {
+                "type": "string",
+                "enum": ["input", "output", "bidirectional"]
+              },
+              "pull": {
+                "type": "string",
+                "enum": ["none", "pullup", "pulldown", "external"]
+              }
+            }
+          }
+        }
+      }
+    },
+    "power": {
+      "type": "object",
+      "properties": {
+        "rails": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "nominal_v"],
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "nominal_v": {
+                "type": "number"
+              },
+              "min_v": {
+                "type": "number"
+              },
+              "max_v": {
+                "type": "number"
+              },
+              "tolerance_percent": {
+                "type": "number"
+              }
+            }
+          }
+        }
+      }
+    },
+    "firmware_constraints": {
+      "type": "object",
+      "properties": {
+        "boot_time_max_ms": {
+          "type": "integer"
+        },
+        "watchdog_required": {
+          "type": "boolean"
+        },
+        "brownout_handling_required": {
+          "type": "boolean"
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "properties": {
+        "required_commands": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "required_evidence": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "firmware_build",
+          "host_unit_tests",
+          "target_build",
+          "static_analysis",
+          "simulation_test",
+          "hardware_in_loop_test",
+          "independent_verification"
+        ]
+      }
+    }
+  },
+  "definitions": {
+    "pin_config": {
+      "type": "object",
+      "required": ["mcu_pin", "net"],
+      "properties": {
+        "mcu_pin": {
+          "type": "string",
+          "description": "MCU pin identifier (e.g., PA0, PB7)"
+        },
+        "net": {
+          "type": "string",
+          "description": "Net name from PCB"
+        },
+        "pullup": {
+          "type": "string",
+          "enum": ["none", "internal", "external"]
+        },
+        "pulldown": {
+          "type": "string",
+          "enum": ["none", "internal", "external"]
+        }
+      }
+    },
+    "interrupt_config": {
+      "type": "object",
+      "required": ["mcu_pin", "net", "edge"],
+      "properties": {
+        "mcu_pin": {
+          "type": "string"
+        },
+        "net": {
+          "type": "string"
+        },
+        "edge": {
+          "type": "string",
+          "enum": ["rising", "falling", "both"]
+        },
+        "pull": {
+          "type": "string",
+          "enum": ["none", "pullup", "pulldown", "external"]
+        }
+      }
+    }
+  }
+}

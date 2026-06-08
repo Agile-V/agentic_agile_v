@@ -11,13 +11,13 @@ This demonstrates:
 """
 
 import sys
+
 sys.path.insert(0, 'src')
 
 from pathlib import Path
-from agilev.pcb.circuit_ir import (
-    CircuitIR, Component, Pin, PinType, Net, NetType, PowerDomain
-)
-from agilev.pcb.validators import validate_circuit, generate_validation_report
+
+from agilev.pcb.circuit_ir import CircuitIR, Component, Net, NetType, Pin, PinType, PowerDomain
+from agilev.pcb.validators import generate_validation_report, validate_circuit
 
 
 def create_led_blinker_circuit():

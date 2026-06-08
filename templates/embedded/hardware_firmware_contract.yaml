@@ -1,0 +1,79 @@
+contract_id: HFC-001
+board: example_board_rev_a
+pcb_revision: rev_a
+source_pcb_task: AAV-PCB-001
+source_pcb_candidate: pcb-candidate-001
+
+mcu:
+  part_number: stm32f411ce
+  package: LQFP48
+  voltage_domain: 3V3
+  clock_speed_mhz: 100
+
+interfaces:
+  i2c:
+    - id: I2C1
+      sda:
+        mcu_pin: PB7
+        net: I2C1_SDA
+        pullup: external
+      scl:
+        mcu_pin: PB6
+        net: I2C1_SCL
+        pullup: external
+      speed_hz: 400000
+      devices:
+        - name: temp_sensor
+          part_number: TMP117
+          address: "0x48"
+          interrupt:
+            mcu_pin: PA3
+            net: TEMP_INT
+            edge: falling
+            pull: external
+
+  gpio:
+    - name: led_status
+      mcu_pin: PC13
+      net: LED_STATUS
+      direction: output
+      pull: none
+
+  adc:
+    - id: battery_voltage
+      channel: ADC1_IN4
+      mcu_pin: PA4
+      net: VBAT_SENSE
+      scaling:
+        r_high_ohm: 100000
+        r_low_ohm: 33000
+        tolerance_percent: 1
+
+power:
+  rails:
+    - name: 3V3
+      nominal_v: 3.3
+      tolerance_percent: 5
+    - name: VBAT
+      min_v: 3.0
+      max_v: 4.2
+
+firmware_constraints:
+  boot_time_max_ms: 1500
+  watchdog_required: true
+  brownout_handling_required: true
+
+diagnostics:
+  required_commands:
+    - i2c_scan
+    - sensor_self_test
+    - adc_range_check
+
+required_evidence:
+  - firmware_build
+  - host_unit_tests
+  - target_build
+  - static_analysis
+  - simulation_test
+  - hardware_in_loop_test
+  - independent_verification
