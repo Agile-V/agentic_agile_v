@@ -460,8 +460,8 @@ def cmd_status(args: argparse.Namespace) -> int:
     print("Tasks:")
     print(f"  Total: {len(all_tasks)}")
 
-    by_status = {}
-    by_risk = {}
+    by_status: dict[str, int] = {}
+    by_risk: dict[str, int] = {}
     for task in all_tasks:
         status = task.get("status", "unknown")
         risk = task.get("risk_level", "unknown")
@@ -998,8 +998,11 @@ def cmd_openhands_session_show(args: argparse.Namespace) -> int:
             print(f"  Started: {metadata.started_at}")
         if metadata.completed_at:
             print(f"  Completed: {metadata.completed_at}")
-            duration = (metadata.completed_at - metadata.started_at).total_seconds()
-            print(f"  Duration: {duration:.1f}s")
+            if metadata.started_at:
+                duration = (
+                    metadata.completed_at - metadata.started_at
+                ).total_seconds()
+                print(f"  Duration: {duration:.1f}s")
 
         print("\nMetrics:")
         print(f"  Iterations: {metadata.iterations}")

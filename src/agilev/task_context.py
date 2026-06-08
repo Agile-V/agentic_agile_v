@@ -171,7 +171,7 @@ class TaskContextResolver:
             evidence_bundle = task_dir / "evidence_bundle.json"
             task_brief = task_dir / "task_brief.md"
 
-            max_mtime = 0
+            max_mtime: float = 0
             for file_path in [evidence_bundle, task_brief]:
                 if file_path.exists():
                     max_mtime = max(max_mtime, file_path.stat().st_mtime)
