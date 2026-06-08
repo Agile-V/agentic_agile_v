@@ -17,7 +17,6 @@ relevance scoring, architectural layer filtering, and risk inference.
 from __future__ import annotations
 
 import logging
-from typing import Sequence
 
 from .model import (
     AffectedComponent,

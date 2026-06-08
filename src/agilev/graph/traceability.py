@@ -13,8 +13,8 @@ automatic test-result parsing.
 from __future__ import annotations
 
 import logging
+from collections.abc import Sequence
 from dataclasses import dataclass, field
-from typing import Sequence
 
 from .model import (
     AffectedComponent,

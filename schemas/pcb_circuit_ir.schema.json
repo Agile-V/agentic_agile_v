@@ -1,0 +1,331 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://github.com/Agile-V/agentic_agile_v/schemas/pcb_circuit_ir.schema.json",
+  "title": "PCB Circuit Intermediate Representation",
+  "description": "Schema for validating PCB circuit intermediate representation (IR) files",
+  "type": "object",
+  "required": ["name", "version", "components", "nets"],
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Circuit name"
+    },
+    "version": {
+      "type": "string",
+      "description": "IR schema version",
+      "pattern": "^\\d+\\.\\d+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "Circuit description"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-PCB-\\d{3,}$",
+      "description": "Associated Agile-V PCB task ID"
+    },
+    "candidate_id": {
+      "type": "string",
+      "description": "Candidate identifier"
+    },
+    "created": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Creation timestamp"
+    },
+    "modified": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Last modification timestamp"
+    },
+    "author": {
+      "type": "string",
+      "description": "Author (agent or human)"
+    },
+    "components": {
+      "type": "array",
+      "description": "List of components in the circuit",
+      "items": {
+        "$ref": "#/definitions/component"
+      }
+    },
+    "nets": {
+      "type": "array",
+      "description": "List of nets (electrical connections)",
+      "items": {
+        "$ref": "#/definitions/net"
+      }
+    },
+    "power_domains": {
+      "type": "array",
+      "description": "List of power domains (voltage rails)",
+      "items": {
+        "$ref": "#/definitions/power_domain"
+      }
+    },
+    "interfaces": {
+      "type": "array",
+      "description": "List of communication interfaces",
+      "items": {
+        "$ref": "#/definitions/interface"
+      }
+    }
+  },
+  "definitions": {
+    "pin": {
+      "type": "object",
+      "required": ["number", "name", "type", "electrical_type"],
+      "properties": {
+        "number": {
+          "type": "string",
+          "description": "Pin number"
+        },
+        "name": {
+          "type": "string",
+          "description": "Pin name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["input", "output", "bidirectional", "power", "ground", "no_connect", "passive"],
+          "description": "Pin type"
+        },
+        "electrical_type": {
+          "type": "string",
+          "description": "Electrical type from datasheet"
+        },
+        "voltage": {
+          "type": "number",
+          "description": "Operating voltage (V)"
+        },
+        "current_max": {
+          "type": "number",
+          "description": "Maximum current (mA)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Pin description"
+        }
+      }
+    },
+    "component": {
+      "type": "object",
+      "required": ["id", "type", "pins"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[A-Z]+\\d+$",
+          "description": "Component reference designator (e.g., U1, R1, C1)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Component type"
+        },
+        "value": {
+          "type": "string",
+          "description": "Component value (e.g., 10k, 100nF, STM32F4)"
+        },
+        "package": {
+          "type": "string",
+          "description": "Component package (e.g., 0603, SOIC-8, QFN-32)"
+        },
+        "manufacturer": {
+          "type": "string",
+          "description": "Manufacturer name"
+        },
+        "part_number": {
+          "type": "string",
+          "description": "Manufacturer part number"
+        },
+        "datasheet_url": {
+          "type": "string",
+          "format": "uri",
+          "description": "URL to component datasheet"
+        },
+        "description": {
+          "type": "string",
+          "description": "Component description"
+        },
+        "pins": {
+          "type": "array",
+          "description": "List of component pins",
+          "items": {
+            "$ref": "#/definitions/pin"
+          }
+        },
+        "voltage_rating": {
+          "type": "number",
+          "description": "Voltage rating (V)"
+        },
+        "current_rating": {
+          "type": "number",
+          "description": "Current rating (A)"
+        },
+        "power_rating": {
+          "type": "number",
+          "description": "Power rating (W)"
+        },
+        "tolerance": {
+          "type": "string",
+          "description": "Tolerance (e.g., 1%, 5%)"
+        },
+        "temperature_coefficient": {
+          "type": "string",
+          "description": "Temperature coefficient"
+        },
+        "footprint": {
+          "type": "string",
+          "description": "KiCad footprint reference"
+        },
+        "symbol": {
+          "type": "string",
+          "description": "KiCad symbol reference"
+        },
+        "alternate_parts": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Alternate/compatible part numbers"
+        }
+      }
+    },
+    "net": {
+      "type": "object",
+      "required": ["name", "type", "connections"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Net name"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["signal", "power", "ground", "clock", "reset", "analog"],
+          "description": "Net type"
+        },
+        "connections": {
+          "type": "array",
+          "description": "List of pins connected to this net",
+          "items": {
+            "type": "object",
+            "required": ["component", "pin"],
+            "properties": {
+              "component": {
+                "type": "string",
+                "description": "Component ID"
+              },
+              "pin": {
+                "type": "string",
+                "description": "Pin number"
+              }
+            }
+          }
+        },
+        "voltage": {
+          "type": "number",
+          "description": "Operating voltage (V)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Net description"
+        }
+      }
+    },
+    "power_domain": {
+      "type": "object",
+      "required": ["name", "voltage", "source_component"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Power domain name (e.g., 3V3, 5V, 1V8_CORE)"
+        },
+        "voltage": {
+          "type": "number",
+          "description": "Nominal voltage (V)"
+        },
+        "source_component": {
+          "type": "string",
+          "description": "Component providing this voltage"
+        },
+        "source_pin": {
+          "type": "string",
+          "description": "Pin providing voltage"
+        },
+        "typical_current_ma": {
+          "type": "number",
+          "description": "Typical current draw (mA)"
+        },
+        "max_current_ma": {
+          "type": "number",
+          "description": "Maximum current draw (mA)"
+        },
+        "power_net": {
+          "type": "string",
+          "description": "Power net name"
+        },
+        "ground_net": {
+          "type": "string",
+          "description": "Ground net name"
+        },
+        "loads": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Component IDs powered by this domain"
+        },
+        "tolerance_percent": {
+          "type": "number",
+          "description": "Voltage tolerance (%)"
+        },
+        "ripple_max_mv": {
+          "type": "number",
+          "description": "Maximum ripple voltage (mV)"
+        }
+      }
+    },
+    "interface": {
+      "type": "object",
+      "required": ["name", "type", "signals"],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Interface name (e.g., I2C1, SPI_FLASH, USB)"
+        },
+        "type": {
+          "type": "string",
+          "description": "Interface type (i2c, spi, uart, usb, can, etc.)"
+        },
+        "signals": {
+          "type": "object",
+          "description": "Map of signal names to net names",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "voltage": {
+          "type": "number",
+          "description": "Interface voltage (V)"
+        },
+        "frequency": {
+          "type": "number",
+          "description": "Interface frequency (Hz) or baud rate (bps)"
+        },
+        "description": {
+          "type": "string",
+          "description": "Interface description"
+        },
+        "master": {
+          "type": "string",
+          "description": "Master component ID"
+        },
+        "slaves": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Slave component IDs"
+        }
+      }
+    }
+  }
+}

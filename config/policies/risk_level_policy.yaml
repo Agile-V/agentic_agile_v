@@ -1,0 +1,85 @@
+# Risk Level Policy
+# Guidance for risk classification (L0-L4)
+
+risk_levels:
+  L0:
+    name: "Trivial"
+    description: "No code execution changes"
+    examples:
+      - "Documentation updates"
+      - "Comment changes"
+      - "README updates"
+      - "Markdown formatting"
+    
+  L1:
+    name: "Low Risk"
+    description: "Small, isolated changes with limited blast radius"
+    examples:
+      - "Small bug fixes (internal)"
+      - "Internal refactors (no API change)"
+      - "New unit tests"
+      - "Logging additions"
+      - "Error message improvements"
+    
+  L2:
+    name: "Moderate Risk"
+    description: "Moderate changes with potential customer impact"
+    examples:
+      - "New features (internal)"
+      - "API changes (non-breaking, additive)"
+      - "Database schema changes (additive columns)"
+      - "New vetted dependencies"
+      - "Performance optimizations"
+    
+  L3:
+    name: "High Risk"
+    description: "Significant changes with high impact potential"
+    examples:
+      - "Breaking API changes"
+      - "Authentication/authorization changes"
+      - "Cryptography changes"
+      - "Data migration"
+      - "Security-sensitive changes"
+      - "Infrastructure changes (production)"
+      - "Database schema changes (destructive)"
+    
+  L4:
+    name: "Critical Risk"
+    description: "Safety-critical or mission-critical changes"
+    examples:
+      - "Safety-critical systems (hardware, firmware)"
+      - "Medical devices"
+      - "Aviation systems"
+      - "Automotive systems"
+      - "Financial transaction integrity"
+      - "Customer data deletion/migration"
+      - "Disaster recovery procedures"
+
+# Auto-classification hints
+auto_classification:
+  patterns:
+    L0:
+      - "**/*.md"
+      - "**/README*"
+      - "**/docs/**"
+    
+    L3_or_higher:
+      - "**/auth/**"
+      - "**/crypto/**"
+      - "**/secrets/**"
+      - "**/migration/**"
+      - "infra/**"
+      - "terraform/**"
+  
+  dependency_changes:
+    default_risk: "L2"
+    security_dependency: "L3"
+  
+  api_changes:
+    additive: "L2"
+    breaking: "L3"
+
+# Escalation rules
+escalation:
+  when_uncertain: "escalate_to_higher_risk"
+  default_risk_if_unknown: "L2"

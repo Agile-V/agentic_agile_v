@@ -1,0 +1,87 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/event.schema.json",
+  "title": "Agentic Agile-V Event",
+  "description": "An immutable event in the Agile-V process history",
+  "type": "object",
+  "required": [
+    "event_id",
+    "timestamp",
+    "event_type",
+    "actor"
+  ],
+  "properties": {
+    "event_id": {
+      "type": "string",
+      "pattern": "^evt_[0-9]{6}$",
+      "description": "Unique event identifier"
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "ISO 8601 timestamp"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-[0-9]{4}$",
+      "description": "Associated task ID"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": [
+        "IntentDeclared",
+        "BriefCreated",
+        "BriefValidated",
+        "RiskClassAssigned",
+        "ImpactAnalyzed",
+        "PlanProposed",
+        "PlanApproved",
+        "ImplementationStarted",
+        "FilesChanged",
+        "TestsAdded",
+        "EvidenceAdded",
+        "EvidenceValidated",
+        "GatePassed",
+        "GateFailed",
+        "VerificationStarted",
+        "VerificationPassed",
+        "VerificationFailed",
+        "HumanApproved",
+        "HumanRejected",
+        "HandoffCreated",
+        "BaselineUpdated",
+        "TaskClosed"
+      ],
+      "description": "Type of event"
+    },
+    "actor": {
+      "type": "string",
+      "description": "Agent, tool, or human who triggered the event"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable event summary"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "List of artifact paths created or modified"
+    },
+    "hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "SHA-256 hash of the event content"
+    },
+    "previous_event_hash": {
+      "type": "string",
+      "pattern": "^sha256:[a-f0-9]{64}$",
+      "description": "Hash of the previous event (for chain integrity)"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Additional event-specific metadata"
+    }
+  }
+}

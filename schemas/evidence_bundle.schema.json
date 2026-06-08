@@ -32,6 +32,119 @@
     "evidence_artifacts": {"type": "array", "items": {"type": "string"}},
     "reviewer_gate": {"type": "object"},
     "rollback_path": {"type": "string"},
-    "residual_risks": {"type": "array", "items": {"type": "string"}}
+    "residual_risks": {"type": "array", "items": {"type": "string"}},
+    "agent_execution": {
+      "type": "object",
+      "description": "Agent execution metadata (optional, only present if agent was used)",
+      "properties": {
+        "engine": {
+          "type": "string",
+          "enum": ["openhands", "cursor", "continue", "windsurf", "cline", "manual"],
+          "description": "Execution engine used"
+        },
+        "mode": {
+          "type": "string",
+          "enum": ["builder", "verifier", "risk_classifier"],
+          "description": "Agent mode"
+        },
+        "session_id": {
+          "type": "string",
+          "description": "Unique session identifier"
+        },
+        "agent_model": {
+          "type": "string",
+          "description": "LLM model used (e.g., claude-3.5-sonnet, gpt-4)"
+        },
+        "started_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Session start timestamp (ISO 8601)"
+        },
+        "ended_at": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Session end timestamp (ISO 8601)"
+        },
+        "tool_log_path": {
+          "type": "string",
+          "description": "Relative path to tool usage log (JSONL format)"
+        },
+        "handoff_path": {
+          "type": "string",
+          "description": "Relative path to session handoff document"
+        }
+      },
+      "required": ["engine", "mode", "session_id"]
+    },
+    "scope_control": {
+      "type": "object",
+      "description": "Scope validation metadata (optional)",
+      "properties": {
+        "allowed_paths": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Glob patterns for allowed file changes"
+        },
+        "blocked_paths": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Glob patterns for blocked file changes"
+        },
+        "changed_files_within_scope": {
+          "type": "boolean",
+          "description": "Whether all changed files are within allowed scope"
+        },
+        "out_of_scope_changes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Files changed that are outside allowed scope"
+        },
+        "dependency_changes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Dependency files that were changed"
+        },
+        "public_api_changes": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Public API files that were changed"
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "description": "Independent verification metadata (required for L2+)",
+      "properties": {
+        "builder_summary_path": {
+          "type": "string",
+          "description": "Path to builder implementation summary"
+        },
+        "verifier_report_path": {
+          "type": "string",
+          "description": "Path to independent verifier report"
+        },
+        "fresh_context_verification": {
+          "type": "boolean",
+          "description": "Whether verifier started from fresh context (no builder memory)"
+        },
+        "verifier_result": {
+          "type": "string",
+          "enum": ["pass", "fail", "needs-human-review"],
+          "description": "Verifier recommendation"
+        },
+        "criteria_coverage": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "criterion": {"type": "string"},
+              "evidence": {"type": "string"},
+              "satisfied": {"type": "boolean"}
+            }
+          },
+          "description": "Mapping of acceptance criteria to evidence"
+        }
+      }
+    }
   }
 }

@@ -1,0 +1,67 @@
+# Evidence Policy
+# Evidence requirements by risk level
+
+risk_levels:
+  L0:
+    required_evidence:
+      - "changed_files"
+    optional_evidence:
+      - "tests"
+    
+  L1:
+    required_evidence:
+      - "task_brief"
+      - "changed_files"
+      - "tests_or_rationale"
+    optional_evidence:
+      - "checks"
+  
+  L2:
+    required_evidence:
+      - "task_brief"
+      - "changed_files"
+      - "tests_added_or_modified"
+      - "tests_passed"
+      - "checks_passed"
+      - "verifier_report"
+    optional_evidence:
+      - "performance_benchmarks"
+  
+  L3:
+    required_evidence:
+      - "task_brief"
+      - "risk_assessment"
+      - "changed_files"
+      - "tests_added_or_modified"
+      - "tests_passed"
+      - "checks_passed"
+      - "rollback_path"
+      - "verifier_report"
+      - "domain_owner_approval"
+    optional_evidence:
+      - "performance_benchmarks"
+      - "load_testing"
+  
+  L4:
+    required_evidence:
+      - "task_brief"
+      - "formal_risk_assessment"
+      - "changed_files"
+      - "tests_added_or_modified"
+      - "tests_passed"
+      - "checks_passed"
+      - "rollback_path"
+      - "simulation_or_hil"
+      - "traceability_matrix"
+      - "verifier_report"
+      - "independent_verification"
+      - "formal_approval"
+    optional_evidence:
+      - "formal_methods_proof"
+      - "certification_evidence"
+
+# Validation rules
+validation:
+  fail_on_missing_required: true
+  warn_on_missing_optional: true
+  allow_override_for_risk_levels: []  # No overrides

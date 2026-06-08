@@ -1,0 +1,58 @@
+# Approval Policy
+# Human approval requirements by risk level
+
+risk_levels:
+  L0:
+    human_approval_required: false
+    approvers: []
+  
+  L1:
+    human_approval_required: false
+    approvers: []
+  
+  L2:
+    human_approval_required: true
+    approvers:
+      - type: "reviewer"
+        count: 1
+        description: "Any team member can review L2 changes"
+  
+  L3:
+    human_approval_required: true
+    approvers:
+      - type: "domain_owner"
+        count: 1
+        description: "Requires approval from domain owner or tech lead"
+    additional_requirements:
+      - "rollback_path_documented"
+      - "verifier_report_passed"
+  
+  L4:
+    human_approval_required: true
+    approvers:
+      - type: "independent_verifier"
+        count: 1
+        description: "Independent verification required"
+      - type: "formal_approval"
+        count: 1
+        description: "Formal approval from designated authority"
+    additional_requirements:
+      - "rollback_path_documented"
+      - "simulation_or_hil_evidence"
+      - "traceability_matrix"
+      - "verifier_report_passed"
+
+# GitHub integration
+github:
+  use_codeowners: true
+  required_reviews_by_risk:
+    L0: 0
+    L1: 0
+    L2: 1
+    L3: 2
+    L4: 3
+  
+  dismiss_stale_reviews: false
+  require_code_owner_reviews:
+    L3: true
+    L4: true

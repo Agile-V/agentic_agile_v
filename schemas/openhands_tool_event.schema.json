@@ -1,0 +1,52 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "OpenHands Tool Event",
+  "description": "Schema for OpenHands tool usage events logged during sessions",
+  "type": "object",
+  "required": ["timestamp", "event_type", "tool_name"],
+  "properties": {
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "Event timestamp in ISO 8601 format"
+    },
+    "event_type": {
+      "type": "string",
+      "enum": ["pre_tool_use", "post_tool_use", "tool_error"],
+      "description": "Type of tool event"
+    },
+    "tool_name": {
+      "type": "string",
+      "description": "Name of the tool being used",
+      "examples": ["terminal", "edit", "read", "write", "browser"]
+    },
+    "tool_args": {
+      "type": "object",
+      "description": "Arguments passed to the tool"
+    },
+    "result": {
+      "type": "object",
+      "description": "Tool execution result (post_tool_use only)",
+      "properties": {
+        "success": {"type": "boolean"},
+        "exit_code": {"type": "integer"},
+        "stdout": {"type": "string"},
+        "stderr": {"type": "string"},
+        "error": {"type": "string"}
+      }
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^[A-Z]+-[0-9]+$",
+      "description": "Associated task ID"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "OpenHands session identifier"
+    },
+    "summary": {
+      "type": "string",
+      "description": "Human-readable summary of the event"
+    }
+  }
+}

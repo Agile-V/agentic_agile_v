@@ -1,0 +1,340 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "PCB Evidence Bundle",
+  "description": "Evidence bundle for PCB development tasks. Extends base evidence bundle with PCB-specific artifacts.",
+  "type": "object",
+  "required": [
+    "version",
+    "task_id",
+    "candidate_id",
+    "risk_level",
+    "pcb_stage",
+    "artifacts",
+    "validation",
+    "manufacturing_approval"
+  ],
+  "properties": {
+    "version": {
+      "type": "string",
+      "enum": ["1.0"],
+      "description": "Schema version"
+    },
+    "task_id": {
+      "type": "string",
+      "description": "Task ID from task brief"
+    },
+    "candidate_id": {
+      "type": "string",
+      "description": "Candidate ID (e.g., candidate_001)"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4"],
+      "description": "PCB risk level"
+    },
+    "pcb_stage": {
+      "type": "string",
+      "enum": ["concept", "schematic", "layout", "manufacturing", "assembly", "validation"],
+      "description": "Current PCB development stage"
+    },
+    "artifacts": {
+      "type": "object",
+      "description": "PCB-specific artifacts",
+      "properties": {
+        "circuit_ir": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to circuit IR JSON file"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$",
+              "description": "SHA-256 hash of circuit IR file"
+            },
+            "component_count": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "net_count": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "kicad_schematic": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to .kicad_sch file"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "kicad_pcb": {
+          "type": "object",
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to .kicad_pcb file"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "layer_count": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 32
+            },
+            "board_area_mm2": {
+              "type": "number",
+              "minimum": 0
+            }
+          }
+        },
+        "bom": {
+          "type": "object",
+          "required": ["path", "sha256"],
+          "properties": {
+            "path": {
+              "type": "string",
+              "description": "Path to BOM CSV/JSON file"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            },
+            "total_components": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "unique_parts": {
+              "type": "integer",
+              "minimum": 0
+            }
+          }
+        },
+        "gerbers": {
+          "type": "object",
+          "properties": {
+            "archive_path": {
+              "type": "string",
+              "description": "Path to gerber ZIP archive"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        },
+        "datasheet_bundle": {
+          "type": "object",
+          "properties": {
+            "archive_path": {
+              "type": "string",
+              "description": "Path to ZIP of all datasheets"
+            },
+            "sha256": {
+              "type": "string",
+              "pattern": "^[a-f0-9]{64}$"
+            }
+          }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "description": "Validation results",
+      "required": ["semantic_validation"],
+      "properties": {
+        "semantic_validation": {
+          "type": "object",
+          "required": ["passed", "report_path"],
+          "properties": {
+            "passed": {
+              "type": "boolean"
+            },
+            "report_path": {
+              "type": "string"
+            },
+            "validator_results": {
+              "type": "object",
+              "additionalProperties": {
+                "type": "object",
+                "properties": {
+                  "passed": {"type": "boolean"},
+                  "errors": {"type": "array", "items": {"type": "string"}},
+                  "warnings": {"type": "array", "items": {"type": "string"}}
+                }
+              }
+            }
+          }
+        },
+        "erc": {
+          "type": "object",
+          "properties": {
+            "passed": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "report_path": {
+              "type": "string"
+            }
+          }
+        },
+        "drc": {
+          "type": "object",
+          "properties": {
+            "passed": {
+              "type": "boolean"
+            },
+            "errors": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "warnings": {
+              "type": "integer",
+              "minimum": 0
+            },
+            "report_path": {
+              "type": "string"
+            }
+          }
+        },
+        "power_analysis": {
+          "type": "object",
+          "properties": {
+            "total_power_w": {
+              "type": "number",
+              "minimum": 0
+            },
+            "peak_current_a": {
+              "type": "number",
+              "minimum": 0
+            },
+            "thermal_concerns": {
+              "type": "array",
+              "items": {"type": "string"}
+            }
+          }
+        }
+      }
+    },
+    "manufacturing_approval": {
+      "type": "object",
+      "required": ["required", "status"],
+      "description": "Manufacturing approval status (BLOCKING GATE for L3-L4)",
+      "properties": {
+        "required": {
+          "type": "boolean",
+          "description": "True for L3-L4 designs"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["not_required", "pending", "approved", "rejected"],
+          "description": "Approval status"
+        },
+        "approved_by": {
+          "type": "string",
+          "description": "Name/email of approving EE"
+        },
+        "approved_date": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "approval_notes": {
+          "type": "string"
+        },
+        "rejection_reason": {
+          "type": "string"
+        }
+      }
+    },
+    "compliance": {
+      "type": "object",
+      "description": "Regulatory compliance",
+      "properties": {
+        "certifications_required": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["CE", "FCC", "UL", "RoHS", "REACH", "Medical", "Automotive", "None"]
+          }
+        },
+        "safety_critical": {
+          "type": "boolean"
+        },
+        "emc_considerations": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "test_plan": {
+      "type": "object",
+      "description": "Testing and validation plan",
+      "properties": {
+        "functional_tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "description": {"type": "string"},
+              "pass_criteria": {"type": "string"}
+            }
+          }
+        },
+        "environmental_tests": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {"type": "string"},
+              "temperature_range": {"type": "string"},
+              "duration": {"type": "string"}
+            }
+          }
+        },
+        "bring_up_checklist": {
+          "type": "array",
+          "items": {"type": "string"}
+        }
+      }
+    },
+    "metadata": {
+      "type": "object",
+      "properties": {
+        "created": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updated": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "generated_by": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        }
+      }
+    }
+  }
+}

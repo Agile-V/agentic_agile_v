@@ -1,0 +1,260 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/evidence-bundle.schema.json",
+  "title": "Agentic Agile-V Evidence Bundle v2",
+  "description": "Auditable evidence bundle for AI-assisted engineering work",
+  "type": "object",
+  "required": [
+    "schema_version",
+    "task_id",
+    "risk_level",
+    "requirements",
+    "changed_files",
+    "test_runs",
+    "gate_results"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "2.0.0",
+      "description": "Schema version"
+    },
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-[0-9]{4}$",
+      "description": "Associated task ID"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4"],
+      "description": "Risk classification"
+    },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^REQ-[0-9]{4}$"
+      },
+      "minItems": 1,
+      "description": "Requirement IDs addressed"
+    },
+    "changed_files": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["path", "sha256", "change_type"],
+        "properties": {
+          "path": {
+            "type": "string",
+            "description": "File path relative to repository root"
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "description": "SHA-256 hash of the file"
+          },
+          "requirement_ids": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^REQ-[0-9]{4}$"
+            },
+            "description": "Requirements addressed by this file"
+          },
+          "change_type": {
+            "type": "string",
+            "enum": ["add", "modify", "delete"],
+            "description": "Type of change"
+          }
+        }
+      },
+      "description": "Files changed with hashes"
+    },
+    "test_runs": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "command", "exit_code", "status"],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^TRUN-[0-9]{3}$",
+            "description": "Test run identifier"
+          },
+          "command": {
+            "type": "string",
+            "description": "Command used to run the test"
+          },
+          "exit_code": {
+            "type": "integer",
+            "description": "Process exit code"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "failed", "skipped", "not_run"],
+            "description": "Test run status"
+          },
+          "started_at": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Test start timestamp"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "minimum": 0,
+            "description": "Test duration in seconds"
+          },
+          "artifact": {
+            "type": "string",
+            "description": "Path to test output artifact"
+          },
+          "artifact_sha256": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$",
+            "description": "Hash of test output artifact"
+          }
+        }
+      },
+      "description": "Test execution records"
+    },
+    "gate_results": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["gate", "status"],
+        "properties": {
+          "gate": {
+            "type": "string",
+            "description": "Gate name"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["pass", "fail", "waived"],
+            "description": "Gate result"
+          },
+          "tool_version": {
+            "type": "string",
+            "description": "Version of tool that ran the gate"
+          },
+          "details": {
+            "type": "string",
+            "description": "Additional gate details"
+          },
+          "waiver": {
+            "type": "object",
+            "properties": {
+              "waiver_id": {
+                "type": "string"
+              },
+              "approver": {
+                "type": "string"
+              },
+              "reason": {
+                "type": "string"
+              },
+              "expires_at": {
+                "type": "string",
+                "format": "date-time"
+              }
+            }
+          }
+        }
+      },
+      "description": "Quality gate results"
+    },
+    "reviewer_gate": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "reviewer": {
+          "type": "string"
+        },
+        "approval_ref": {
+          "type": "string"
+        },
+        "reviewed_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Human review gate"
+    },
+    "static_analysis": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["tool", "status"],
+        "properties": {
+          "tool": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string",
+            "enum": ["passed", "failed", "skipped"]
+          },
+          "path": {
+            "type": "string"
+          },
+          "hash": {
+            "type": "string",
+            "pattern": "^sha256:[a-f0-9]{64}$"
+          }
+        }
+      },
+      "description": "Static analysis results"
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["self-check", "peer-check", "independent", "red-team", "human-review"]
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "passed", "failed"]
+        },
+        "verifier": {
+          "type": "string"
+        },
+        "path": {
+          "type": "string"
+        }
+      },
+      "description": "Independent verification record"
+    },
+    "approval": {
+      "type": "object",
+      "properties": {
+        "required": {
+          "type": "boolean"
+        },
+        "status": {
+          "type": "string",
+          "enum": ["pending", "approved", "rejected"]
+        },
+        "approver": {
+          "type": "string"
+        },
+        "approved_at": {
+          "type": "string",
+          "format": "date-time"
+        }
+      },
+      "description": "Final approval record"
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string"
+    }
+  }
+}

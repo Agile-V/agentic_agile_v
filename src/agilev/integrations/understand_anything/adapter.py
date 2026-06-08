@@ -16,14 +16,14 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from ...graph.model import SystemGraph
-from .detector import find_understand_graph, find_understand_diff
-from .errors import GraphLoadError, GraphHashError, GraphNotFoundError
+from .detector import find_understand_diff, find_understand_graph
+from .errors import GraphHashError, GraphLoadError
 from .hashing import sha256_file
-from .loader import load_graph_json, detect_nodes, detect_edges
+from .loader import detect_edges, detect_nodes, load_graph_json
 from .normalizer import normalize_graph
 
 logger = logging.getLogger(__name__)
@@ -164,7 +164,7 @@ class UnderstandAnythingAdapter:
             source="understand-anything",
             source_graph_path=str(graph_path),
             source_graph_hash=graph_hash,
-            generated_at=datetime.now(tz=timezone.utc).isoformat(),
+            generated_at=datetime.now(tz=UTC).isoformat(),
             nodes=nodes,
             edges=edges,
             metadata={

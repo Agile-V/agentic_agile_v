@@ -15,7 +15,7 @@ from __future__ import annotations
 import logging
 from typing import Any
 
-from ...graph.model import SystemNode, SystemEdge
+from ...graph.model import SystemEdge, SystemNode
 
 logger = logging.getLogger(__name__)
 
