@@ -26,6 +26,14 @@
         {
           "command": ".openhands/hooks/validate_scope.sh",
           "timeout": 20
+        },
+        {
+          "command": ".openhands/hooks/validate_firmware_scope.sh",
+          "timeout": 20
+        },
+        {
+          "command": ".openhands/hooks/enforce_hardware_firmware_contract.sh",
+          "timeout": 30
         }
       ]
     },
@@ -48,6 +56,11 @@
           "command": ".openhands/hooks/log_tool_usage.sh",
           "timeout": 10,
           "async": true
+        },
+        {
+          "command": ".openhands/hooks/collect_firmware_evidence.sh",
+          "timeout": 30,
+          "async": true
         }
       ]
     }
@@ -68,6 +81,10 @@
     {
       "matcher": "*",
       "hooks": [
+        {
+          "command": ".openhands/hooks/require_firmware_tests.sh",
+          "timeout": 30
+        },
         {
           "command": ".openhands/hooks/validate_evidence_on_stop.sh",
           "timeout": 180
