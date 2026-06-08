@@ -10,19 +10,15 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
 from agilev.graph.model import (
     AffectedComponent,
     GraphTraceabilityLink,
     ImpactMap,
-    ImpactRisk,
     SystemEdge,
     SystemGraph,
     SystemNode,
 )
-from agilev.graph.traceability import build_traceability, TraceabilityResult
-
+from agilev.graph.traceability import TraceabilityResult, build_traceability
 
 # ---------------------------------------------------------------------------
 # Fixtures

@@ -10,17 +10,13 @@ Tests cover:
 
 from __future__ import annotations
 
-import pytest
-
 from agilev.integrations.understand_anything.normalizer import (
-    normalize_node,
+    _EDGE_TYPE_MAP,
+    _NODE_TYPE_MAP,
     normalize_edge,
     normalize_graph,
-    _NODE_TYPE_MAP,
-    _EDGE_TYPE_MAP,
+    normalize_node,
 )
-from agilev.graph.model import SystemNode, SystemEdge
-
 
 # ---------------------------------------------------------------------------
 # normalize_node
