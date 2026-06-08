@@ -999,9 +999,7 @@ def cmd_openhands_session_show(args: argparse.Namespace) -> int:
         if metadata.completed_at:
             print(f"  Completed: {metadata.completed_at}")
             if metadata.started_at:
-                duration = (
-                    metadata.completed_at - metadata.started_at
-                ).total_seconds()
+                duration = (metadata.completed_at - metadata.started_at).total_seconds()
                 print(f"  Duration: {duration:.1f}s")
 
         print("\nMetrics:")
