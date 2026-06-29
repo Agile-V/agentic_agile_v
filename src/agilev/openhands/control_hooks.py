@@ -2,22 +2,40 @@
 
 Provides tool-class classification and control-event logging used by shell hooks
 and the CLI enforcement commands.
+
+Tool classification uses a two-pass lookup:
+1. Try the full (normalised) tool name string.
+2. Try the first word of the tool name.
+
+This ensures that compound tool names like ``"git diff"`` and ``"git status"``
+map to distinct tool classes (``git_diff`` and ``git_status``) while still
+supporting simple names like ``"git"`` via the first-word fallback.
+
+The Python ``_TOOL_CLASS_MAP`` is the authoritative in-process registry.
+``config/policies/control_matrix_policy.yaml`` documents the same mapping for
+human operators; both must be kept in sync.  A CI step in
+``.github/workflows/control-matrix.yml`` diffs them on each push.
 """
 
 from __future__ import annotations
 
 import json
+import logging
+import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 import yaml
 
+logger = logging.getLogger(__name__)
+
 # ---------------------------------------------------------------------------
 # Tool classification
 # ---------------------------------------------------------------------------
 
-#: Mapping from OpenHands concrete tool names to control matrix tool classes.
+#: Mapping from OpenHands concrete tool names/prefixes to control matrix tool classes.
+#: Multi-word names (e.g. "git diff") take priority over single-word prefixes.
 _TOOL_CLASS_MAP: dict[str, str] = {
     # shell / terminal
     "terminal": "shell_exec",
@@ -33,16 +51,29 @@ _TOOL_CLASS_MAP: dict[str, str] = {
     "find": "list_files",
     "glob": "list_files",
     "grep": "read_file",
+    "sed": "read_file",
+    "awk": "read_file",
     # filesystem write
     "write_file": "write_file",
     "write": "write_file",
     "edit": "write_file",
     "patch": "write_file",
     "create_file": "write_file",
-    # git
+    # git — compound names first for precise matching
+    "git diff": "git_diff",
+    "git status": "git_status",
+    "git log": "git_status",
+    "git show": "git_diff",
+    "git add": "git_write",
+    "git commit": "git_write",
+    "git push": "git_write",
+    "git merge": "git_write",
+    "git rebase": "git_write",
+    "git checkout": "git_write",
+    "git branch": "git_status",
+    "git": "git_diff",  # single-word fallback
     "git_diff": "git_diff",
     "git_status": "git_status",
-    "git": "git_diff",
     # network
     "curl": "network_egress",
     "wget": "network_egress",
@@ -75,18 +106,29 @@ _TOOL_CLASS_MAP: dict[str, str] = {
     # production / destructive
     "deploy": "deploy_production",
     "kubectl": "deploy_production",
+    "kubectl apply": "deploy_production",
+    "kubectl delete": "deploy_production",
     "helm": "deploy_production",
+    "helm upgrade": "deploy_production",
+    "helm install": "deploy_production",
 }
 
 
 def classify_tool(tool_name: str) -> str:
     """Return the control matrix tool class for *tool_name*.
 
-    Falls back to the literal tool name when no mapping is found.
+    Performs a two-pass lookup:
+    1. Full normalised name (e.g. ``"git diff"`` → ``"git_diff"``).
+    2. First word of the normalised name (e.g. ``"git"`` → ``"git_diff"``).
+
+    Falls back to the original *tool_name* when no mapping is found.
     Unknown tool classes will be denied unless the matrix explicitly allows them.
     """
-    lower = tool_name.lower().split()[0]  # first word only
-    return _TOOL_CLASS_MAP.get(lower, tool_name)
+    normalised = tool_name.lower().strip()
+    if normalised in _TOOL_CLASS_MAP:
+        return _TOOL_CLASS_MAP[normalised]
+    first_word = normalised.split()[0] if normalised else normalised
+    return _TOOL_CLASS_MAP.get(first_word, tool_name)
 
 
 # ---------------------------------------------------------------------------
@@ -106,8 +148,9 @@ def append_control_event(
     """Append a JSONL control event to *log_path*.
 
     Creates parent directories and the file if they do not exist.
+    Write failures are logged to stderr but never propagated — logging must
+    not block enforcement.
     """
-    log_path.parent.mkdir(parents=True, exist_ok=True)
     entry: dict[str, Any] = {
         "timestamp": datetime.now(UTC).isoformat(),
         "task_id": task_id,
@@ -118,8 +161,15 @@ def append_control_event(
     }
     if extra:
         entry.update(extra)
-    with log_path.open("a", encoding="utf-8") as fh:
-        fh.write(json.dumps(entry) + "\n")
+    try:
+        log_path.parent.mkdir(parents=True, exist_ok=True)
+        with log_path.open("a", encoding="utf-8") as fh:
+            fh.write(json.dumps(entry) + "\n")
+    except OSError as exc:
+        print(
+            f"WARNING: control matrix log write failed ({log_path}): {exc}",
+            file=sys.stderr,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -130,15 +180,20 @@ def append_control_event(
 def has_approval(approvals_file: Path, task_id: str, gate: str) -> bool:
     """Return ``True`` when a durable approval row exists for *task_id* and *gate*.
 
-    Looks for lines in *approvals_file* that contain both *task_id* and *gate*.
+    Looks for lines in *approvals_file* that contain both *task_id* and *gate*
+    and the **whole word** ``approved`` (so ``not_approved`` does not match).
+
     This is a lightweight heuristic check; the full audit relies on the pipe-
     delimited APPROVALS.md format.
     """
+    import re
+
     if not approvals_file.exists():
         return False
     content = approvals_file.read_text(encoding="utf-8")
+    approved_pattern = re.compile(r"\bapproved\b", re.IGNORECASE)
     for line in content.splitlines():
-        if task_id in line and gate in line and "approved" in line.lower():
+        if task_id in line and gate in line and approved_pattern.search(line):
             return True
     return False
 

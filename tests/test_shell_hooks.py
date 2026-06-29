@@ -14,6 +14,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+import yaml
 
 FIXTURES = Path(__file__).parent / "fixtures"
 HOOKS_DIR = Path(__file__).parent.parent / ".openhands" / "hooks"
