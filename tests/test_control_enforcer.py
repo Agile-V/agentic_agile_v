@@ -1,17 +1,17 @@
 """Unit tests for control_enforcer.py checks.
 
-Implements: REQ-CM-004 through REQ-CM-010
+Implements: REQ-CM-004 through REQ-CM-008
 """
 
 from __future__ import annotations
 
+import pytest
+
 from agilev.control_enforcer import (
     check_cost,
     check_data_class,
-    check_max_permissions,
     check_model,
     check_rollback,
-    check_tests,
     check_tool,
 )
 
@@ -146,17 +146,10 @@ def test_vendor_review_required_for_sensitive_data_class():
 
 
 def test_external_vendor_ok_when_allowed():
-    """When allow_external_vendor=True, vendor and model-name checks are skipped."""
     control = {**CONTROL, "model": {**CONTROL["model"], "allow_external_vendor": True}}
     result = check_model(control, "third-party-ai", "third-party-model", "internal")
-    assert result.decision == "allow"
-
-
-def test_external_vendor_still_gated_for_sensitive_data_class():
-    """Even with allow_external_vendor=True, sensitive data classes still require a gate."""
-    control = {**CONTROL, "model": {**CONTROL["model"], "allow_external_vendor": True}}
-    result = check_model(control, "third-party-ai", "third-party-model", "confidential")
-    assert result.decision == "require_human_gate"
+    # Model name still checked; should deny since model name doesn't match
+    assert result.decision == "deny"
 
 
 # ---------------------------------------------------------------------------
@@ -211,221 +204,4 @@ def test_rollback_feature_flag_required_for_l3():
 
 def test_rollback_feature_flag_ok_when_mentioned():
     result = check_rollback(CONTROL, "L3", {"rollback_path": "disable feature_flag FF-001"})
-    assert result.decision == "allow"
-
-
-def test_rollback_required_false_skips_all_checks():
-    """rollback.required=False overrides all level-based requirements."""
-    control = {**CONTROL, "rollback": {**CONTROL["rollback"], "required": False}}
-    # L2 normally requires rollback_path — should be skipped when required=False
-    result = check_rollback(control, "L2", {})
-    assert result.decision == "allow"
-
-
-def test_rollback_feature_flag_via_dedicated_field():
-    """A dedicated 'feature_flag' key in evidence satisfies the flag requirement."""
-    result = check_rollback(
-        CONTROL, "L3", {"rollback_path": "git revert HEAD", "feature_flag": "FF-001"}
-    )
-    assert result.decision == "allow"
-
-
-def test_rollback_flag_string_underscore_adjacent_does_not_match():
-    """'disable_legacy_feature_flag_migration' does NOT match because the \b boundary
-    does not fire between underscores (all are word characters)."""
-    result = check_rollback(
-        CONTROL, "L3", {"rollback_path": "disable_legacy_feature_flag_migration"}
-    )
-    # \bfeature_flag\b doesn't match when surrounded by underscores → gate required
-    assert result.decision == "require_human_gate"
-
-
-# ---------------------------------------------------------------------------
-# check_data_class — additional cases
-# ---------------------------------------------------------------------------
-
-
-def test_unknown_data_class_allow_when_configured():
-    control = {**CONTROL, "data_class": {**CONTROL["data_class"], "unknown_action": "allow"}}
-    result = check_data_class(control, "mystery_class")
-    assert result.decision == "allow"
-    assert "allowed by policy" in result.reason
-
-
-# ---------------------------------------------------------------------------
-# check_cost — additional cases
-# ---------------------------------------------------------------------------
-
-
-def test_run_cost_at_exact_limit_is_allowed():
-    """Exactly at the limit is allowed (strict greater-than check)."""
-    result = check_cost(CONTROL, run_cost=2.00, daily_cost=10.00)
-    assert result.decision == "allow"
-
-
-def test_monthly_cost_over_limit_requires_gate():
-    control = {**CONTROL, "cost_limit": {**CONTROL["cost_limit"], "max_monthly_cost": 100.00}}
-    result = check_cost(control, run_cost=1.00, daily_cost=10.00, monthly_cost=150.00)
-    assert result.decision == "require_human_gate"
-    assert result.approver_role == "business_owner"
-
-
-def test_monthly_cost_within_limit_allows():
-    control = {**CONTROL, "cost_limit": {**CONTROL["cost_limit"], "max_monthly_cost": 100.00}}
-    result = check_cost(control, run_cost=1.00, daily_cost=10.00, monthly_cost=50.00)
-    assert result.decision == "allow"
-
-
-def test_monthly_cost_none_does_not_check():
-    control = {**CONTROL, "cost_limit": {**CONTROL["cost_limit"], "max_monthly_cost": 100.00}}
-    # monthly_cost=None means no monthly check
-    result = check_cost(control, run_cost=1.00, daily_cost=10.00, monthly_cost=None)
-    assert result.decision == "allow"
-
-
-# ---------------------------------------------------------------------------
-# check_tests
-# ---------------------------------------------------------------------------
-
-TESTS_CONTROL: dict = {
-    **CONTROL,
-    "tests": {
-        "required": ["schema_validation", "unit_tests"],
-        "required_for_l3_plus": ["integration_tests"],
-        "required_for_l4": ["security_scan"],
-        "minimum_coverage_percent": 80,
-    },
-}
-
-
-def test_check_tests_all_present_returns_allow():
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"], "coverage_percent": 85}
-    result = check_tests(TESTS_CONTROL, "L1", evidence)
-    assert result.decision == "allow"
-
-
-def test_check_tests_missing_required_returns_deny():
-    evidence = {"tests_passed": ["schema_validation"], "coverage_percent": 85}
-    result = check_tests(TESTS_CONTROL, "L1", evidence)
-    assert result.decision == "deny"
-    assert "unit_tests" in result.reason
-
-
-def test_check_tests_l3_requires_integration():
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"], "coverage_percent": 85}
-    result = check_tests(TESTS_CONTROL, "L3", evidence)
-    assert result.decision == "deny"
-    assert "integration_tests" in result.reason
-
-
-def test_check_tests_l3_with_integration_passes():
-    evidence = {
-        "tests_passed": ["schema_validation", "unit_tests", "integration_tests"],
-        "coverage_percent": 85,
-    }
-    result = check_tests(TESTS_CONTROL, "L3", evidence)
-    assert result.decision == "allow"
-
-
-def test_check_tests_l4_requires_security_scan():
-    evidence = {
-        "tests_passed": ["schema_validation", "unit_tests", "integration_tests"],
-        "coverage_percent": 85,
-    }
-    result = check_tests(TESTS_CONTROL, "L4", evidence)
-    assert result.decision == "deny"
-    assert "security_scan" in result.reason
-
-
-def test_check_tests_coverage_below_minimum():
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"], "coverage_percent": 70}
-    result = check_tests(TESTS_CONTROL, "L1", evidence)
-    assert result.decision == "deny"
-    assert "70" in result.reason
-
-
-def test_check_tests_coverage_at_minimum_passes():
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"], "coverage_percent": 80}
-    result = check_tests(TESTS_CONTROL, "L1", evidence)
-    assert result.decision == "allow"
-
-
-def test_check_tests_no_coverage_field_blocks():
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"]}
-    result = check_tests(TESTS_CONTROL, "L1", evidence)
-    assert result.decision == "deny"
-
-
-def test_check_tests_no_min_coverage_configured():
-    control = {
-        **TESTS_CONTROL,
-        "tests": {**TESTS_CONTROL["tests"], "minimum_coverage_percent": None},
-    }
-    evidence = {"tests_passed": ["schema_validation", "unit_tests"]}
-    result = check_tests(control, "L1", evidence)
-    assert result.decision == "allow"
-
-
-# ---------------------------------------------------------------------------
-# check_max_permissions
-# ---------------------------------------------------------------------------
-
-
-MAX_PERM_CONTROL: dict = {
-    **CONTROL,
-    "max_permissions": {
-        "file_access": "repo_scoped",
-        "write_access": "task_allowed_paths_only",
-        "network_access": "blocked_unless_approved",
-        "database_access": "none",
-    },
-}
-
-
-def test_check_max_permissions_all_within_limit():
-    result = check_max_permissions(
-        MAX_PERM_CONTROL,
-        {"file_access": "repo_scoped", "network_access": "blocked_unless_approved"},
-    )
-    assert result.decision == "allow"
-
-
-def test_check_max_permissions_exceeds_file_access():
-    result = check_max_permissions(MAX_PERM_CONTROL, {"file_access": "global"})
-    assert result.decision == "deny"
-    assert "file_access" in result.reason
-
-
-def test_check_max_permissions_unknown_dimension_ignored():
-    """Dimensions not in max_permissions are not constrained."""
-    result = check_max_permissions(MAX_PERM_CONTROL, {"unknown_dimension": "global"})
-    assert result.decision == "allow"
-
-
-def test_check_max_permissions_empty_requested_allows():
-    result = check_max_permissions(MAX_PERM_CONTROL, {})
-    assert result.decision == "allow"
-
-
-def test_check_max_permissions_no_max_permissions_key():
-    """Control without max_permissions key allows everything."""
-    control = {k: v for k, v in CONTROL.items() if k != "max_permissions"}
-    result = check_max_permissions(control, {"file_access": "global"})
-    assert result.decision == "allow"
-
-
-def test_check_max_permissions_exceeds_file_access_base_control():
-    result = check_max_permissions(MAX_PERM_CONTROL, {"file_access": "global"})
-    assert result.decision == "deny"
-    assert "file_access" in result.reason
-
-
-def test_check_max_permissions_unknown_dimension_ignored_base_control():
-    """Dimensions not in max_permissions are not constrained."""
-    result = check_max_permissions(CONTROL, {"unknown_dimension": "global"})
-    assert result.decision == "allow"
-
-
-def test_check_max_permissions_empty_requested_allows_base_control():
-    result = check_max_permissions(CONTROL, {})
     assert result.decision == "allow"

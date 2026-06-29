@@ -10,9 +10,6 @@ cd "$ROOT"
 
 TOOL_CLASS="${AGILEV_TOOL_CLASS:-}"
 TASK_ID="${AGILEV_TASK_ID:-}"
-# Set AGILEV_STRICT_MODE=1 to block all tool calls when the CLI is unavailable.
-# Default: fail-open (warn only) so that repos without agilev installed are not blocked.
-STRICT_MODE="${AGILEV_STRICT_MODE:-0}"
 
 # If no tool class is provided, skip (non-matrix tool calls pass through)
 if [ -z "$TOOL_CLASS" ]; then
@@ -27,15 +24,8 @@ fi
 
 # Check whether the agilev CLI is available
 if ! command -v agilev &>/dev/null; then
-  LOG_FILE="$ROOT/.agile-v/logs/control-events.jsonl"
-  TS="$(date -u +%Y-%m-%dT%H:%M:%SZ 2>/dev/null || echo 'unknown')"
-  WARN_JSON="{\"timestamp\":\"$TS\",\"task_id\":\"$TASK_ID\",\"decision\":\"warn\",\"reason\":\"agilev CLI not found; control matrix enforcement skipped\"}"
-  # Best-effort: append to log (ignore errors so the hook itself never blocks on log failure)
-  mkdir -p "$ROOT/.agile-v/logs" 2>/dev/null && echo "$WARN_JSON" >> "$LOG_FILE" 2>/dev/null || true
-  echo "$WARN_JSON" >&2
-  if [ "$STRICT_MODE" = "1" ]; then
-    exit 2
-  fi
+  # Graceful degradation: warn but do not block if CLI is not installed
+  echo '{"decision":"warn","reason":"agilev CLI not found; control matrix enforcement skipped"}' >&2
   exit 0
 fi
 

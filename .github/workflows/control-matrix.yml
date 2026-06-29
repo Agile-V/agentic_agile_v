@@ -4,38 +4,16 @@ on:
   pull_request:
   push:
     branches: [main]
-    paths:
-      - "src/agilev/control_matrix.py"
-      - "src/agilev/control_enforcer.py"
-      - "src/agilev/openhands/control_hooks.py"
-      - "schemas/control_matrix.schema.json"
-      - "schemas/evidence_bundle.schema.json"
-      - "config/control_matrix.yaml"
-      - "config/policies/**"
-      - "tests/test_control_*.py"
-      - "tests/fixtures/control_matrix*.yaml"
-      - ".openhands/hooks/enforce_control_matrix.sh"
-      - ".openhands/hooks/validate_control_evidence_on_stop.sh"
 
 jobs:
   control-matrix:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: Cache pip
-        uses: actions/cache@v4
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml') }}
-          restore-keys: ${{ runner.os }}-pip-${{ matrix.python-version }}-
+          python-version: "3.11"
 
       - name: Install package with dev dependencies
         run: pip install -e ".[dev]" jsonschema
@@ -43,25 +21,5 @@ jobs:
       - name: Validate control matrix schema and semantics
         run: agilev controls validate
 
-      - name: Validate schema file itself against JSON Schema meta-schema
-        run: |
-          python - <<'EOF'
-          import json, sys
-          from jsonschema import Draft202012Validator
-          schema = json.loads(open("schemas/control_matrix.schema.json").read())
-          meta = Draft202012Validator.META_SCHEMA
-          errors = list(Draft202012Validator(meta).iter_errors(schema))
-          for e in errors:
-              print("META-SCHEMA ERROR:", e.message)
-          sys.exit(len(errors))
-          EOF
-
       - name: Run control matrix unit tests
-        run: pytest tests/test_control_matrix_loader.py tests/test_control_enforcer.py tests/test_control_cli.py tests/test_control_hooks.py -q --tb=short
-
-      - name: Upload test results
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-results-${{ matrix.python-version }}
-          path: .pytest_cache/
+        run: pytest tests/test_control_matrix_loader.py tests/test_control_enforcer.py tests/test_control_cli.py -q

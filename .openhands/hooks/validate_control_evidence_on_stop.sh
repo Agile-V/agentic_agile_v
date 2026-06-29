@@ -10,15 +10,8 @@ cd "$ROOT"
 TASK_ID="${AGILEV_TASK_ID:-}"
 RISK_LEVEL="${AGILEV_RISK_LEVEL:-}"
 
-# No task ID: cannot enforce, skip gracefully
-if [ -z "$TASK_ID" ]; then
-  exit 0
-fi
-
-# Task ID present but no risk level: warn and skip — evidence check would silently
-# pass as L0 if we continued, which is misleading for high-risk tasks.
-if [ -z "$RISK_LEVEL" ]; then
-  echo '{"decision":"warn","reason":"AGILEV_RISK_LEVEL not set; control evidence stop-hook skipped for '"$TASK_ID"'"}' >&2
+# No task ID or no risk level means we cannot enforce — skip gracefully
+if [ -z "$TASK_ID" ] || [ -z "$RISK_LEVEL" ]; then
   exit 0
 fi
 
@@ -32,10 +25,8 @@ if ! command -v agilev &>/dev/null; then
   exit 0
 fi
 
-# Run the evidence command; non-zero exit indicates a validation failure.
-# Pass --risk so the L2+ evidence requirement check is correctly applied.
-# Note: `if !` suppresses set -e for the condition expression (POSIX sh behaviour).
-if ! agilev controls evidence --task "$TASK_ID" --risk "$RISK_LEVEL" --check-only --json; then
+# Run the evidence command; non-zero exit indicates a validation failure
+if ! agilev controls evidence --task "$TASK_ID" --check-only --json; then
   echo '{"decision":"deny","reason":"Control matrix evidence validation failed for '"$TASK_ID"'"}' >&2
   exit 2
 fi

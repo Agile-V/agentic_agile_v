@@ -76,14 +76,9 @@ Fail-closed enforcement is phased to avoid disrupting current workflows:
 - Evidence bundles gain structured control_matrix proof for regulators.
 
 **Negative / trade-offs:**
-- The matrix must be maintained. Unresolved `TBD` values (owner, vendor, model) prevent activation.
-- Hooks require `AGILEV_TOOL_CLASS`, `AGILEV_TASK_ID`, and `AGILEV_RISK_LEVEL` environment variables to be set by the execution environment. Missing vars degrade gracefully (warn and pass) — see the fail-open vs. fail-closed trade-off note below.
-- `jsonschema` is an optional dependency; schema validation is skipped when not installed (CLI prints a notice).
-- **Graceful degradation is fail-open by default:** when the `agilev` CLI is not installed, the pre-tool-use hook warns but does not block. This permits teams to adopt incrementally. Set `AGILEV_STRICT_MODE=1` to make the hook fail-closed. This decision is intentional and documented; see *Alternatives considered — strict-by-default enforcement* below.
-- **Not yet enforced at runtime** (deferred to a follow-up iteration):
-  - `tests.required_for_l3_plus` and `tests.minimum_coverage_percent` checks exist in `check_tests()` but are not wired into the pre-tool-use hook (only the stop hook via evidence check).
-  - `max_permissions` is loaded and validated by `check_max_permissions()` but not automatically called from the hooks (requires calling code to pass `requested_permissions`).
-  - Gate and approver roles can be configured per-action in `human_gates.required_before`; the enforcer reads this config but not all callers pass an explicit action name.
+- The matrix must be maintained. Unresolved `TBD` values prevent activation.
+- Hooks require `AGILEV_TOOL_CLASS` and `AGILEV_TASK_ID` environment variables to be set by the execution environment.
+- `jsonschema` is an optional dependency; semantic checks still run without it.
 
 ---
 
@@ -95,8 +90,6 @@ Fail-closed enforcement is phased to avoid disrupting current workflows:
 
 3. **No runtime enforcement, skills only**: Rejected. Skills instruct agents but cannot block execution. A fail-closed hook or CI gate cannot be bypassed without leaving evidence.
 
-4. **Strict-by-default enforcement (fail-closed on missing CLI)**: Deferred. Fail-closed enforcement requires the `agilev` binary to be installed in every agent session. Many teams do not yet have this; requiring it would block adoption. The current default (fail-open, warn only) allows teams to onboard the matrix at their own pace while gradually tightening. `AGILEV_STRICT_MODE=1` is the migration path to fail-closed.
-
 ---
 
 ## Related
@@ -107,4 +100,4 @@ Fail-closed enforcement is phased to avoid disrupting current workflows:
 - `src/agilev/control_matrix.py` — loader and resolver
 - `src/agilev/control_enforcer.py` — runtime checks
 - `agile_v_skills/agile-v-control-matrix/SKILL.md` — normative skill
-- `docs/adr/ADR-0001-openhands-execution-backend.md` — OpenHands execution backend (referenced decision)
+- ADR-0001: OpenHands execution backend

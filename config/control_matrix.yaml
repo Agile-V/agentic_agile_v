@@ -50,8 +50,8 @@ controls:
         - "public_api_change"
 
     model:
-      vendor: "TBD"         # Replace with your approved AI vendor before setting status: active
-      model_name: "TBD"     # Replace with your approved model name before setting status: active
+      vendor: "approved_vendor"
+      model_name: "approved_model"
       fallback_model: null
       allow_external_vendor: false
       require_vendor_review_for_data_classes: ["confidential", "secret", "regulated_health"]

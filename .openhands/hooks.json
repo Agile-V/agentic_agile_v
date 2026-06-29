@@ -46,6 +46,16 @@
           "blocking": true
         }
       ]
+    },
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/enforce_control_matrix.sh",
+          "timeout": 10,
+          "blocking": true
+        }
+      ]
     }
   ],
   "post_tool_use": [
