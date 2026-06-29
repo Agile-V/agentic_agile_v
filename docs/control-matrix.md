@@ -14,29 +14,43 @@ The `config/control_matrix.yaml` ships in `draft` mode. Copy it to `.agile-v/CON
 ## Quick start
 
 ```bash
+# 1. Copy the default matrix and customise it
 mkdir -p .agile-v
 cp config/control_matrix.yaml .agile-v/CONTROL_MATRIX.yaml
-# Edit: owners, vendor/model, data class, tool rules, cost limits, rollback
-# Then: set status: active
+# Edit: replace all TBD owner fields, vendor, model_name; set status: active when ready
 
-# Validate
+# 2. Validate
 agilev controls validate
 
-# Explain selected control for a task
+# 3. Explain which control applies to a task
 agilev controls explain --task-type feature --risk L2 --mode builder --skill agile-v-builder
 
-# Check a tool call
-agilev controls check-tool --task AAV-0001 --tool shell_exec --json
+# 4. Check specific enforcement dimensions
+agilev controls check-tool       --task AAV-0001 --tool shell_exec --json
+agilev controls check-data-class --task AAV-0001 --data-class confidential --json
+agilev controls check-model      --task AAV-0001 --vendor my-vendor --model my-model --data-class internal
+agilev controls check-cost       --task AAV-0001 --run-cost 1.20 --daily-cost 4.50 --monthly-cost 120.00
+agilev controls check-rollback   --task AAV-0001 --risk L2 --rollback-path "git revert HEAD"
 
-# Check model/vendor
-agilev controls check-model --task AAV-0001 --vendor my-vendor --model my-model --data-class internal
-
-# Check cost
-agilev controls check-cost --task AAV-0001 --run-cost 1.20 --daily-cost 4.50
-
-# Check evidence bundle
+# 5. Check evidence bundle (stop hook equivalent)
 agilev controls evidence --task AAV-0001 --risk L2 --check-only
+
+# 6. Export evidence template for a task
+agilev controls evidence --task AAV-0001 --json
 ```
+
+> **Environment variables required by the OpenHands hooks:**
+>
+> - `AGILEV_TASK_ID` — set to the current task ID (e.g. `AAV-0001`) before running agentic sessions.
+> - `AGILEV_RISK_LEVEL` — set to the task risk level (`L0`–`L4`). Required for the stop hook to enforce L2+ evidence.
+> - `AGILEV_TOOL_CLASS` — set by the execution environment to the tool class being invoked (e.g. `shell_exec`).
+> - `AGILEV_STRICT_MODE` — set to `1` to block all tool calls when the `agilev` CLI is not installed (default: `0`, fail-open).
+>
+> Example:
+> ```bash
+> export AGILEV_TASK_ID=AAV-0001
+> export AGILEV_RISK_LEVEL=L2
+> ```
 
 ## Schema
 
@@ -62,13 +76,15 @@ The JSON schema is at `schemas/control_matrix.schema.json`. Validate using `agil
 
 ## Migration phases
 
-| Phase | Behavior |
-|---|---|
-| 1 (current) | Matrix in `draft` mode. CI validates syntax only. No blocking hooks. |
-| 2 | Enable warnings. Hooks log decisions. Deny decisions warn for low-risk. |
-| 3 | Fail closed for L3+. Gated/forbidden actions block high-risk tasks. |
-| 4 | Fail closed for all L2+. Evidence bundle must include control_matrix section. |
-| 5 | Fail closed globally. All non-trivial work requires matrix resolution. |
+| Phase | Behavior | How to advance |
+|---|---|---|
+| 1 (current) | Matrix in `draft` mode. CI validates syntax only. No blocking hooks. | Fill in all TBD fields, set `status: active`. |
+| 2 | Enable warnings. Hooks log decisions. Deny decisions warn for low-risk. | Set `AGILEV_STRICT_MODE=0`, deploy hooks, verify log output for a few tasks. |
+| 3 | Fail closed for L3+. Gated/forbidden actions block high-risk tasks. | Set `minimum_risk_level: L3` controls to active; verify L3 tasks are blocked on policy violations. |
+| 4 | Fail closed for all L2+. Evidence bundle must include `control_matrix` section. | Require evidence bundles; set `AGILEV_RISK_LEVEL` in all sessions. |
+| 5 | Fail closed globally. All non-trivial work requires matrix resolution. | Set `AGILEV_STRICT_MODE=1`; ensure all tasks export `AGILEV_TASK_ID`. |
+
+> **Note:** The two tool-classification registries (`_TOOL_CLASS_MAP` in `src/agilev/openhands/control_hooks.py` and `config/policies/control_matrix_policy.yaml`) must be kept in sync. When adding a new tool mapping, update both files.
 
 ## Evidence bundle
 
@@ -89,11 +105,25 @@ Hooks require `AGILEV_TOOL_CLASS` and `AGILEV_TASK_ID` environment variables to 
 
 The normative skill (`agile-v-control-matrix/SKILL.md`), template (`CONTROL_MATRIX.example.yaml`), and schema are published in the `Agile-V/agile_v_skills` repository. This runtime repo enforces the policy.
 
+## Troubleshooting
+
+| Symptom | Cause | Fix |
+|---|---|---|
+| `No control matrix found` | No YAML in `.agile-v/` or `config/` | Run `cp config/control_matrix.yaml .agile-v/CONTROL_MATRIX.yaml` |
+| `unresolved owner field` | `status: active` with TBD owner | Replace all TBD values in `owner` section before activating |
+| `unresolved model field` | `status: active` with TBD vendor/model | Replace `vendor` and `model_name` with real values |
+| `PASS (schema validation skipped…)` | `jsonschema` not installed | `pip install jsonschema` |
+| Stop hook does nothing for L2 tasks | `AGILEV_RISK_LEVEL` not set | `export AGILEV_RISK_LEVEL=L2` before starting the session |
+| All tool calls pass without checking | `agilev` CLI not in PATH, `AGILEV_STRICT_MODE` not set | Install agilev or set `AGILEV_STRICT_MODE=1` to fail-closed |
+| `No matching active control` | Task type or agent mode not in `applies_to` | Add `"*"` to `task_types` or `agent_modes`, or add the specific value |
+| Currency pattern error | `currency` is not a 3-letter uppercase code | Use ISO 4217 codes: `EUR`, `USD`, `GBP`, etc. |
+
 ## Related docs
 
 - `docs/adr/ADR-0002-control-matrix.md` — architectural decision record
 - `config/control_matrix.yaml` — default matrix
-- `schemas/control_matrix.schema.json` — JSON Schema
-- `config/policies/control_matrix_policy.yaml` — tool classification
+- `schemas/control_matrix.schema.json` — JSON Schema (hardened with `additionalProperties: false`)
+- `config/policies/control_matrix_policy.yaml` — tool classification (keep in sync with `control_hooks.py`)
 - `src/agilev/control_matrix.py` — loader and resolver
-- `src/agilev/control_enforcer.py` — runtime checks
+- `src/agilev/control_enforcer.py` — runtime checks (check_data_class, check_tool, check_model, check_cost, check_rollback, check_tests, check_max_permissions)
+- `src/agilev/openhands/control_hooks.py` — classify_tool, has_approval, append_control_event
