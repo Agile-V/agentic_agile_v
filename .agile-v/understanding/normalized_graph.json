@@ -1,0 +1,429 @@
+{
+  "schema_version": "1.0.0",
+  "source": "understand-anything",
+  "source_graph_path": "/Users/chris/agile-v/agentic_agile_v/tests/fixtures/knowledge_graph.json",
+  "source_graph_hash": "sha256:3bbd4137a59324dffea96902cc8ca08048b4e29617d0744350b6604f7bdedc13",
+  "generated_at": "2026-05-26T11:10:33.292330+00:00",
+  "nodes": [
+    {
+      "id": "n1",
+      "type": "file",
+      "name": "auth.py",
+      "path": "src/api/auth.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Handles user authentication and JWT token issuance",
+      "tags": []
+    },
+    {
+      "id": "n2",
+      "type": "function",
+      "name": "login",
+      "path": "src/api/auth.py",
+      "symbol": "login",
+      "language": null,
+      "layer": null,
+      "summary": "Validates credentials and returns a JWT",
+      "tags": []
+    },
+    {
+      "id": "n3",
+      "type": "function",
+      "name": "refresh_token",
+      "path": "src/api/auth.py",
+      "symbol": "refresh_token",
+      "language": null,
+      "layer": null,
+      "summary": "Reissues a JWT given a valid refresh token",
+      "tags": []
+    },
+    {
+      "id": "n4",
+      "type": "class",
+      "name": "TokenStore",
+      "path": "src/services/token.py",
+      "symbol": "TokenStore",
+      "language": null,
+      "layer": null,
+      "summary": "In-memory cache for issued JWT tokens and revocation list",
+      "tags": []
+    },
+    {
+      "id": "n5",
+      "type": "file",
+      "name": "token.py",
+      "path": "src/services/token.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Token storage and revocation service",
+      "tags": []
+    },
+    {
+      "id": "n6",
+      "type": "function",
+      "name": "revoke",
+      "path": "src/services/token.py",
+      "symbol": "TokenStore.revoke",
+      "language": null,
+      "layer": null,
+      "summary": "Marks a token as revoked",
+      "tags": []
+    },
+    {
+      "id": "n7",
+      "type": "file",
+      "name": "status.py",
+      "path": "src/api/status.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Read-only device health status endpoint",
+      "tags": []
+    },
+    {
+      "id": "n8",
+      "type": "function",
+      "name": "get_status",
+      "path": "src/api/status.py",
+      "symbol": "get_status",
+      "language": null,
+      "layer": null,
+      "summary": "Returns current device state, firmware version, and uptime",
+      "tags": []
+    },
+    {
+      "id": "n9",
+      "type": "file",
+      "name": "device.py",
+      "path": "src/services/device.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Device polling and state machine",
+      "tags": []
+    },
+    {
+      "id": "n10",
+      "type": "class",
+      "name": "DevicePoller",
+      "path": "src/services/device.py",
+      "symbol": "DevicePoller",
+      "language": null,
+      "layer": null,
+      "summary": "Polls device over serial; handles timeouts and reconnect",
+      "tags": []
+    },
+    {
+      "id": "n11",
+      "type": "function",
+      "name": "poll",
+      "path": "src/services/device.py",
+      "symbol": "DevicePoller.poll",
+      "language": null,
+      "layer": null,
+      "summary": "Executes a single poll cycle with configurable timeout",
+      "tags": []
+    },
+    {
+      "id": "n12",
+      "type": "file",
+      "name": "models.py",
+      "path": "src/models.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Shared Pydantic models used across API and services",
+      "tags": []
+    },
+    {
+      "id": "n13",
+      "type": "class",
+      "name": "DeviceStatus",
+      "path": "src/models.py",
+      "symbol": "DeviceStatus",
+      "language": null,
+      "layer": null,
+      "summary": "Pydantic model for device state, firmware version, and uptime",
+      "tags": []
+    },
+    {
+      "id": "n14",
+      "type": "class",
+      "name": "TokenClaims",
+      "path": "src/models.py",
+      "symbol": "TokenClaims",
+      "language": null,
+      "layer": null,
+      "summary": "Pydantic model for JWT payload claims",
+      "tags": []
+    },
+    {
+      "id": "n15",
+      "type": "file",
+      "name": "db.py",
+      "path": "src/db.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Database session factory and connection pool",
+      "tags": []
+    },
+    {
+      "id": "n16",
+      "type": "function",
+      "name": "get_session",
+      "path": "src/db.py",
+      "symbol": "get_session",
+      "language": null,
+      "layer": null,
+      "summary": "Returns a scoped SQLAlchemy session",
+      "tags": []
+    },
+    {
+      "id": "n17",
+      "type": "file",
+      "name": "config.py",
+      "path": "src/config.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Application configuration loaded from environment variables",
+      "tags": []
+    },
+    {
+      "id": "n18",
+      "type": "class",
+      "name": "Settings",
+      "path": "src/config.py",
+      "symbol": "Settings",
+      "language": null,
+      "layer": null,
+      "summary": "Pydantic settings class; holds DB URL, JWT secret, poll timeout",
+      "tags": []
+    },
+    {
+      "id": "n19",
+      "type": "test",
+      "name": "test_auth.py",
+      "path": "tests/test_auth.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Unit tests for auth.py: login success, invalid credentials, token refresh",
+      "tags": []
+    },
+    {
+      "id": "n20",
+      "type": "test",
+      "name": "test_status.py",
+      "path": "tests/test_status.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Unit tests for status endpoint: normal state, unavailable device",
+      "tags": []
+    },
+    {
+      "id": "n21",
+      "type": "test",
+      "name": "test_device.py",
+      "path": "tests/test_device.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Unit tests for DevicePoller: poll success, timeout, reconnect",
+      "tags": []
+    },
+    {
+      "id": "n22",
+      "type": "test",
+      "name": "test_token.py",
+      "path": "tests/test_token.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "Unit tests for TokenStore: issue, revoke, expiry",
+      "tags": []
+    },
+    {
+      "id": "n23",
+      "type": "file",
+      "name": "main.py",
+      "path": "src/main.py",
+      "symbol": null,
+      "language": null,
+      "layer": null,
+      "summary": "FastAPI application factory; mounts routers and configures middleware",
+      "tags": []
+    },
+    {
+      "id": "n24",
+      "type": "function",
+      "name": "create_app",
+      "path": "src/main.py",
+      "symbol": "create_app",
+      "language": null,
+      "layer": null,
+      "summary": "Constructs the FastAPI app instance with auth and status routers",
+      "tags": []
+    }
+  ],
+  "edges": [
+    {
+      "id": "edge-0",
+      "source": "n2",
+      "target": "n4",
+      "type": "calls",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-1",
+      "source": "n3",
+      "target": "n4",
+      "type": "calls",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-2",
+      "source": "n2",
+      "target": "n14",
+      "type": "uses",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-3",
+      "source": "n3",
+      "target": "n14",
+      "type": "uses",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-4",
+      "source": "n4",
+      "target": "n16",
+      "type": "calls",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-5",
+      "source": "n6",
+      "target": "n16",
+      "type": "calls",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-6",
+      "source": "n8",
+      "target": "n10",
+      "type": "calls",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-7",
+      "source": "n8",
+      "target": "n13",
+      "type": "uses",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-8",
+      "source": "n11",
+      "target": "n18",
+      "type": "uses",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-9",
+      "source": "n10",
+      "target": "n18",
+      "type": "uses",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-10",
+      "source": "n24",
+      "target": "n1",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-11",
+      "source": "n24",
+      "target": "n7",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-12",
+      "source": "n1",
+      "target": "n5",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-13",
+      "source": "n7",
+      "target": "n9",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-14",
+      "source": "n9",
+      "target": "n17",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-15",
+      "source": "n5",
+      "target": "n15",
+      "type": "imports",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-16",
+      "source": "n19",
+      "target": "n1",
+      "type": "tests",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-17",
+      "source": "n20",
+      "target": "n7",
+      "type": "tests",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-18",
+      "source": "n21",
+      "target": "n9",
+      "type": "tests",
+      "confidence": "high"
+    },
+    {
+      "id": "edge-19",
+      "source": "n22",
+      "target": "n5",
+      "type": "tests",
+      "confidence": "high"
+    }
+  ],
+  "metadata": {
+    "generated_by": "understand-anything",
+    "version": "2.1.0",
+    "repo": "device-service",
+    "generated_at": "2026-05-26T00:00:00Z",
+    "adapter_name": "understand-anything-adapter",
+    "adapter_version": "0.1.0",
+    "source": "Lum1104/Understand-Anything",
+    "source_graph_path": "/Users/chris/agile-v/agentic_agile_v/tests/fixtures/knowledge_graph.json",
+    "source_graph_hash": "sha256:3bbd4137a59324dffea96902cc8ca08048b4e29617d0744350b6604f7bdedc13",
+    "node_key_detected": "nodes",
+    "edge_key_detected": "edges",
+    "normalization_warnings": []
+  }
+}

@@ -28,11 +28,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Optional: enables JSON Schema validation in `agilev controls validate`
+validate = ["jsonschema>=4.0"]
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
     "ruff>=0.4",
     "mypy>=1.10",
+    "jsonschema>=4.0",
 ]
 
 [project.scripts]
@@ -76,6 +79,10 @@ ignore = []
 "src/agilev/state.py" = ["E501"]
 "src/agilev/task_context.py" = ["E501"]
 "tests/test_pcb.py" = ["E501"]  # Pin constructors
+"src/agilev/control_matrix.py" = ["E501"]
+"src/agilev/control_enforcer.py" = ["E501"]
+"src/agilev/openhands/control_hooks.py" = ["E501"]
+"tests/test_control_cli.py" = ["E501"]
 
 [tool.mypy]
 python_version = "3.11"
@@ -86,6 +93,8 @@ ignore_missing_imports = true
 module = [
     "agilev.pcb.*",
     "agilev.openhands.*",
+    "agilev.control_matrix",
+    "agilev.control_enforcer",
 ]
 disable_error_code = [
     "assignment",

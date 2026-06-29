@@ -1,0 +1,25 @@
+name: Control Matrix Gates
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  control-matrix:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install package with dev dependencies
+        run: pip install -e ".[dev]" jsonschema
+
+      - name: Validate control matrix schema and semantics
+        run: agilev controls validate
+
+      - name: Run control matrix unit tests
+        run: pytest tests/test_control_matrix_loader.py tests/test_control_enforcer.py tests/test_control_cli.py -q

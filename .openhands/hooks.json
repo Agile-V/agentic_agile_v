@@ -28,6 +28,16 @@
           "timeout": 20
         }
       ]
+    },
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/enforce_control_matrix.sh",
+          "timeout": 10,
+          "blocking": true
+        }
+      ]
     }
   ],
   "post_tool_use": [
@@ -61,6 +71,16 @@
         {
           "command": ".openhands/hooks/validate_evidence_on_stop.sh",
           "timeout": 180
+        }
+      ]
+    },
+    {
+      "matcher": "*",
+      "hooks": [
+        {
+          "command": ".openhands/hooks/validate_control_evidence_on_stop.sh",
+          "timeout": 20,
+          "blocking": true
         }
       ]
     }
