@@ -61,7 +61,7 @@ Each module ships with unit tests using `tmp_path` fixtures; no real
   required-page list here is an Agile-V convention layered on top, not a
   reverse-engineered spec of upstream's internal output. If upstream diverges,
   `agilev wiki validate` will need a follow-up update.
-- `openwiki` requires an LLM provider API key at generation time; CI update
-  workflow will fail at the `openwiki --update` step until repo secrets
-  (`OPENROUTER_API_KEY` or equivalent) are configured. This is expected and
-  documented in `docs/integrations/openwiki.md`.
+- `openwiki --update` requires an LLM provider credential at generation
+  time; CI update workflow will fail at the `openwiki --update` step
+  until repository-level provider configuration is added. This is
+  expected and documented in `docs/integrations/openwiki.md`.

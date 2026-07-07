@@ -1,85 +1,286 @@
 {
   "changed_files": [
-    "src/agilev/wiki/__init__.py",
-    "src/agilev/wiki/constants.py",
-    "src/agilev/wiki/domains.py",
-    "src/agilev/wiki/errors.py",
-    "src/agilev/wiki/frontmatter.py",
-    "src/agilev/wiki/manifest.py",
-    "src/agilev/wiki/source_map.py",
-    "src/agilev/wiki/freshness.py",
-    "src/agilev/wiki/validator.py",
-    "src/agilev/wiki/runner.py",
-    "src/agilev/wiki/snapshot.py",
-    "src/agilev/wiki/scaffolder.py",
-    "src/agilev/wiki/page_templates.py",
-    "src/agilev/wiki/cli.py",
-    "src/agilev/cli.py",
-    "src/agilev/openhands/scaffold.py",
-    "src/agilev/openhands/evidence_adapter.py",
-    "schemas/evidence_bundle.schema.json",
-    "templates/openwiki/README.md",
-    "templates/openwiki/ARCHITECTURE.md",
-    "templates/openwiki/ONBOARDING.md",
-    "templates/openwiki/ci-and-release.md",
-    "templates/openwiki/co-verification.md",
-    "templates/openwiki/domains/software.md",
-    "templates/openwiki/domains/pcb.md",
-    "templates/openwiki/domains/firmware.md",
-    "templates/openwiki/domains/embedded.md",
-    "openwiki/README.md",
-    "openwiki/ARCHITECTURE.md",
-    "openwiki/ONBOARDING.md",
-    "openwiki/ci-and-release.md",
-    "openwiki/domains/software.md",
-    "openwiki/domains/pcb.md",
-    ".agile-v/wiki/manifest.json",
-    ".agile-v/wiki/source_map.json",
-    ".agile-v/wiki/freshness.json",
-    ".agile-v/wiki/validation.json",
-    ".github/workflows/openwiki-validate.yml",
-    ".github/workflows/openwiki-update.yml",
-    "docs/integrations/openwiki.md",
-    "README.md",
-    "tests/unit/wiki/test_domains.py",
-    "tests/unit/wiki/test_manifest.py",
-    "tests/unit/wiki/test_source_map.py",
-    "tests/unit/wiki/test_freshness.py",
-    "tests/unit/wiki/test_validator.py",
-    "tests/unit/wiki/test_scaffolder.py",
-    "tests/unit/wiki/test_runner.py",
-    "tests/unit/wiki/test_snapshot.py",
-    "tests/unit/wiki/test_wiki_cli.py",
-    "tests/unit/wiki/test_evidence_schema.py"
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/__init__.py",
+      "sha256": "sha256:bd577137878122e4553298bbe4a8fdb6bf64eedaeca5b7ed3d6d8bf6bb1aaa8d"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/constants.py",
+      "sha256": "sha256:014b7c87c3062ca86c946436d0ac8a87efa59635c59a167567e28482782b42f9"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/domains.py",
+      "sha256": "sha256:4fb2eabb7656a772a4e320f527eafe77e857575956a9ce5e61adb055605290b1"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/errors.py",
+      "sha256": "sha256:83bd3a8cf05310515a4aa28ac2c920a351cd54798415c320ac662c1e7e077355"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/frontmatter.py",
+      "sha256": "sha256:8ab41fc508f375ed8fd8489f20d66721bde9369d888fed97576a82aa0ef80c57"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/manifest.py",
+      "sha256": "sha256:971e6cdbd3b128ec5c4af077275951bf3be369162b1ef28b647b76bbd75bf160"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/source_map.py",
+      "sha256": "sha256:adefed607e63de4b76d2acb4a1f01292e087441826a5e00ec468488953942a84"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/freshness.py",
+      "sha256": "sha256:8868098f0477cb73db093ba5a81546bf5b532cb570b59b0b73ece2d8f19b5fe8"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/validator.py",
+      "sha256": "sha256:d14f805d28f65a697f6fc3637b18c59bf09d58b606c508e5e1d9a2cfe995b123"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/runner.py",
+      "sha256": "sha256:f645efdb1c69d919a55e8c10518f07d5f06c468058b7214a0616e0f784bc49ce"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/snapshot.py",
+      "sha256": "sha256:17cd22eff7edee4ba5d57c677a8d89a75e691ec6d337febfdd9e1835a6cefceb"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/scaffolder.py",
+      "sha256": "sha256:dec864e9e89b9ca86857afa6984daab2cfbb2a20efad3ce330cf9854ccbd1c2b"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/page_templates.py",
+      "sha256": "sha256:14f3e25c4705d89c5769ba8061572da9cf5042e77e439d85624555f29788734f"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/wiki/cli.py",
+      "sha256": "sha256:e97227aca952a463291606183ec4e1b092cd814adbe81638b8fd29b0657cde29"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/cli.py",
+      "sha256": "sha256:5c2aef75fa1e6955fda489df87fbee5879fb0cc5b29ed14f5ac313c75188abfa"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/openhands/scaffold.py",
+      "sha256": "sha256:020df5ebce86f66f260df05801df1f9f111b77a744fd28b2322a71459e576210"
+    },
+    {
+      "change_type": "add",
+      "path": "src/agilev/openhands/evidence_adapter.py",
+      "sha256": "sha256:86124b8c27fc26c28001b461e054d3bf76a9118a00b4e90a0631616723fc3a4b"
+    },
+    {
+      "change_type": "add",
+      "path": "schemas/evidence_bundle.schema.json",
+      "sha256": "sha256:b34a80521f789ef36ebce9a389667dababd5cffd3fdc1f6e1efdaaa92cf314f9"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/README.md",
+      "sha256": "sha256:bd8ac541e75cb9b20f5ce030cd728b2f83a59a75ac59c661974c549629b0df70"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/ARCHITECTURE.md",
+      "sha256": "sha256:dd0afb6d059fb9b20007b824735f7b5cfd2b3a0aaafd419a58af749f23ad158b"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/ONBOARDING.md",
+      "sha256": "sha256:43a4d97d416c2c9f1a2ef06efb3c5151cb3d6a6387023da17dabbad123139543"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/ci-and-release.md",
+      "sha256": "sha256:23c2db42fb6bdaf808e1a94a58bcf5875835a67c350cadbafd8305576e3d3c37"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/co-verification.md",
+      "sha256": "sha256:589db45cabb00934839d5cacee2fe68909e10410ebafb19b1aad8b1e04ea9d40"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/domains/software.md",
+      "sha256": "sha256:2227bb023aaf60b103dbd8d043460e2600408486aeec1fe619369e941da8d757"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/domains/pcb.md",
+      "sha256": "sha256:4b1036b1c4deab4ad1253256316a369c619980eb981c5e7b28fe4687841bc7ca"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/domains/firmware.md",
+      "sha256": "sha256:88c80f880dd78bb5bb914e40eaf155ffd01957ec8aa39730e703aa72084637a0"
+    },
+    {
+      "change_type": "add",
+      "path": "templates/openwiki/domains/embedded.md",
+      "sha256": "sha256:bec14a864b2f26367617eda55cb55093b0ddfa4fccf24ba93a898f0777656f55"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/README.md",
+      "sha256": "sha256:bd8ac541e75cb9b20f5ce030cd728b2f83a59a75ac59c661974c549629b0df70"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/ARCHITECTURE.md",
+      "sha256": "sha256:dd0afb6d059fb9b20007b824735f7b5cfd2b3a0aaafd419a58af749f23ad158b"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/ONBOARDING.md",
+      "sha256": "sha256:43a4d97d416c2c9f1a2ef06efb3c5151cb3d6a6387023da17dabbad123139543"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/ci-and-release.md",
+      "sha256": "sha256:23c2db42fb6bdaf808e1a94a58bcf5875835a67c350cadbafd8305576e3d3c37"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/domains/software.md",
+      "sha256": "sha256:2227bb023aaf60b103dbd8d043460e2600408486aeec1fe619369e941da8d757"
+    },
+    {
+      "change_type": "add",
+      "path": "openwiki/domains/pcb.md",
+      "sha256": "sha256:4b1036b1c4deab4ad1253256316a369c619980eb981c5e7b28fe4687841bc7ca"
+    },
+    {
+      "change_type": "add",
+      "path": ".agile-v/wiki/manifest.json",
+      "sha256": "sha256:e36a91b5fcb909f4c187cba6fdaee17660d76ef13b6ffe72725af2b486c49d3d"
+    },
+    {
+      "change_type": "add",
+      "path": ".agile-v/wiki/source_map.json",
+      "sha256": "sha256:ba62b07d62f312c6c169f479c28d6da547745e1a76ae41e9b0c0f5725eb6a3f6"
+    },
+    {
+      "change_type": "add",
+      "path": ".agile-v/wiki/freshness.json",
+      "sha256": "sha256:f10a5f38be48a6cfb5406049ca32d635d10287a824758969dbf69b9e975a2ffb"
+    },
+    {
+      "change_type": "add",
+      "path": ".agile-v/wiki/validation.json",
+      "sha256": "sha256:4dc70732cba04b7b9db3e8b91371c4cd34a202ac0e88192b63397481fda8377e"
+    },
+    {
+      "change_type": "add",
+      "path": ".github/workflows/openwiki-validate.yml",
+      "sha256": "sha256:216d74e598816b00d2ba98fc81c2dba71d7e0f5b8fca34a1c5450f8d1692062a"
+    },
+    {
+      "change_type": "add",
+      "path": ".github/workflows/openwiki-update.yml",
+      "sha256": "sha256:4bdc19b72e5e4082dcb26620dc51e0fd4368748b9a7f1292fdb4a37816bdd7e7"
+    },
+    {
+      "change_type": "add",
+      "path": "docs/integrations/openwiki.md",
+      "sha256": "sha256:ff9e9a0627d981c0a7df0420d6c604635f26a0c48903bd63153c88e0099e339d"
+    },
+    {
+      "change_type": "add",
+      "path": "README.md",
+      "sha256": "sha256:3b5df31b0f50028f3f62b363438cf74519dff236380f033624bd45cb172c4096"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_domains.py",
+      "sha256": "sha256:45a23fe2bc4b14646a0b313768d0ddcc0f8faae6e1d9a2be2f7cccc742247ce5"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_manifest.py",
+      "sha256": "sha256:2904cf369d80e4bc97069b5bd6003f9073afe11cfc90ef5566fea99022a566ae"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_source_map.py",
+      "sha256": "sha256:addf0d59829789b782cb0933edcbefbef15366b9fbc87ff3e30a782acc15dce8"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_freshness.py",
+      "sha256": "sha256:f69438b862423ab2a233f1c1ca00ffa29a7eed56225ff9536a755b287ce448e3"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_validator.py",
+      "sha256": "sha256:e81ed963a45a31ed1ab62f291e549c275a36fefb0691f92772be9634e43ef60a"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_scaffolder.py",
+      "sha256": "sha256:8e38d5fc5cf131b54d296f8166deebc795a97dd448b2f3e7916e7975f585af4c"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_runner.py",
+      "sha256": "sha256:49979b0b58073c98e2eb11dca62ba43ede53d78469b8ab1eb88e09422c2d72cd"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_snapshot.py",
+      "sha256": "sha256:0c9bea2f075dddcf9feeb2a786c958f8fa49b28b5b2b08a636b28d07e73dd579"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_wiki_cli.py",
+      "sha256": "sha256:cf2f4a571b75ca7c4d90bb658a36e054611cf6fe381b2b6391a491073e4ef95e"
+    },
+    {
+      "change_type": "add",
+      "path": "tests/unit/wiki/test_evidence_schema.py",
+      "sha256": "sha256:df2ac0bf253d3fd5365f3ee3c4614be5ee8ea50aacf131dd15ad9ad64505d3d8"
+    }
   ],
   "gate_results": [
     {
+      "details": "196 passed (59 new under tests/unit/wiki/), 0 failed",
       "gate": "unit_tests",
-      "command": "pytest",
-      "result": "pass",
-      "summary": "193 passed (59 new in tests/unit/wiki/), 0 failed"
+      "status": "pass"
     },
     {
+      "details": "ruff check src/ tests/ -- all checks passed",
       "gate": "lint",
-      "command": "ruff check src/ tests/",
-      "result": "pass"
+      "status": "pass"
     },
     {
+      "details": "mypy src/agilev -- no issues found in 47 source files",
       "gate": "typecheck",
-      "command": "mypy src/agilev",
-      "result": "pass",
-      "summary": "Success: no issues found in 47 source files"
+      "status": "pass"
     },
     {
+      "details": "agilev wiki init/update/validate/status -- 6 pages scaffolded (base + pcb domain); validation PASSED; fresh",
       "gate": "cli_smoke_test",
-      "command": "agilev wiki init && agilev wiki update && agilev wiki validate && agilev wiki status",
-      "result": "pass",
-      "summary": "6 pages scaffolded (base + pcb domain); validation PASSED; fresh"
+      "status": "pass"
     }
   ],
   "knowledge_snapshot": {
-    "captured_at": "2026-07-07T18:45:10.612224+00:00",
-    "manifest_generated_at": "2026-07-07T18:45:04.579068+00:00",
+    "captured_at": "2026-07-07T21:05:05.634830+00:00",
+    "manifest_generated_at": "2026-07-07T21:05:00.274234+00:00",
     "manifest_path": ".agile-v/wiki/manifest.json",
     "page_count": 6,
     "pages": [
@@ -121,13 +322,15 @@
   "test_runs": [
     {
       "command": "pytest tests/unit/wiki -q",
-      "result": "pass",
-      "count": 59
+      "exit_code": 0,
+      "id": "TRUN-001",
+      "status": "passed"
     },
     {
       "command": "pytest -q",
-      "result": "pass",
-      "count": 193
+      "exit_code": 0,
+      "id": "TRUN-002",
+      "status": "passed"
     }
   ]
 }
