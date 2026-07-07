@@ -117,6 +117,7 @@ class OpenHandsScaffold:
             "validate_scope.sh": self._get_validate_scope_hook(),
             "log_tool_usage.sh": self._get_log_tool_usage_hook(),
             "collect_session_metadata.sh": self._get_collect_session_metadata_hook(),
+            "check_wiki_freshness.sh": self._get_check_wiki_freshness_hook(),
             "validate_evidence_on_stop.sh": self._get_validate_evidence_on_stop_hook(),
             "generate_handoff_on_session_end.sh": self._get_generate_handoff_hook(),
         }
@@ -197,6 +198,7 @@ class OpenHandsScaffold:
             "validate_scope.sh",
             "log_tool_usage.sh",
             "collect_session_metadata.sh",
+            "check_wiki_freshness.sh",
             "validate_evidence_on_stop.sh",
             "generate_handoff_on_session_end.sh",
         ]
@@ -622,7 +624,12 @@ L3/L4 classification requires explicit risk assessment document.
                             "command": ".openhands/hooks/collect_session_metadata.sh",
                             "timeout": 10,
                             "async": True,
-                        }
+                        },
+                        {
+                            "command": ".openhands/hooks/check_wiki_freshness.sh",
+                            "timeout": 15,
+                            "async": True,
+                        },
                     ],
                 }
             ],
@@ -909,6 +916,49 @@ cat > "$LOG_DIR/openhands_session.json" <<EOF
   "engine": "openhands"
 }
 EOF
+
+exit 0
+"""
+
+    def _get_check_wiki_freshness_hook(self) -> str:
+        return """#!/usr/bin/env bash
+# Agile-V Hook: check_wiki_freshness
+# Advisory-only (never blocks): warn if the OpenWiki knowledge layer
+# (openwiki/) is missing, stale, or fails structural validation.
+
+set -euo pipefail
+
+if ! command -v agilev &> /dev/null; then
+    exit 0
+fi
+
+if [ ! -d "openwiki" ]; then
+    cat <<EOF
+{
+  "decision": "allow",
+  "reason": "openwiki/ not found. Run 'agilev wiki init' to scaffold the knowledge layer."
+}
+EOF
+    exit 0
+fi
+
+if agilev wiki validate &> /tmp/agilev_wiki_validate.$$ 2>&1; then
+    cat <<EOF
+{
+  "decision": "allow",
+  "reason": "OpenWiki knowledge layer is valid."
+}
+EOF
+else
+    REASON=$(tr '\\n' ' ' < /tmp/agilev_wiki_validate.$$ | head -c 500)
+    cat <<EOF
+{
+  "decision": "allow",
+  "reason": "OpenWiki knowledge layer validation warnings/errors (non-blocking): ${REASON}"
+}
+EOF
+fi
+rm -f /tmp/agilev_wiki_validate.$$
 
 exit 0
 """

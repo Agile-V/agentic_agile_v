@@ -145,6 +145,60 @@
           "description": "Mapping of acceptance criteria to evidence"
         }
       }
+    },
+    "knowledge_snapshot": {
+      "type": "object",
+      "description": "Snapshot of the OpenWiki knowledge layer (openwiki/) at evidence-collection time. Written by 'agilev wiki snapshot'.",
+      "required": ["wiki_dir", "page_count", "validation_passed"],
+      "properties": {
+        "wiki_dir": {
+          "type": "string",
+          "description": "Repo-relative directory containing generated wiki pages (default: openwiki)"
+        },
+        "manifest_path": {
+          "type": "string",
+          "description": "Path to the Agile-V wiki manifest (.agile-v/wiki/manifest.json)"
+        },
+        "manifest_generated_at": {
+          "type": ["string", "null"],
+          "description": "Timestamp (ISO 8601) the manifest was last generated"
+        },
+        "page_count": {
+          "type": "integer",
+          "description": "Number of wiki pages tracked in the manifest"
+        },
+        "pages": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Relative paths of tracked wiki pages"
+        },
+        "required_pages": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Pages required for this repository's detected domains"
+        },
+        "validation_passed": {
+          "type": "boolean",
+          "description": "Whether 'agilev wiki validate' passed at capture time"
+        },
+        "validation_errors": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "validation_warnings": {
+          "type": "array",
+          "items": {"type": "string"}
+        },
+        "stale_pages": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Pages whose declared sources changed after the manifest was generated"
+        },
+        "captured_at": {
+          "type": "string",
+          "description": "Timestamp (ISO 8601) the snapshot was captured"
+        }
+      }
     }
   }
 }

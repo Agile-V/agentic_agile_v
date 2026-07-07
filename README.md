@@ -129,6 +129,29 @@ See `docs/understand-anything-integration.md` for full usage documentation.
 
 The companion skill documentation is in `agile_v_skills/integrations/understand-anything/`.
 
+## OpenWiki Integration
+
+Agile-V treats [OpenWiki](https://github.com/langchain-ai/openwiki)-generated
+documentation (`openwiki/`) as a validated, evidence-linked knowledge layer
+rather than optional reading material.
+
+```bash
+# Scaffold required pages + manifest
+agilev wiki init
+
+# (optional) also invoke the real `openwiki` CLI
+agilev wiki init --run-openwiki
+
+# Validate structure and freshness
+agilev wiki validate
+
+# Record a knowledge_snapshot in a task's evidence bundle
+agilev wiki snapshot --task AAV-0001
+```
+
+See `docs/integrations/openwiki.md` for the full integration design,
+required page structure, CI workflows, and backlog.
+
 ## Principle
 
 Do not let an agent implement from a long chat history. Let it implement from a reviewed, versioned brief.

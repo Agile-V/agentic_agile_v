@@ -1,0 +1,133 @@
+{
+  "changed_files": [
+    "src/agilev/wiki/__init__.py",
+    "src/agilev/wiki/constants.py",
+    "src/agilev/wiki/domains.py",
+    "src/agilev/wiki/errors.py",
+    "src/agilev/wiki/frontmatter.py",
+    "src/agilev/wiki/manifest.py",
+    "src/agilev/wiki/source_map.py",
+    "src/agilev/wiki/freshness.py",
+    "src/agilev/wiki/validator.py",
+    "src/agilev/wiki/runner.py",
+    "src/agilev/wiki/snapshot.py",
+    "src/agilev/wiki/scaffolder.py",
+    "src/agilev/wiki/page_templates.py",
+    "src/agilev/wiki/cli.py",
+    "src/agilev/cli.py",
+    "src/agilev/openhands/scaffold.py",
+    "src/agilev/openhands/evidence_adapter.py",
+    "schemas/evidence_bundle.schema.json",
+    "templates/openwiki/README.md",
+    "templates/openwiki/ARCHITECTURE.md",
+    "templates/openwiki/ONBOARDING.md",
+    "templates/openwiki/ci-and-release.md",
+    "templates/openwiki/co-verification.md",
+    "templates/openwiki/domains/software.md",
+    "templates/openwiki/domains/pcb.md",
+    "templates/openwiki/domains/firmware.md",
+    "templates/openwiki/domains/embedded.md",
+    "openwiki/README.md",
+    "openwiki/ARCHITECTURE.md",
+    "openwiki/ONBOARDING.md",
+    "openwiki/ci-and-release.md",
+    "openwiki/domains/software.md",
+    "openwiki/domains/pcb.md",
+    ".agile-v/wiki/manifest.json",
+    ".agile-v/wiki/source_map.json",
+    ".agile-v/wiki/freshness.json",
+    ".agile-v/wiki/validation.json",
+    ".github/workflows/openwiki-validate.yml",
+    ".github/workflows/openwiki-update.yml",
+    "docs/integrations/openwiki.md",
+    "README.md",
+    "tests/unit/wiki/test_domains.py",
+    "tests/unit/wiki/test_manifest.py",
+    "tests/unit/wiki/test_source_map.py",
+    "tests/unit/wiki/test_freshness.py",
+    "tests/unit/wiki/test_validator.py",
+    "tests/unit/wiki/test_scaffolder.py",
+    "tests/unit/wiki/test_runner.py",
+    "tests/unit/wiki/test_snapshot.py",
+    "tests/unit/wiki/test_wiki_cli.py",
+    "tests/unit/wiki/test_evidence_schema.py"
+  ],
+  "gate_results": [
+    {
+      "gate": "unit_tests",
+      "command": "pytest",
+      "result": "pass",
+      "summary": "193 passed (59 new in tests/unit/wiki/), 0 failed"
+    },
+    {
+      "gate": "lint",
+      "command": "ruff check src/ tests/",
+      "result": "pass"
+    },
+    {
+      "gate": "typecheck",
+      "command": "mypy src/agilev",
+      "result": "pass",
+      "summary": "Success: no issues found in 47 source files"
+    },
+    {
+      "gate": "cli_smoke_test",
+      "command": "agilev wiki init && agilev wiki update && agilev wiki validate && agilev wiki status",
+      "result": "pass",
+      "summary": "6 pages scaffolded (base + pcb domain); validation PASSED; fresh"
+    }
+  ],
+  "knowledge_snapshot": {
+    "captured_at": "2026-07-07T18:45:10.612224+00:00",
+    "manifest_generated_at": "2026-07-07T18:45:04.579068+00:00",
+    "manifest_path": ".agile-v/wiki/manifest.json",
+    "page_count": 6,
+    "pages": [
+      "ARCHITECTURE.md",
+      "ONBOARDING.md",
+      "README.md",
+      "ci-and-release.md",
+      "domains/pcb.md",
+      "domains/software.md"
+    ],
+    "required_pages": [
+      "README.md",
+      "ARCHITECTURE.md",
+      "ONBOARDING.md",
+      "domains/software.md",
+      "ci-and-release.md",
+      "domains/pcb.md"
+    ],
+    "stale_pages": [],
+    "validation_errors": [],
+    "validation_passed": true,
+    "validation_warnings": [],
+    "wiki_dir": "openwiki"
+  },
+  "requirements": [
+    "REQ-0001",
+    "REQ-0002",
+    "REQ-0003",
+    "REQ-0004",
+    "REQ-0005",
+    "REQ-0006",
+    "REQ-0007",
+    "REQ-0008",
+    "REQ-0009"
+  ],
+  "risk_level": "L2",
+  "schema_version": "2.0.0",
+  "task_id": "AAV-0001",
+  "test_runs": [
+    {
+      "command": "pytest tests/unit/wiki -q",
+      "result": "pass",
+      "count": 59
+    },
+    {
+      "command": "pytest -q",
+      "result": "pass",
+      "count": 193
+    }
+  ]
+}

@@ -1,0 +1,78 @@
+{
+  "generated_at": "2026-07-07T18:45:04.579367+00:00",
+  "page_sources": {
+    "ARCHITECTURE.md": [
+      "src/agilev",
+      "ARCHITECTURE.md",
+      "pyproject.toml"
+    ],
+    "ONBOARDING.md": [
+      "AGENTS.md",
+      "CONTRIBUTIONS.md"
+    ],
+    "README.md": [
+      "README.md",
+      "AGENTS.md"
+    ],
+    "ci-and-release.md": [
+      ".github/workflows",
+      "schemas/evidence_bundle.schema.json",
+      "schemas/task_brief.schema.json"
+    ],
+    "domains/pcb.md": [
+      "src/agilev/pcb",
+      "examples/pcb"
+    ],
+    "domains/software.md": [
+      "src/agilev/openhands",
+      "src/agilev/cli.py",
+      "src/agilev/state.py"
+    ]
+  },
+  "schema_version": "1.0.0",
+  "source_pages": {
+    ".github/workflows": [
+      "ci-and-release.md"
+    ],
+    "AGENTS.md": [
+      "ONBOARDING.md",
+      "README.md"
+    ],
+    "ARCHITECTURE.md": [
+      "ARCHITECTURE.md"
+    ],
+    "CONTRIBUTIONS.md": [
+      "ONBOARDING.md"
+    ],
+    "README.md": [
+      "README.md"
+    ],
+    "examples/pcb": [
+      "domains/pcb.md"
+    ],
+    "pyproject.toml": [
+      "ARCHITECTURE.md"
+    ],
+    "schemas/evidence_bundle.schema.json": [
+      "ci-and-release.md"
+    ],
+    "schemas/task_brief.schema.json": [
+      "ci-and-release.md"
+    ],
+    "src/agilev": [
+      "ARCHITECTURE.md"
+    ],
+    "src/agilev/cli.py": [
+      "domains/software.md"
+    ],
+    "src/agilev/openhands": [
+      "domains/software.md"
+    ],
+    "src/agilev/pcb": [
+      "domains/pcb.md"
+    ],
+    "src/agilev/state.py": [
+      "domains/software.md"
+    ]
+  }
+}

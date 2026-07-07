@@ -1,0 +1,12 @@
+{
+  "tasks": {
+    "AAV-0001": {
+      "task_id": "AAV-0001",
+      "title": "Integrate OpenWiki as repository knowledge layer",
+      "risk_level": "L2",
+      "status": "implemented",
+      "created_at": "2026-07-06T06:57:50.998352+00:00",
+      "updated_at": "2026-07-07T18:48:23.745252+00:00"
+    }
+  }
+}

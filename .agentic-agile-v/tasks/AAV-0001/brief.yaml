@@ -1,0 +1,100 @@
+task_id: AAV-0001
+title: Integrate OpenWiki as repository knowledge layer
+problem_statement: >-
+  The repository has no first-class, machine-checkable knowledge layer.
+  Agents (OpenHands sessions, build/verify skills) and humans re-derive
+  architecture and domain context from scratch each session, which is slow,
+  inconsistent, and produces stale or contradictory guidance across the
+  software (OpenHands) backend, the planned PCB backend, and the
+  firmware/embedded backend. langchain-ai/openwiki (`openwiki --init`,
+  `openwiki --update`, `openwiki -p`) already generates and maintains
+  `openwiki/` documentation and injects guidance into AGENTS.md/CLAUDE.md,
+  but there is no Agile-V wrapper that tracks freshness, validates required
+  structure, or surfaces the wiki as evidence.
+intended_outcome: >-
+  OpenWiki-generated `openwiki/` documentation becomes a fundamental,
+  validated knowledge layer: tracked via a manifest/source-map/freshness
+  model in `.agile-v/wiki/`, exposed through `agilev wiki
+  init|update|validate|status|snapshot`, checked (non-blocking) at OpenHands
+  session start, included in evidence bundles as `knowledge_snapshot`, and
+  kept current via CI (PR validation + scheduled update PR). GitHub Wiki
+  mirroring remains optional/out of scope because repo-local docs are
+  reviewable through normal PRs and CI.
+scope:
+- 'src/agilev/wiki/ package: manifest, source_map, freshness, validator, domains, runner, snapshot, cli'
+- 'agilev wiki subcommands: init, update, validate, status, snapshot'
+- '.agile-v/wiki/ runtime files: manifest.json, source_map.json, freshness.json, validation.json'
+- 'templates/openwiki/ required page structure (README, architecture, onboarding, domains/software, domains/pcb, domains/firmware, domains/embedded, co-verification, ci-and-release)'
+- 'OpenHands session_start hook: non-blocking freshness/validation warning'
+- 'Evidence bundle knowledge_snapshot section + schema update + EvidenceAdapter wiring'
+- 'CI: .github/workflows/openwiki-validate.yml (PR) and .github/workflows/openwiki-update.yml (scheduled update PR), matching upstream openwiki-update.yml conventions'
+- 'docs/integrations/openwiki.md documentation'
+- 'Companion skill in agile_v_skills repo (separate repository, submoduled as .opencode/skills) teaching agents to use agilev wiki'
+non_goals:
+- 'Reimplementing the openwiki CLI itself (it remains an external npm tool)'
+- 'GitHub Wiki (the separate git-backed wiki repo) mirroring - optional/future, not required for this task'
+- 'Automatic unattended execution of openwiki --update during an OpenHands session (session-start hook is read-only/advisory only)'
+- 'Actual PCB or firmware backend implementation (only their knowledge/documentation pages are in scope)'
+requirements:
+- id: REQ-0001
+  description: 'agilev wiki init scaffolds openwiki/ required pages and .agile-v/wiki/ manifest if missing, without overwriting existing content unless --force'
+  priority: must
+- id: REQ-0002
+  description: 'agilev wiki update recomputes the manifest/source-map from current openwiki/ + repo state and records freshness'
+  priority: must
+- id: REQ-0003
+  description: 'agilev wiki validate fails (non-zero exit) when required pages are missing, manifest hashes do not match on-disk pages, or a page has invalid frontmatter; warns (exit 0) on staleness alone'
+  priority: must
+- id: REQ-0004
+  description: 'agilev wiki status prints a human-readable freshness/validation summary; supports --json'
+  priority: must
+- id: REQ-0005
+  description: 'agilev wiki snapshot writes a knowledge_snapshot object into a task evidence_bundle.json (or standalone file) for use as CI/evidence artifact'
+  priority: must
+- id: REQ-0006
+  description: 'Required page set is extended with domain pages (domains/pcb.md, domains/firmware.md, domains/embedded.md, co-verification.md) only when the corresponding domain is detected in-repo (src/agilev/pcb, src/agilev/firmware or examples/pcb present)'
+  priority: must
+- id: REQ-0007
+  description: 'OpenHands session_start hook warns (does not block) when the wiki is missing or stale, referencing agilev wiki status'
+  priority: should
+- id: REQ-0008
+  description: 'evidence_bundle.schema.json gains an optional knowledge_snapshot property'
+  priority: must
+- id: REQ-0009
+  description: 'CI validates wiki structure on PR and opens a scheduled update PR mirroring upstream openwiki-update.yml (npm install -g openwiki; openwiki --update --print)'
+  priority: should
+requirements_note: >-
+  Requirement IDs above are task-local (REQ-0001..REQ-0009); this repository
+  does not yet have a global REQUIREMENTS.md ledger for this feature area.
+constraints:
+- 'No network calls to the real openwiki CLI during unit tests; runner must be mockable/dependency-injected'
+- 'Do not require the openwiki npm package to be installed for agilev wiki validate/status/snapshot to work (those operate on already-generated content)'
+- 'Follow existing src/agilev module conventions (dataclasses, pathlib, no new required runtime dependencies beyond pyyaml which is already a dependency)'
+- 'Keep CI update workflow disabled-by-default in terms of secrets (uses repository secrets that may not exist yet; job should be safe to merge without secrets configured, i.e. it will simply fail at the API-call step until secrets are added, not error at workflow-parse time)'
+acceptance_criteria:
+- 'pytest tests/unit/wiki/ passes'
+- 'ruff check src/agilev/wiki passes'
+- 'agilev wiki init on an empty repo creates openwiki/ with all base required pages and .agile-v/wiki/manifest.json'
+- 'agilev wiki validate returns exit 1 with a clear error when a required page is deleted, and exit 0 with warnings when a source file changes without a wiki update'
+- 'agilev wiki snapshot --task AAV-0001 adds a knowledge_snapshot object to .agentic-agile-v/tasks/AAV-0001/evidence.json'
+- 'evidence_bundle.schema.json validates an evidence bundle containing knowledge_snapshot'
+- 'agilev --help lists the wiki command group'
+risk_level: L2
+affected_components:
+- src/agilev/wiki/ (new)
+- src/agilev/cli.py (wire wiki subcommands)
+- src/agilev/openhands/scaffold.py (new session_start hook + doctor check)
+- src/agilev/openhands/evidence_adapter.py (optional knowledge_snapshot collection)
+- schemas/evidence_bundle.schema.json
+- templates/openwiki/ (new)
+- docs/integrations/openwiki.md (new)
+- .github/workflows/openwiki-validate.yml (new)
+- .github/workflows/openwiki-update.yml (new)
+- tests/unit/wiki/ (new)
+required_evidence:
+- unit_tests
+- lint
+- cli_smoke_test
+human_approval_required: false
+created_at: '2026-07-06T06:57:50.997485+00:00'
+created_by: agilev-cli
