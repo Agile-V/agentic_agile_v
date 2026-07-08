@@ -10,6 +10,14 @@ from typing import Any
 
 import yaml
 
+try:
+    import jsonschema as _jsonschema
+
+    _JSONSCHEMA_AVAILABLE = True
+except ImportError:
+    _jsonschema = None  # type: ignore[assignment]
+    _JSONSCHEMA_AVAILABLE = False
+
 
 class HardwareFirmwareContract:
     """Hardware-firmware contract defining PCB capabilities for firmware."""
@@ -52,15 +60,15 @@ class HardwareFirmwareContract:
         Returns:
             Tuple of (is_valid, errors)
         """
+        if not _JSONSCHEMA_AVAILABLE or _jsonschema is None:
+            return False, ["jsonschema not installed"]
         try:
-            import jsonschema
-
             with open(schema_path) as f:
                 schema = json.load(f)
 
-            jsonschema.validate(instance=self.data, schema=schema)
+            _jsonschema.validate(instance=self.data, schema=schema)
             return True, []
-        except jsonschema.ValidationError as e:
+        except _jsonschema.ValidationError as e:
             return False, [str(e)]
         except Exception as e:
             return False, [f"Validation error: {e}"]
@@ -132,15 +140,15 @@ class FirmwareSoftwareContract:
         Returns:
             Tuple of (is_valid, errors)
         """
+        if not _JSONSCHEMA_AVAILABLE or _jsonschema is None:
+            return False, ["jsonschema not installed"]
         try:
-            import jsonschema
-
             with open(schema_path) as f:
                 schema = json.load(f)
 
-            jsonschema.validate(instance=self.data, schema=schema)
+            _jsonschema.validate(instance=self.data, schema=schema)
             return True, []
-        except jsonschema.ValidationError as e:
+        except _jsonschema.ValidationError as e:
             return False, [str(e)]
         except Exception as e:
             return False, [f"Validation error: {e}"]

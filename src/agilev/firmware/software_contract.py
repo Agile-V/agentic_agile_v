@@ -137,7 +137,7 @@ class FirmwareSoftwareContractGenerator:
 
         return commands
 
-    def _extract_error_codes(self) -> list[dict[str, str]]:
+    def _extract_error_codes(self) -> list[dict[str, Any]]:
         """Extract error codes from firmware.
 
         Returns:

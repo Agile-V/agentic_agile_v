@@ -218,7 +218,7 @@ class EmbeddedReleaseGate:
         Returns:
             Gate check results
         """
-        results = {
+        results: dict[str, Any] = {
             "passed": True,
             "task_id": task_id,
             "risk_level": risk_level,

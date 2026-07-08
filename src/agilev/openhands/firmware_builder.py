@@ -8,7 +8,7 @@ from pathlib import Path
 from typing import Any
 
 from agilev.firmware.platformio_backend import PlatformIOBackend
-from agilev.openhands.session_manager import SessionConfig
+from agilev.openhands.session_manager import AgentRole, SessionConfig
 
 
 class FirmwareBuilderConfig:
@@ -51,7 +51,11 @@ def create_firmware_session_config(
     if base_session_config:
         session_config = base_session_config
     else:
-        session_config = SessionConfig()
+        session_config = SessionConfig(
+            task_id=fw_config.task_id or "firmware-task",
+            role=AgentRole.BUILDER,
+            workspace_dir=fw_config.project_dir,
+        )
 
     # Add firmware-specific context
     session_config.environment_vars = session_config.environment_vars or {}

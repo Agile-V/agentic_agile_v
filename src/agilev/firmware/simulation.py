@@ -192,7 +192,7 @@ quit
         Returns:
             Test results dictionary
         """
-        results = {
+        results: dict[str, Any] = {
             "passed": False,
             "tests_run": 0,
             "tests_passed": 0,

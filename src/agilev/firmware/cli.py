@@ -80,6 +80,7 @@ def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
 
     try:
         # Determine contract type from filename or content
+        contract: HardwareFirmwareContract | FirmwareSoftwareContract
         if "hardware_firmware" in contract_path.name or args.type == "hardware-firmware":
             contract = HardwareFirmwareContract.from_file(contract_path)
             schema_name = "hardware_firmware_contract.schema.json"
@@ -125,13 +126,13 @@ def cmd_firmware_contract_validate(args: argparse.Namespace) -> int:
 
             elif isinstance(contract, FirmwareSoftwareContract):
                 commands = contract.get_commands()
-                errors = contract.get_error_codes()
+                error_codes = contract.get_error_codes()
 
                 print("\nContract summary:")
                 print(f"  Transport: {contract.transport}")
                 print(f"  Protocol version: {contract.protocol_version}")
                 print(f"  Commands: {len(commands)}")
-                print(f"  Error codes: {len(errors)}")
+                print(f"  Error codes: {len(error_codes)}")
 
                 if args.verbose:
                     print("\n  Command list:")

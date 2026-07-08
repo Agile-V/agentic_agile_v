@@ -257,7 +257,7 @@ class CrossDomainVerifier:
         Returns:
             Verification results
         """
-        results = {
+        results: dict[str, Any] = {
             "passed": True,
             "violations": [],
             "warnings": [],

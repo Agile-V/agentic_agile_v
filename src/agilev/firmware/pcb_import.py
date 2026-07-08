@@ -102,7 +102,7 @@ def validate_hardware_firmware_contract_against_pcb(
     Returns:
         Tuple of (is_valid, errors)
     """
-    errors = []
+    errors: list[str] = []
 
     # Load contract
     with open(contract_path) as f:
