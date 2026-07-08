@@ -8,9 +8,10 @@ import json
 import subprocess
 import time
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
-import serial
+if TYPE_CHECKING:
+    import serial
 
 
 class HILRunner:
@@ -76,7 +77,7 @@ class HILRunner:
         port: str,
         baudrate: int = 115200,
         timeout: float = 1.0,
-    ) -> serial.Serial:
+    ) -> "serial.Serial":
         """Connect to hardware serial port.
 
         Args:
@@ -87,7 +88,13 @@ class HILRunner:
         Returns:
             Serial connection
         """
-        return serial.Serial(
+        try:
+            import serial as _serial  # noqa: PLC0415
+        except ImportError as exc:
+            raise ImportError(
+                "pyserial is required for HIL tests. Install with: pip install pyserial"
+            ) from exc
+        return _serial.Serial(
             port=port,
             baudrate=baudrate,
             timeout=timeout,
@@ -95,7 +102,7 @@ class HILRunner:
 
     def wait_for_ready(
         self,
-        ser: serial.Serial,
+        ser: "serial.Serial",
         timeout: float = 5.0,
         ready_marker: str = "READY",
     ) -> bool:
@@ -123,7 +130,7 @@ class HILRunner:
 
     def send_command(
         self,
-        ser: serial.Serial,
+        ser: "serial.Serial",
         command: str,
         timeout: float = 1.0,
     ) -> str | None:
@@ -161,7 +168,7 @@ class HILRunner:
 
     def run_test_sequence(
         self,
-        ser: serial.Serial,
+        ser: "serial.Serial",
         test_sequence: list[dict[str, Any]],
     ) -> list[dict[str, Any]]:
         """Run test sequence.
