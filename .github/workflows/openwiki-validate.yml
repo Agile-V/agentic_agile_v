@@ -1,0 +1,42 @@
+name: OpenWiki Knowledge Layer Validation
+
+# Validates the repository-local `openwiki/` knowledge layer on every PR.
+# This job never installs or invokes the real `openwiki` CLI, and makes no
+# network/API calls: it only checks that the already-generated `openwiki/`
+# tree is structurally complete and that its Agile-V manifest
+# (`.agile-v/wiki/manifest.json`) is in sync with what's on disk. Staleness
+# relative to source code is a warning, not a failure (see
+# docs/integrations/openwiki.md).
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  validate-wiki:
+    name: Validate openwiki/ structure
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install agilev
+        run: |
+          pip install -e .
+
+      - name: Run agilev wiki validate
+        run: |
+          agilev wiki validate
+
+      - name: Wiki status (always shown)
+        if: always()
+        run: |
+          agilev wiki status --json

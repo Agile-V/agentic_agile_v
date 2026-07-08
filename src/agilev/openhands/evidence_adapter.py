@@ -67,7 +67,33 @@ class EvidenceAdapter:
         if check_results:
             evidence["checks"] = check_results
 
+        # Collect OpenWiki knowledge-layer snapshot, if the wiki exists
+        knowledge_snapshot = self._collect_knowledge_snapshot()
+        if knowledge_snapshot:
+            evidence["knowledge_snapshot"] = knowledge_snapshot
+
         return evidence
+
+    def _collect_knowledge_snapshot(self) -> dict[str, Any] | None:
+        """Collect an OpenWiki knowledge-layer snapshot, if available.
+
+        Returns None (rather than raising) when the `openwiki/` directory
+        does not exist, since the knowledge layer is optional.
+
+        Returns:
+            A `knowledge_snapshot` dict (see `agilev.wiki.snapshot`), or
+            None if `openwiki/` is not present in the repository.
+        """
+        if not (self.repo_root / "openwiki").exists():
+            return None
+
+        try:
+            from agilev.wiki.snapshot import build_knowledge_snapshot
+
+            return build_knowledge_snapshot(self.repo_root)
+        except Exception as e:
+            print(f"Warning: Failed to build knowledge snapshot: {e}")
+            return None
 
     def _collect_session_metadata(self, task_dir: Path) -> dict[str, Any] | None:
         """Collect OpenHands session metadata.

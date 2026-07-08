@@ -1,0 +1,16 @@
+{
+  "errors": [],
+  "generated_at": "2026-07-07T21:05:55.653433+00:00",
+  "passed": true,
+  "required_pages": [
+    "README.md",
+    "ARCHITECTURE.md",
+    "ONBOARDING.md",
+    "domains/software.md",
+    "ci-and-release.md",
+    "domains/pcb.md"
+  ],
+  "schema_version": "1.0.0",
+  "stale_pages": [],
+  "warnings": []
+}

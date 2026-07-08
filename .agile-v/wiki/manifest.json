@@ -1,0 +1,88 @@
+{
+  "generated_at": "2026-07-07T21:05:00.274234+00:00",
+  "pages": {
+    "ARCHITECTURE.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "ARCHITECTURE.md",
+      "sha256": "sha256:dd0afb6d059fb9b20007b824735f7b5cfd2b3a0aaafd419a58af749f23ad158b",
+      "sources": [
+        "src/agilev",
+        "ARCHITECTURE.md",
+        "pyproject.toml"
+      ],
+      "title": "Architecture Overview"
+    },
+    "ONBOARDING.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "ONBOARDING.md",
+      "sha256": "sha256:43a4d97d416c2c9f1a2ef06efb3c5151cb3d6a6387023da17dabbad123139543",
+      "sources": [
+        "AGENTS.md",
+        "CONTRIBUTIONS.md"
+      ],
+      "title": "Agent & Contributor Onboarding"
+    },
+    "README.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "README.md",
+      "sha256": "sha256:bd8ac541e75cb9b20f5ce030cd728b2f83a59a75ac59c661974c549629b0df70",
+      "sources": [
+        "README.md",
+        "AGENTS.md"
+      ],
+      "title": "Repository Knowledge Base"
+    },
+    "ci-and-release.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "ci-and-release.md",
+      "sha256": "sha256:23c2db42fb6bdaf808e1a94a58bcf5875835a67c350cadbafd8305576e3d3c37",
+      "sources": [
+        ".github/workflows",
+        "schemas/evidence_bundle.schema.json",
+        "schemas/task_brief.schema.json"
+      ],
+      "title": "CI, Evidence Bundles, Task Briefs, and Release Gates"
+    },
+    "domains/pcb.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "domains/pcb.md",
+      "sha256": "sha256:4b1036b1c4deab4ad1253256316a369c619980eb981c5e7b28fe4687841bc7ca",
+      "sources": [
+        "src/agilev/pcb",
+        "examples/pcb"
+      ],
+      "title": "PCB Backend"
+    },
+    "domains/software.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "domains/software.md",
+      "sha256": "sha256:2227bb023aaf60b103dbd8d043460e2600408486aeec1fe619369e941da8d757",
+      "sources": [
+        "src/agilev/openhands",
+        "src/agilev/cli.py",
+        "src/agilev/state.py"
+      ],
+      "title": "Software / OpenHands Backend"
+    }
+  },
+  "repo_commit": null,
+  "schema_version": "1.0.0"
+}

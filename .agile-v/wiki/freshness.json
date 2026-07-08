@@ -1,0 +1,43 @@
+{
+  "generated_at": "2026-07-07T21:05:00.275933+00:00",
+  "manifest_generated_at": "2026-07-07T21:05:00.274234+00:00",
+  "pages": {
+    "ARCHITECTURE.md": {
+      "missing_sources": [],
+      "path": "ARCHITECTURE.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "ONBOARDING.md": {
+      "missing_sources": [],
+      "path": "ONBOARDING.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "README.md": {
+      "missing_sources": [],
+      "path": "README.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "ci-and-release.md": {
+      "missing_sources": [],
+      "path": "ci-and-release.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "domains/pcb.md": {
+      "missing_sources": [],
+      "path": "domains/pcb.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "domains/software.md": {
+      "missing_sources": [],
+      "path": "domains/software.md",
+      "stale": false,
+      "stale_sources": []
+    }
+  },
+  "schema_version": "1.0.0"
+}

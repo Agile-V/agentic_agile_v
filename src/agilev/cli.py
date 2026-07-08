@@ -25,6 +25,7 @@ from agilev.openhands.session_manager import (
 from agilev.pcb.cli import build_pcb_parser
 from agilev.state import EventLogger, LockManager, TaskState
 from agilev.task_context import TaskContextResolver
+from agilev.wiki.cli import build_wiki_parser
 
 
 def compute_file_hash(file_path: Path) -> str:
@@ -1455,6 +1456,9 @@ def build_parser() -> argparse.ArgumentParser:
 
     # PCB commands
     build_pcb_parser(subparsers)
+
+    # OpenWiki knowledge-layer commands
+    build_wiki_parser(subparsers)
 
     return parser
 
