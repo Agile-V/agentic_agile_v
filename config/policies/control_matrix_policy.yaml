@@ -1,0 +1,45 @@
+# Control Matrix Tool Classification Policy
+# Maps concrete tool names and patterns to control matrix tool classes.
+# Used by enforce_control_matrix.sh and agilev controls check-tool.
+version: "1.0.0"
+
+tool_classification:
+  shell:
+    class: "shell_exec"
+    patterns: ["bash", "sh", "terminal", "exec", "run", "subprocess"]
+  filesystem_read:
+    class: "read_file"
+    patterns: ["read", "cat", "head", "tail", "grep", "rg"]
+  filesystem_list:
+    class: "list_files"
+    patterns: ["ls", "find", "glob", "list", "tree"]
+  filesystem_write:
+    class: "write_file"
+    patterns: ["write", "edit", "patch", "create_file", "sed", "awk"]
+  git_read:
+    class: "git_diff"
+    patterns: ["git diff", "git status", "git show", "git log"]
+  network:
+    class: "network_egress"
+    patterns: ["curl", "wget", "fetch", "http", "requests", "web_search", "browser"]
+  dependency:
+    class: "dependency_install"
+    patterns: ["pip install", "pip3", "npm install", "pnpm add", "yarn add", "cargo add", "apt", "brew"]
+  database:
+    class: "database_migration"
+    patterns: ["alembic", "prisma migrate", "knex migrate", "flyway", "liquibase"]
+  test_runner:
+    class: "run_tests"
+    patterns: ["pytest", "unittest", "jest", "mocha", "cargo test", "go test"]
+  static_analysis:
+    class: "static_analysis"
+    patterns: ["ruff", "mypy", "flake8", "eslint", "tsc", "bandit", "semgrep"]
+  schema_validation:
+    class: "schema_validation"
+    patterns: ["jsonschema", "ajv", "validate_schema", "agilev validate"]
+  deploy:
+    class: "deploy_production"
+    patterns: ["kubectl apply", "helm install", "helm upgrade", "terraform apply", "pulumi up", "deploy", "release"]
+
+# Fail mode for unknown tool classes
+unknown_tool_class_action: "deny"

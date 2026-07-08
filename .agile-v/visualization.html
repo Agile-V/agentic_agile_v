@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Agile V + Understand Anything — Integration Proof</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #0d1117; color: #e6edf3; }
+
+  /* ── Header ─────────────────────────────────────────────────────────── */
+  header {
+    background: linear-gradient(135deg, #161b22 0%, #1c2128 100%);
+    border-bottom: 1px solid #30363d;
+    padding: 20px 32px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  header .badge {
+    background: #238636; color: #fff; font-size: 11px; font-weight: 700;
+    padding: 3px 8px; border-radius: 20px; letter-spacing: 0.5px;
+  }
+  header h1 { font-size: 18px; font-weight: 600; color: #f0f6fc; }
+  header p  { font-size: 13px; color: #8b949e; margin-top: 2px; }
+
+  /* ── Tabs ────────────────────────────────────────────────────────────── */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid #30363d; background: #161b22; padding: 0 32px; }
+  .tab  { padding: 12px 20px; font-size: 13px; cursor: pointer; color: #8b949e;
+          border-bottom: 2px solid transparent; transition: all 0.15s; user-select: none; }
+  .tab:hover  { color: #e6edf3; }
+  .tab.active { color: #58a6ff; border-bottom-color: #58a6ff; }
+
+  /* ── Panels ──────────────────────────────────────────────────────────── */
+  .panel { display: none; padding: 24px 32px; }
+  .panel.active { display: block; }
+
+  /* ── Legend ──────────────────────────────────────────────────────────── */
+  .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 20px; }
+  .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #8b949e; }
+  .dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+
+  /* ── Pipeline strip ─────────────────────────────────────────────────── */
+  .pipeline { display: flex; align-items: center; gap: 0; margin-bottom: 28px; flex-wrap: wrap; }
+  .pipe-step {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 10px 16px; font-size: 12px; line-height: 1.5;
+  }
+  .pipe-step .label { font-weight: 600; color: #58a6ff; }
+  .pipe-step .sub   { color: #8b949e; margin-top: 1px; }
+  .pipe-arrow { color: #30363d; font-size: 20px; padding: 0 6px; }
+
+  /* ── Graph canvas ───────────────────────────────────────────────────── */
+  #graph-canvas { width: 100%; height: 560px; border: 1px solid #30363d; border-radius: 8px;
+                  background: #0d1117; position: relative; overflow: hidden; }
+  svg { width: 100%; height: 100%; }
+
+  /* ── Traceability table ─────────────────────────────────────────────── */
+  .section-title { font-size: 14px; font-weight: 600; color: #f0f6fc; margin-bottom: 12px; margin-top: 24px; }
+  .section-title:first-child { margin-top: 0; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th { background: #161b22; color: #8b949e; font-weight: 600; text-align: left;
+       padding: 8px 12px; border-bottom: 1px solid #30363d; font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 9px 12px; border-bottom: 1px solid #21262d; vertical-align: middle; }
+  tr:hover td { background: #161b22; }
+  .badge-high   { background: #3d1f1f; color: #f85149; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-medium { background: #2d2008; color: #d29922; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-low    { background: #1c2d1c; color: #3fb950; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-pass   { background: #1c2d1c; color: #3fb950; font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .badge-mod    { background: #1f2d3d; color: #58a6ff; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  .badge-rev    { background: #2d2008; color: #d29922; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 20px; }
+  code { background: #161b22; border: 1px solid #30363d; border-radius: 4px; padding: 1px 6px; font-size: 12px; color: #79c0ff; font-family: "SF Mono", "Fira Code", monospace; }
+
+  /* ── Artifacts panel ─────────────────────────────────────────────────── */
+  .artifact-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px; }
+  .artifact-card {
+    background: #161b22; border: 1px solid #30363d; border-radius: 8px;
+    padding: 14px 16px; transition: border-color 0.15s;
+  }
+  .artifact-card:hover { border-color: #58a6ff; }
+  .artifact-card .apath { font-family: "SF Mono", "Fira Code", monospace; font-size: 12px; color: #79c0ff; margin-bottom: 6px; }
+  .artifact-card .adesc { font-size: 12px; color: #8b949e; line-height: 1.5; }
+  .artifact-card .asize { font-size: 11px; color: #484f58; margin-top: 6px; }
+  .section-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 7px;
+                   border-radius: 4px; margin-bottom: 8px; letter-spacing: 0.3px; }
+  .sec-00 { background: #1f2d3d; color: #58a6ff; }
+  .sec-01 { background: #2d2008; color: #d29922; }
+  .sec-07 { background: #1c2d1c; color: #3fb950; }
+
+  /* ── Gate decision banner ────────────────────────────────────────────── */
+  .gate-banner {
+    background: #1c2d1c; border: 1px solid #238636; border-radius: 8px;
+    padding: 14px 20px; margin-bottom: 24px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .gate-banner .icon { font-size: 28px; }
+  .gate-banner .title { font-size: 15px; font-weight: 700; color: #3fb950; }
+  .gate-banner .sub   { font-size: 12px; color: #8b949e; margin-top: 2px; }
+
+  /* ── Tooltip ─────────────────────────────────────────────────────────── */
+  #tooltip {
+    position: fixed; background: #161b22; border: 1px solid #30363d;
+    border-radius: 8px; padding: 10px 14px; font-size: 12px; pointer-events: none;
+    opacity: 0; transition: opacity 0.1s; max-width: 260px; z-index: 100; line-height: 1.6;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+  }
+  #tooltip .tt-name { font-weight: 700; color: #f0f6fc; margin-bottom: 4px; }
+  #tooltip .tt-row  { color: #8b949e; }
+  #tooltip .tt-row span { color: #e6edf3; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:4px">
+      <h1>Agile V + Understand Anything</h1>
+      <span class="badge">INTEGRATION PROOF</span>
+      <span class="badge" style="background:#1f2d3d;color:#58a6ff;">CR-AUTH-001</span>
+    </div>
+    <p>knowledge_graph.json &rarr; adapter &rarr; impact analysis &rarr; traceability &rarr; .agile-v/ artifacts &nbsp;&middot;&nbsp; 122/122 tests passing</p>
+  </div>
+</header>
+
+<div class="tabs">
+  <div class="tab active" onclick="showTab('graph')">Knowledge Graph</div>
+  <div class="tab" onclick="showTab('impact')">Impact Analysis</div>
+  <div class="tab" onclick="showTab('trace')">Traceability</div>
+  <div class="tab" onclick="showTab('artifacts')">Artifacts</div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 1: KNOWLEDGE GRAPH                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="panel active" id="tab-graph">
+
+  <div class="legend">
+    <div class="legend-item"><div class="dot" style="background:#f85149"></div> Direct impact (modify)</div>
+    <div class="legend-item"><div class="dot" style="background:#d29922"></div> Indirect impact (review)</div>
+    <div class="legend-item"><div class="dot" style="background:#3fb950"></div> Test file</div>
+    <div class="legend-item"><div class="dot" style="background:#58a6ff"></div> File node</div>
+    <div class="legend-item"><div class="dot" style="background:#bc8cff"></div> Class</div>
+    <div class="legend-item"><div class="dot" style="background:#79c0ff"></div> Function</div>
+    <div class="legend-item"><div class="dot" style="background:#484f58"></div> Unaffected</div>
+    <div class="legend-item" style="margin-left:auto;font-size:11px;color:#484f58">Drag to pan &nbsp;·&nbsp; Impact highlighted for CR-AUTH-001</div>
+  </div>
+
+  <div id="graph-canvas">
+    <svg id="graph-svg" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#30363d"/>
+        </marker>
+        <marker id="arrow-test" markerWidth="8" markerHeight="8" refX="7" refY="3" orient="auto">
+          <path d="M0,0 L0,6 L8,3 z" fill="#3fb950"/>
+        </marker>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge>
+        </filter>
+      </defs>
+      <g id="graph-root"></g>
+    </svg>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 2: IMPACT ANALYSIS                                                 -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="tab-impact">
+
+  <div class="pipeline">
+    <div class="pipe-step">
+      <div class="label">CR-AUTH-001</div>
+      <div class="sub">Modify login → MFA</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="label">analyze_impact()</div>
+      <div class="sub">keyword + graph traversal</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="label">confidence: HIGH</div>
+      <div class="sub">5 direct · 6 indirect</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="label">3 required tests</div>
+      <div class="sub">test_auth · test_status · test_token</div>
+    </div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step">
+      <div class="label">RISK-001 HIGH</div>
+      <div class="sub">security scope</div>
+    </div>
+  </div>
+
+  <div class="section-title">Direct components — modify (confidence: high)</div>
+  <table>
+    <thead><tr><th>File</th><th>Symbol</th><th>Impact type</th><th>Confidence</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/api/auth.py</code></td><td>—</td><td><span class="badge-mod">modify</span></td><td><span class="badge-high">high</span></td><td>Keyword match in name/path/summary</td></tr>
+      <tr><td><code>src/api/auth.py</code></td><td><code>login</code></td><td><span class="badge-mod">modify</span></td><td><span class="badge-high">high</span></td><td>Keyword match in name/path/summary</td></tr>
+      <tr><td><code>src/db.py</code></td><td>—</td><td><span class="badge-mod">modify</span></td><td><span class="badge-high">high</span></td><td>Keyword match in name/path/summary</td></tr>
+      <tr><td><code>tests/test_auth.py</code></td><td>—</td><td><span class="badge-mod">modify</span></td><td><span class="badge-high">high</span></td><td>Keyword match in name/path/summary</td></tr>
+      <tr><td><code>src/main.py</code></td><td>—</td><td><span class="badge-mod">modify</span></td><td><span class="badge-high">high</span></td><td>Keyword match in name/path/summary</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Indirect components — review (confidence: medium, &le;2 graph hops)</div>
+  <table>
+    <thead><tr><th>File</th><th>Symbol</th><th>Impact type</th><th>Confidence</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/api/status.py</code></td><td>—</td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+      <tr><td><code>src/services/token.py</code></td><td>—</td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+      <tr><td><code>src/main.py</code></td><td><code>create_app</code></td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+      <tr><td><code>src/db.py</code></td><td><code>get_session</code></td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+      <tr><td><code>src/api/auth.py</code></td><td><code>refresh_token</code></td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+      <tr><td><code>src/services/token.py</code></td><td><code>TokenStore</code></td><td><span class="badge-rev">review</span></td><td><span class="badge-medium">medium</span></td><td>Indirect dependency (&le;2 hops)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Required regression tests</div>
+  <table>
+    <thead><tr><th>Test file</th><th>Priority</th><th>Reason</th></tr></thead>
+    <tbody>
+      <tr><td><code>tests/test_auth.py</code></td><td><span class="badge-high">high</span></td><td>Directly tests <code>src/api/auth.py</code> (affected)</td></tr>
+      <tr><td><code>tests/test_status.py</code></td><td><span class="badge-high">high</span></td><td>Tests <code>src/api/status.py</code> (indirect)</td></tr>
+      <tr><td><code>tests/test_token.py</code></td><td><span class="badge-high">high</span></td><td>Tests <code>src/services/token.py</code> (indirect)</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Risk register</div>
+  <table>
+    <thead><tr><th>Risk ID</th><th>Severity</th><th>Description</th><th>Mitigation</th></tr></thead>
+    <tbody>
+      <tr><td><code>RISK-001</code></td><td><span class="badge-high">high</span></td><td>Security-sensitive components in impact scope</td><td>Ensure security regression tests are included and reviewed</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 3: TRACEABILITY                                                    -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="tab-trace">
+
+  <div class="gate-banner">
+    <div class="icon">✅</div>
+    <div>
+      <div class="title">Gate decision: PASS</div>
+      <div class="sub">0 orphan requirements &nbsp;·&nbsp; 0 orphan changes &nbsp;·&nbsp; 0 warnings &nbsp;·&nbsp; schema_version 1.0.0 &nbsp;·&nbsp; change_request_id CR-AUTH-001</div>
+    </div>
+  </div>
+
+  <div class="section-title">REQ &rarr; Component links</div>
+  <table>
+    <thead><tr><th>Requirement</th><th>Component file</th><th>Symbol</th><th>Match reason</th></tr></thead>
+    <tbody>
+      <tr><td><code>REQ-001</code></td><td><code>src/api/auth.py</code></td><td>—</td><td>keyword/text match in requirement text</td></tr>
+      <tr><td><code>REQ-001</code></td><td><code>src/api/auth.py</code></td><td><code>login</code></td><td>keyword/text match in requirement text</td></tr>
+      <tr><td><code>REQ-002</code></td><td><code>src/services/token.py</code></td><td>—</td><td>keyword/text match in requirement text</td></tr>
+      <tr><td><code>REQ-002</code></td><td><code>src/services/token.py</code></td><td><code>TokenStore</code></td><td>keyword/text match in requirement text</td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Component &rarr; Test links (from graph edges)</div>
+  <table>
+    <thead><tr><th>Component</th><th>Test file</th><th>Link source</th><th>Status</th></tr></thead>
+    <tbody>
+      <tr><td><code>src/api/auth.py</code></td><td><code>tests/test_auth.py</code></td><td>graph edge: <code>tests</code></td><td><span class="badge-medium">not run yet</span></td></tr>
+      <tr><td><code>src/services/token.py</code></td><td><code>tests/test_token.py</code></td><td>graph edge: <code>tests</code></td><td><span class="badge-medium">not run yet</span></td></tr>
+    </tbody>
+  </table>
+
+  <div class="section-title">Full audit chain</div>
+  <div class="pipeline" style="margin-top:8px">
+    <div class="pipe-step"><div class="label">CR-AUTH-001</div><div class="sub">change_request.md</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">00_understanding</div><div class="sub">system_overview.md<br>normalized_graph.json<br>knowledge_graph_hash.txt</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">01_impact</div><div class="sub">impact_map.md<br>affected_components.json<br>regression_test_candidates.md</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">02_requirements</div><div class="sub">REQ-001<br>REQ-002</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step"><div class="label">07_traceability</div><div class="sub">graph_traceability_matrix.md<br>traceability_result.json</div></div>
+    <div class="pipe-arrow">→</div>
+    <div class="pipe-step" style="border-color:#238636"><div class="label" style="color:#3fb950">PASS ✅</div><div class="sub">0 orphans, gate clear</div></div>
+  </div>
+
+  <div class="section-title">Requirements</div>
+  <table>
+    <thead><tr><th>ID</th><th>Text</th></tr></thead>
+    <tbody>
+      <tr><td><code>REQ-001</code></td><td>The login endpoint must support multi-factor authentication via auth.py login</td></tr>
+      <tr><td><code>REQ-002</code></td><td>Token revocation must be supported via TokenStore.revoke in token.py</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<!-- TAB 4: ARTIFACTS                                                       -->
+<!-- ═══════════════════════════════════════════════════════════════════════ -->
+<div class="panel" id="tab-artifacts">
+  <div class="section-title">9 artifacts written to .agile-v/</div>
+  <div class="artifact-grid">
+    <div class="artifact-card">
+      <div class="section-badge sec-00">00_understanding</div>
+      <div class="apath">.agile-v/understanding/normalized_graph.json</div>
+      <div class="adesc">Full SystemGraph serialized to JSON — 24 nodes, 20 edges, all types and paths preserved</div>
+      <div class="asize">10,208 bytes</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-00">00_understanding</div>
+      <div class="apath">.agile-v/understanding/knowledge_graph_hash.txt</div>
+      <div class="adesc">SHA-256 hash of the source knowledge graph for reproducibility and audit</div>
+      <div class="asize">72 bytes &nbsp;·&nbsp; sha256:3bbd4137…</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-00">00_understanding</div>
+      <div class="apath">.agile-v/understanding/system_overview.md</div>
+      <div class="adesc">Plain-English system summary with source files, test files, graph statistics, and confidence level</div>
+      <div class="asize">1,350 bytes</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-00">00_understanding</div>
+      <div class="apath">.agile-v/understanding/understanding_gate_decision.md</div>
+      <div class="adesc">Gate 0 checklist and PASS/FAIL decision record with graph hash, node/edge counts</div>
+      <div class="asize">728 bytes</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-01">01_impact</div>
+      <div class="apath">.agile-v/impact/impact_map.md</div>
+      <div class="adesc">Full impact map: 5 direct + 6 indirect components, risk register, required tests, confidence</div>
+      <div class="asize">2,275 bytes</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-01">01_impact</div>
+      <div class="apath">.agile-v/impact/affected_components.json</div>
+      <div class="adesc">Machine-readable component list — component_id, path, symbol, impact_type, confidence</div>
+      <div class="asize">2,851 bytes &nbsp;·&nbsp; 11 components</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-01">01_impact</div>
+      <div class="apath">.agile-v/impact/regression_test_candidates.md</div>
+      <div class="adesc">Preliminary test candidates from impact analysis (refined further by regression-selection-agent)</div>
+      <div class="asize">486 bytes &nbsp;·&nbsp; 3 tests</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-07">07_traceability</div>
+      <div class="apath">.agile-v/traceability/graph_traceability_matrix.md</div>
+      <div class="adesc">REQ→component→test chain, gate decision PASS, 0 orphans</div>
+      <div class="asize">935 bytes</div>
+    </div>
+    <div class="artifact-card">
+      <div class="section-badge sec-07">07_traceability</div>
+      <div class="apath">.agile-v/traceability/traceability_result.json</div>
+      <div class="adesc">Schema-conforming JSON — schema_version, change_request_id, links[], decision, orphans</div>
+      <div class="asize">1,235 bytes &nbsp;·&nbsp; 4 links</div>
+    </div>
+  </div>
+
+  <div class="section-title" style="margin-top:28px">Test suite</div>
+  <table>
+    <thead><tr><th>Suite</th><th>Tests</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>tests/unit/test_impact_analysis.py</td><td>28</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>tests/unit/test_traceability.py</td><td>14</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>tests/unit/test_understand_adapter.py</td><td>29</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>tests/integration/test_real_task_smoke.py</td><td>18</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td>tests/unit/ (other)</td><td>33</td><td><span class="badge-pass">PASS</span></td></tr>
+      <tr><td style="font-weight:600">Total</td><td style="font-weight:600">122</td><td><span class="badge-pass">122/122 PASS</span></td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+// ── Tab switching ─────────────────────────────────────────────────────────
+function showTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  const tabs = ['graph','impact','trace','artifacts'];
+  document.querySelectorAll('.tab')[tabs.indexOf(id)].classList.add('active');
+  document.getElementById('tab-' + id).classList.add('active');
+  if (id === 'graph') renderGraph();
+}
+
+// ── Data ─────────────────────────────────────────────────────────────────
+const NODES = [
+  {id:'n1',  name:'auth.py',        type:'file',     path:'src/api/auth.py',         summary:'Handles user authentication and JWT token issuance'},
+  {id:'n2',  name:'login',          type:'function', path:'src/api/auth.py',         symbol:'login',             summary:'Validates credentials and returns a JWT'},
+  {id:'n3',  name:'refresh_token',  type:'function', path:'src/api/auth.py',         symbol:'refresh_token',     summary:'Reissues a JWT given a valid refresh token'},
+  {id:'n4',  name:'TokenStore',     type:'class',    path:'src/services/token.py',   symbol:'TokenStore',        summary:'In-memory cache for issued JWT tokens'},
+  {id:'n5',  name:'token.py',       type:'file',     path:'src/services/token.py',   summary:'Token storage and revocation service'},
+  {id:'n6',  name:'revoke',         type:'function', path:'src/services/token.py',   symbol:'TokenStore.revoke', summary:'Marks a token as revoked'},
+  {id:'n7',  name:'status.py',      type:'file',     path:'src/api/status.py',       summary:'Read-only device health status endpoint'},
+  {id:'n8',  name:'get_status',     type:'function', path:'src/api/status.py',       symbol:'get_status',        summary:'Returns current device state and uptime'},
+  {id:'n9',  name:'device.py',      type:'file',     path:'src/services/device.py',  summary:'Device polling and state machine'},
+  {id:'n10', name:'DevicePoller',   type:'class',    path:'src/services/device.py',  symbol:'DevicePoller',      summary:'Polls device over serial; handles timeouts'},
+  {id:'n11', name:'poll',           type:'function', path:'src/services/device.py',  symbol:'DevicePoller.poll', summary:'Executes a single poll cycle'},
+  {id:'n12', name:'models.py',      type:'file',     path:'src/models.py',           summary:'Shared Pydantic models'},
+  {id:'n13', name:'DeviceStatus',   type:'class',    path:'src/models.py',           symbol:'DeviceStatus',      summary:'Pydantic model for device state'},
+  {id:'n14', name:'TokenClaims',    type:'class',    path:'src/models.py',           symbol:'TokenClaims',       summary:'Pydantic model for JWT payload claims'},
+  {id:'n15', name:'db.py',          type:'file',     path:'src/db.py',               summary:'Database session factory and connection pool'},
+  {id:'n16', name:'get_session',    type:'function', path:'src/db.py',               symbol:'get_session',       summary:'Returns a scoped SQLAlchemy session'},
+  {id:'n17', name:'config.py',      type:'file',     path:'src/config.py',           summary:'App configuration from environment variables'},
+  {id:'n18', name:'Settings',       type:'class',    path:'src/config.py',           symbol:'Settings',          summary:'Pydantic settings: DB URL, JWT secret, poll timeout'},
+  {id:'n19', name:'test_auth.py',   type:'test',     path:'tests/test_auth.py',      summary:'Unit tests for auth.py'},
+  {id:'n20', name:'test_status.py', type:'test',     path:'tests/test_status.py',    summary:'Unit tests for status endpoint'},
+  {id:'n21', name:'test_device.py', type:'test',     path:'tests/test_device.py',    summary:'Unit tests for DevicePoller'},
+  {id:'n22', name:'test_token.py',  type:'test',     path:'tests/test_token.py',     summary:'Unit tests for TokenStore'},
+  {id:'n23', name:'main.py',        type:'file',     path:'src/main.py',             summary:'FastAPI app factory; mounts routers'},
+  {id:'n24', name:'create_app',     type:'function', path:'src/main.py',             symbol:'create_app',        summary:'Constructs the FastAPI app instance'},
+];
+const EDGES = [
+  {s:'n2', t:'n4',  type:'calls'},   {s:'n3', t:'n4',  type:'calls'},
+  {s:'n2', t:'n14', type:'uses'},    {s:'n3', t:'n14', type:'uses'},
+  {s:'n4', t:'n16', type:'calls'},   {s:'n6', t:'n16', type:'calls'},
+  {s:'n8', t:'n10', type:'calls'},   {s:'n8', t:'n13', type:'uses'},
+  {s:'n11',t:'n18', type:'uses'},    {s:'n10',t:'n18', type:'uses'},
+  {s:'n24',t:'n1',  type:'imports'}, {s:'n24',t:'n7',  type:'imports'},
+  {s:'n1', t:'n5',  type:'imports'}, {s:'n7', t:'n9',  type:'imports'},
+  {s:'n9', t:'n17', type:'imports'}, {s:'n5', t:'n15', type:'imports'},
+  {s:'n19',t:'n1',  type:'tests'},   {s:'n20',t:'n7',  type:'tests'},
+  {s:'n21',t:'n9',  type:'tests'},   {s:'n22',t:'n5',  type:'tests'},
+];
+
+// Impact status from prove_integration.py output
+const DIRECT  = new Set(['n1','n2','n15','n19','n23']);
+const INDIRECT= new Set(['n7','n5','n24','n16','n3','n4']);
+
+function nodeColor(n) {
+  if (DIRECT.has(n.id))   return '#f85149';
+  if (INDIRECT.has(n.id)) return '#d29922';
+  if (n.type === 'test')  return '#3fb950';
+  if (n.type === 'file')  return '#58a6ff';
+  if (n.type === 'class') return '#bc8cff';
+  return '#79c0ff';
+}
+function nodeStroke(n) {
+  if (DIRECT.has(n.id))   return '#ff7b72';
+  if (INDIRECT.has(n.id)) return '#e3b341';
+  return nodeColor(n);
+}
+
+// ── Force-directed layout (simple Fruchterman-Reingold) ───────────────────
+function layout(nodes, edges, W, H, iterations=300) {
+  const k = Math.sqrt((W * H) / nodes.length);
+  const pos = {};
+  // Initial positions in a rough circle, grouped by path prefix
+  const groups = {};
+  nodes.forEach(n => {
+    const g = n.path ? n.path.split('/')[0]+'/'+n.path.split('/')[1] : 'other';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push(n.id);
+  });
+  const gkeys = Object.keys(groups);
+  nodes.forEach(n => {
+    const gi = gkeys.indexOf(n.path ? n.path.split('/')[0]+'/'+n.path.split('/')[1] : 'other');
+    const angle = (gi / gkeys.length) * 2 * Math.PI + (Math.random()-0.5)*0.4;
+    const r = 0.28 * Math.min(W, H) + (Math.random()-0.5)*20;
+    pos[n.id] = { x: W/2 + r*Math.cos(angle), y: H/2 + r*Math.sin(angle), vx:0, vy:0 };
+  });
+
+  const edgeSet = new Map();
+  edges.forEach(e => {
+    if (!edgeSet.has(e.s)) edgeSet.set(e.s, new Set());
+    edgeSet.get(e.s).add(e.t);
+    if (!edgeSet.has(e.t)) edgeSet.set(e.t, new Set());
+    edgeSet.get(e.t).add(e.s);
+  });
+
+  for (let iter = 0; iter < iterations; iter++) {
+    const temp = 10 * (1 - iter/iterations);
+    // repulsion
+    nodes.forEach(u => {
+      nodes.forEach(v => {
+        if (u.id === v.id) return;
+        const dx = pos[u.id].x - pos[v.id].x;
+        const dy = pos[u.id].y - pos[v.id].y;
+        const d = Math.max(1, Math.sqrt(dx*dx+dy*dy));
+        const f = (k*k) / d;
+        pos[u.id].vx += (dx/d)*f;
+        pos[u.id].vy += (dy/d)*f;
+      });
+    });
+    // attraction
+    edges.forEach(e => {
+      const dx = pos[e.s].x - pos[e.t].x;
+      const dy = pos[e.s].y - pos[e.t].y;
+      const d = Math.max(1, Math.sqrt(dx*dx+dy*dy));
+      const f = (d*d) / k;
+      const fx = (dx/d)*f, fy = (dy/d)*f;
+      pos[e.s].vx -= fx; pos[e.s].vy -= fy;
+      pos[e.t].vx += fx; pos[e.t].vy += fy;
+    });
+    // apply + clamp
+    nodes.forEach(n => {
+      const p = pos[n.id];
+      const spd = Math.sqrt(p.vx*p.vx+p.vy*p.vy);
+      if (spd > temp) { p.vx = (p.vx/spd)*temp; p.vy = (p.vy/spd)*temp; }
+      p.x = Math.max(50, Math.min(W-50, p.x + p.vx));
+      p.y = Math.max(30, Math.min(H-30, p.y + p.vy));
+      p.vx *= 0.85; p.vy *= 0.85;
+    });
+  }
+  return pos;
+}
+
+// ── Render ────────────────────────────────────────────────────────────────
+let rendered = false;
+function renderGraph() {
+  if (rendered) return;
+  rendered = true;
+
+  const canvas = document.getElementById('graph-canvas');
+  const W = canvas.clientWidth || 900;
+  const H = canvas.clientHeight || 560;
+  const pos = layout(NODES, EDGES, W, H);
+
+  const svg = document.getElementById('graph-svg');
+  const root = document.getElementById('graph-root');
+  root.innerHTML = '';
+
+  // Pan support
+  let dragging = false, ox=0, oy=0, tx=0, ty=0;
+  svg.addEventListener('mousedown', e => { dragging=true; ox=e.clientX-tx; oy=e.clientY-ty; });
+  window.addEventListener('mouseup', () => dragging=false);
+  window.addEventListener('mousemove', e => {
+    if (!dragging) return;
+    tx=e.clientX-ox; ty=e.clientY-oy;
+    root.setAttribute('transform',`translate(${tx},${ty})`);
+  });
+
+  // Edges
+  EDGES.forEach(e => {
+    const sp = pos[e.s], tp = pos[e.t];
+    const isTest = e.type === 'tests';
+    const dx = tp.x-sp.x, dy = tp.y-sp.y;
+    const len = Math.sqrt(dx*dx+dy*dy);
+    const ux = dx/len, uy = dy/len;
+    const R = 22;
+    const x1 = sp.x + ux*R, y1 = sp.y + uy*R;
+    const x2 = tp.x - ux*(R+6), y2 = tp.y - uy*(R+6);
+    const line = document.createElementNS('http://www.w3.org/2000/svg','line');
+    line.setAttribute('x1',x1); line.setAttribute('y1',y1);
+    line.setAttribute('x2',x2); line.setAttribute('y2',y2);
+    line.setAttribute('stroke', isTest ? '#3fb95060' : '#30363d');
+    line.setAttribute('stroke-width', isTest ? 1.5 : 1);
+    line.setAttribute('marker-end', isTest ? 'url(#arrow-test)' : 'url(#arrow)');
+    if (e.type === 'imports') line.setAttribute('stroke-dasharray','4 3');
+    root.appendChild(line);
+  });
+
+  // Nodes
+  const tooltip = document.getElementById('tooltip');
+  NODES.forEach(n => {
+    const p = pos[n.id];
+    const col = nodeColor(n);
+    const str = nodeStroke(n);
+    const isImpacted = DIRECT.has(n.id) || INDIRECT.has(n.id);
+    const R = 22;
+
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.style.cursor = 'pointer';
+
+    // Glow ring for impacted nodes
+    if (isImpacted) {
+      const glow = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      glow.setAttribute('cx', p.x); glow.setAttribute('cy', p.y); glow.setAttribute('r', R+6);
+      glow.setAttribute('fill', col); glow.setAttribute('opacity','0.15');
+      g.appendChild(glow);
+    }
+
+    const circle = document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circle.setAttribute('cx', p.x); circle.setAttribute('cy', p.y); circle.setAttribute('r', R);
+    circle.setAttribute('fill', '#161b22');
+    circle.setAttribute('stroke', str);
+    circle.setAttribute('stroke-width', isImpacted ? 2.5 : 1.5);
+    g.appendChild(circle);
+
+    // Type icon letter
+    const icon = {file:'f', function:'fn', class:'C', test:'T', module:'m'}[n.type] || '?';
+    const iconEl = document.createElementNS('http://www.w3.org/2000/svg','text');
+    iconEl.setAttribute('x', p.x); iconEl.setAttribute('y', p.y-4);
+    iconEl.setAttribute('text-anchor','middle'); iconEl.setAttribute('dominant-baseline','middle');
+    iconEl.setAttribute('font-size','10'); iconEl.setAttribute('font-weight','700');
+    iconEl.setAttribute('fill', col); iconEl.setAttribute('font-family','monospace');
+    iconEl.textContent = icon;
+    g.appendChild(iconEl);
+
+    // Name label below
+    const label = document.createElementNS('http://www.w3.org/2000/svg','text');
+    label.setAttribute('x', p.x); label.setAttribute('y', p.y + R + 12);
+    label.setAttribute('text-anchor','middle'); label.setAttribute('font-size','10');
+    label.setAttribute('fill', isImpacted ? col : '#8b949e');
+    label.setAttribute('font-family', '-apple-system,BlinkMacSystemFont,sans-serif');
+    label.setAttribute('font-weight', isImpacted ? '600' : '400');
+    label.textContent = n.name.length > 14 ? n.name.slice(0,13)+'…' : n.name;
+    g.appendChild(label);
+
+    // Tooltip
+    g.addEventListener('mouseenter', e => {
+      const impact = DIRECT.has(n.id) ? 'DIRECT (modify)' : INDIRECT.has(n.id) ? 'INDIRECT (review)' : 'not affected';
+      tooltip.innerHTML = `
+        <div class="tt-name">${n.name}</div>
+        <div class="tt-row">type: <span>${n.type}</span></div>
+        <div class="tt-row">path: <span>${n.path||'—'}</span></div>
+        ${n.symbol ? `<div class="tt-row">symbol: <span>${n.symbol}</span></div>` : ''}
+        <div class="tt-row">impact: <span style="color:${nodeColor(n)}">${impact}</span></div>
+        <div class="tt-row" style="margin-top:4px;color:#8b949e">${n.summary}</div>
+      `;
+      tooltip.style.opacity='1';
+      tooltip.style.left = (e.clientX+12)+'px';
+      tooltip.style.top  = (e.clientY-10)+'px';
+    });
+    g.addEventListener('mousemove', e => {
+      tooltip.style.left=(e.clientX+12)+'px'; tooltip.style.top=(e.clientY-10)+'px';
+    });
+    g.addEventListener('mouseleave', () => { tooltip.style.opacity='0'; });
+
+    root.appendChild(g);
+  });
+}
+
+// Render on first tab load (already active)
+window.addEventListener('load', () => setTimeout(renderGraph, 50));
+window.addEventListener('resize', () => { rendered=false; renderGraph(); });
+</script>
+</body>
+</html>

@@ -111,6 +111,62 @@
         }
       }
     },
+    "control_matrix": {
+      "type": "object",
+      "description": "Control matrix evidence (required for L2+). Records the selected control ID, matrix path, policy version, decisions, owners, rollback, cost, and log references.",
+      "required": ["control_id", "matrix_path", "policy_version", "decisions", "owner", "rollback", "cost"],
+      "properties": {
+        "control_id": {
+          "type": "string",
+          "description": "ID of the resolved control entry (e.g. cm-default-agentic-task)"
+        },
+        "matrix_path": {
+          "type": "string",
+          "description": "Relative path to the control matrix file used"
+        },
+        "policy_version": {
+          "type": "string",
+          "description": "Version field from the control matrix"
+        },
+        "decisions": {
+          "type": "array",
+          "description": "List of control decisions made during the task",
+          "items": {
+            "type": "object",
+            "required": ["timestamp", "check", "decision", "reason"],
+            "properties": {
+              "timestamp": {"type": "string"},
+              "check": {"type": "string"},
+              "decision": {"type": "string", "enum": ["allow", "deny", "require_human_gate", "warn"]},
+              "reason": {"type": "string"},
+              "approval_ref": {"type": "string"}
+            }
+          }
+        },
+        "owner": {
+          "type": "object",
+          "description": "Owner snapshot from the resolved control entry"
+        },
+        "rollback": {
+          "type": "object",
+          "description": "Rollback evidence and strategy reference"
+        },
+        "cost": {
+          "type": "object",
+          "description": "Cost record for the task run",
+          "properties": {
+            "run_cost": {"type": "number"},
+            "daily_cost": {"type": "number"},
+            "currency": {"type": "string"}
+          }
+        },
+        "log_refs": {
+          "type": "array",
+          "items": {"type": "string"},
+          "description": "Paths to control event log files"
+        }
+      }
+    },
     "verification": {
       "type": "object",
       "description": "Independent verification metadata (required for L2+)",

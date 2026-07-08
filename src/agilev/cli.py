@@ -8,9 +8,19 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 
 import yaml
 
+from agilev.control_enforcer import (
+    check_cost,
+    check_data_class,
+    check_model,
+    check_rollback,
+    check_tool,
+)
+from agilev.control_matrix import ControlMatrix, ControlMatrixError, RiskLevel
+from agilev.openhands.control_hooks import append_control_event, classify_tool, find_matrix_path
 from agilev.openhands.event_ledger import EventLedger, EventType
 from agilev.openhands.evidence_adapter import EvidenceAdapter
 from agilev.openhands.github_actions import generate_github_actions
@@ -1277,6 +1287,294 @@ def cmd_openhands_evidence_collect(args: argparse.Namespace) -> int:
         return 1
 
 
+# ---------------------------------------------------------------------------
+# Controls commands
+# ---------------------------------------------------------------------------
+
+
+def _output(data: dict, as_json: bool) -> None:  # type: ignore[type-arg]
+    if as_json:
+        print(json.dumps(data, indent=2))
+    else:
+        for k, v in data.items():
+            if v is not None:
+                print(f"  {k}: {v}")
+
+
+def cmd_controls_validate(args: argparse.Namespace) -> int:
+    """Validate the control matrix schema and semantics."""
+    root = Path.cwd()
+    try:
+        matrix = ControlMatrix.load(root)
+    except ControlMatrixError as exc:
+        print(f"FAIL  {exc}")
+        return 1
+
+    # Optional JSON schema validation
+    schema_path = root / "schemas" / "control_matrix.schema.json"
+    if schema_path.exists():
+        try:
+            import json as _json
+
+            from jsonschema import Draft202012Validator
+
+            schema = _json.loads(schema_path.read_text(encoding="utf-8"))
+            errors = list(Draft202012Validator(schema).iter_errors(matrix.data))
+            if errors:
+                for err in errors:
+                    print(f"FAIL  schema: {err.message}")
+                return 1
+        except ImportError:
+            print(
+                "PASS  (schema validation skipped: jsonschema not installed; semantic checks passed)"
+            )
+            return 0
+
+    print(f"PASS  {matrix.summary()}")
+    return 0
+
+
+def cmd_controls_explain(args: argparse.Namespace) -> int:
+    """Print the resolved control entry for a given task context."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    try:
+        matrix = ControlMatrix.load(root)
+        control = matrix.resolve(
+            task_type=args.task_type,
+            risk_level=args.risk,
+            agent_mode=args.mode,
+            skill=getattr(args, "skill", None),
+        )
+    except ControlMatrixError as exc:
+        if as_json:
+            print(json.dumps({"error": str(exc)}, indent=2))
+        else:
+            print(f"FAIL  {exc}")
+        return 1
+
+    if as_json:
+        print(json.dumps(control, indent=2))
+    else:
+        print(f"Control: {control['id']}")
+        print(f"  status:     {control.get('status')}")
+        print(f"  scope:      {control.get('scope')}")
+        print(f"  risk_min:   {control.get('minimum_risk_level')}")
+        print(f"  tools_ok:   {control['tools'].get('allowed', [])}")
+        print(f"  tools_no:   {control['tools'].get('forbidden', [])}")
+        print(f"  gates:      {control['tools'].get('requires_gate', [])}")
+    return 0
+
+
+def cmd_controls_check_tool(args: argparse.Namespace) -> int:
+    """Check whether a tool class is allowed."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    tool_class = classify_tool(args.tool)
+
+    try:
+        matrix = ControlMatrix.load(root)
+        task_type = "feature"  # default; improve when task context resolver is available
+        risk = cast(RiskLevel, getattr(args, "risk", "L1"))
+        mode = getattr(args, "mode", "builder")
+        control = matrix.resolve(task_type=task_type, risk_level=risk, agent_mode=mode)
+    except ControlMatrixError as exc:
+        result = {"decision": "deny", "control_id": "none", "reason": str(exc)}
+        _output(result, as_json)
+        return 1
+
+    decision = check_tool(control, tool_class)
+
+    if getattr(args, "log_event", True):
+        log_path_str = control.get("logs", {}).get(
+            "storage_location", ".agile-v/logs/control-events.jsonl"
+        )
+        try:
+            append_control_event(
+                log_path=root / log_path_str,
+                task_id=getattr(args, "task", "unknown"),
+                control_id=control["id"],
+                check="tool",
+                decision=decision.decision,
+                reason=decision.reason,
+                extra={"tool_class": tool_class},
+            )
+        except Exception:
+            pass  # logging must not block enforcement
+
+    _output(decision.to_dict(), as_json)
+    return 0 if decision.decision == "allow" else 1
+
+
+def cmd_controls_check_model(args: argparse.Namespace) -> int:
+    """Check whether a model/vendor is allowed."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
+    mode = getattr(args, "mode", "builder")
+
+    try:
+        matrix = ControlMatrix.load(root)
+        control = matrix.resolve(task_type="feature", risk_level=risk, agent_mode=mode)
+    except ControlMatrixError as exc:
+        result = {"decision": "deny", "control_id": "none", "reason": str(exc)}
+        _output(result, as_json)
+        return 1
+
+    decision = check_model(control, args.vendor, args.model, args.data_class)
+    _output(decision.to_dict(), as_json)
+    return 0 if decision.decision == "allow" else 1
+
+
+def cmd_controls_check_cost(args: argparse.Namespace) -> int:
+    """Check whether run/daily/monthly costs are within limits."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
+    mode = getattr(args, "mode", "builder")
+
+    try:
+        matrix = ControlMatrix.load(root)
+        control = matrix.resolve(task_type="feature", risk_level=risk, agent_mode=mode)
+    except ControlMatrixError as exc:
+        result = {"decision": "deny", "control_id": "none", "reason": str(exc)}
+        _output(result, as_json)
+        return 1
+
+    monthly = getattr(args, "monthly_cost", None)
+    decision = check_cost(control, args.run_cost, args.daily_cost, monthly_cost=monthly)
+    _output(decision.to_dict(), as_json)
+    return 0 if decision.decision == "allow" else 1
+
+
+def cmd_controls_check_data_class(args: argparse.Namespace) -> int:
+    """Check whether a data class is permitted under the active control."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
+    mode = getattr(args, "mode", "builder")
+
+    try:
+        matrix = ControlMatrix.load(root)
+        control = matrix.resolve(task_type="feature", risk_level=risk, agent_mode=mode)
+    except ControlMatrixError as exc:
+        result = {"decision": "deny", "control_id": "none", "reason": str(exc)}
+        _output(result, as_json)
+        return 1
+
+    decision = check_data_class(control, args.data_class)
+    _output(decision.to_dict(), as_json)
+    return 0 if decision.decision == "allow" else 1
+
+
+def cmd_controls_check_rollback(args: argparse.Namespace) -> int:
+    """Check whether rollback evidence meets control requirements for a risk level."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
+    mode = getattr(args, "mode", "builder")
+
+    try:
+        matrix = ControlMatrix.load(root)
+        control = matrix.resolve(task_type="feature", risk_level=risk, agent_mode=mode)
+    except ControlMatrixError as exc:
+        result = {"decision": "deny", "control_id": "none", "reason": str(exc)}
+        _output(result, as_json)
+        return 1
+
+    evidence: dict = {}
+    if getattr(args, "rollback_path", None):
+        evidence["rollback_path"] = args.rollback_path
+    if getattr(args, "feature_flag", None):
+        evidence["feature_flag"] = args.feature_flag
+
+    decision = check_rollback(control, risk, evidence)
+    _output(decision.to_dict(), as_json)
+    return 0 if decision.decision == "allow" else 1
+
+
+def cmd_controls_evidence(args: argparse.Namespace) -> int:
+    """Write or check control matrix evidence for a task."""
+    root = Path.cwd()
+    as_json = getattr(args, "json", False)
+    check_only = getattr(args, "check_only", False)
+    task_id = getattr(args, "task", "unknown")
+
+    matrix_path = find_matrix_path(root)
+    if matrix_path is None:
+        msg = "No control matrix found; evidence check skipped"
+        if as_json:
+            print(json.dumps({"decision": "warn", "reason": msg}, indent=2))
+        else:
+            print(f"WARN  {msg}")
+        return 0
+
+    risk_level = getattr(args, "risk", None)
+    high_risk = risk_level in ("L2", "L3", "L4") if risk_level else False
+
+    if check_only:
+        # Evidence bundle check: look for control_matrix section in evidence file
+        evidence_dir = root / ".agentic-agile-v" / "tasks" / task_id
+        bundle_path = evidence_dir / "evidence.json"
+        if not bundle_path.exists():
+            if high_risk:
+                msg = f"Evidence bundle not found for {task_id}; control_matrix section required for L2+"
+                if as_json:
+                    print(json.dumps({"decision": "deny", "reason": msg}, indent=2))
+                else:
+                    print(f"FAIL  {msg}")
+                return 1
+            return 0
+        import json as _json
+
+        bundle = _json.loads(bundle_path.read_text(encoding="utf-8"))
+        if high_risk and "control_matrix" not in bundle:
+            msg = f"Evidence bundle for {task_id} is missing control_matrix section (required for L2+)"
+            if as_json:
+                print(json.dumps({"decision": "deny", "reason": msg}, indent=2))
+            else:
+                print(f"FAIL  {msg}")
+            return 1
+        if as_json:
+            print(
+                json.dumps(
+                    {"decision": "allow", "reason": "Control matrix evidence present"}, indent=2
+                )
+            )
+        else:
+            print(f"PASS  Control matrix evidence present for {task_id}")
+        return 0
+
+    # Write mode: emit an evidence template populated from the loaded matrix
+    try:
+        matrix = ControlMatrix.load(root)
+        resolved_id = (
+            matrix.data["controls"][0]["id"] if matrix.data.get("controls") else "cm-unknown"
+        )
+        policy_version = matrix.version
+    except ControlMatrixError:
+        resolved_id = "cm-unknown"
+        policy_version = "unknown"
+
+    result = {
+        "control_id": resolved_id,
+        "matrix_path": str(matrix_path.relative_to(root)),
+        "policy_version": policy_version,
+        "decisions": [],
+        "owner": {},
+        "rollback": {"strategy": "revert_commit", "path": ""},
+        "cost": {"run_cost": 0.0, "daily_cost": 0.0, "currency": "EUR"},
+        "log_refs": [".agile-v/logs/control-events.jsonl"],
+    }
+    if as_json:
+        print(json.dumps(result, indent=2))
+    else:
+        print(f"Control matrix evidence template for {task_id}:")
+        for k, v in result.items():
+            print(f"  {k}: {v}")
+    return 0
+
+
 def build_parser() -> argparse.ArgumentParser:
     """Build the argument parser."""
     parser = argparse.ArgumentParser(
@@ -1459,6 +1757,117 @@ def build_parser() -> argparse.ArgumentParser:
 
     # OpenWiki knowledge-layer commands
     build_wiki_parser(subparsers)
+
+    # controls command group
+    controls_parser = subparsers.add_parser("controls", help="Control matrix enforcement commands")
+    controls_subparsers = controls_parser.add_subparsers(dest="controls_command", required=True)
+
+    # controls validate
+    ctrl_validate_parser = controls_subparsers.add_parser(
+        "validate", help="Validate control matrix schema and semantics"
+    )
+    ctrl_validate_parser.set_defaults(func=cmd_controls_validate)
+
+    # controls explain
+    ctrl_explain_parser = controls_subparsers.add_parser(
+        "explain", help="Print the resolved control entry for a task context"
+    )
+    ctrl_explain_parser.add_argument(
+        "--task-type", default="feature", help="Task type (default: feature)"
+    )
+    ctrl_explain_parser.add_argument("--risk", default="L1", help="Risk level L0-L4 (default: L1)")
+    ctrl_explain_parser.add_argument(
+        "--mode", default="builder", help="Agent mode (default: builder)"
+    )
+    ctrl_explain_parser.add_argument("--skill", default=None, help="Skill name (optional)")
+    ctrl_explain_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_explain_parser.set_defaults(func=cmd_controls_explain)
+
+    # controls check-tool
+    ctrl_tool_parser = controls_subparsers.add_parser(
+        "check-tool", help="Check whether a tool class is allowed"
+    )
+    ctrl_tool_parser.add_argument("--task", required=True, help="Task ID (e.g., AAV-0001)")
+    ctrl_tool_parser.add_argument("--tool", required=True, help="Tool name or class")
+    ctrl_tool_parser.add_argument("--risk", default="L1", help="Risk level (default: L1)")
+    ctrl_tool_parser.add_argument("--mode", default="builder", help="Agent mode (default: builder)")
+    ctrl_tool_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_tool_parser.set_defaults(func=cmd_controls_check_tool)
+
+    # controls check-model
+    ctrl_model_parser = controls_subparsers.add_parser(
+        "check-model", help="Check whether a model/vendor is allowed"
+    )
+    ctrl_model_parser.add_argument("--task", required=True, help="Task ID")
+    ctrl_model_parser.add_argument("--vendor", required=True, help="Model vendor")
+    ctrl_model_parser.add_argument("--model", required=True, help="Model name")
+    ctrl_model_parser.add_argument(
+        "--data-class", default="internal", help="Data class (default: internal)"
+    )
+    ctrl_model_parser.add_argument("--risk", default="L1", help="Risk level (default: L1)")
+    ctrl_model_parser.add_argument(
+        "--mode", default="builder", help="Agent mode (default: builder)"
+    )
+    ctrl_model_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_model_parser.set_defaults(func=cmd_controls_check_model)
+
+    # controls check-cost
+    ctrl_cost_parser = controls_subparsers.add_parser(
+        "check-cost", help="Check whether run/daily/monthly costs are within limits"
+    )
+    ctrl_cost_parser.add_argument("--task", required=True, help="Task ID")
+    ctrl_cost_parser.add_argument(
+        "--run-cost", type=float, required=True, help="Estimated run cost"
+    )
+    ctrl_cost_parser.add_argument(
+        "--daily-cost", type=float, required=True, help="Estimated daily cost"
+    )
+    ctrl_cost_parser.add_argument(
+        "--monthly-cost", type=float, default=None, help="Estimated monthly cost (optional)"
+    )
+    ctrl_cost_parser.add_argument("--risk", default="L1", help="Risk level (default: L1)")
+    ctrl_cost_parser.add_argument("--mode", default="builder", help="Agent mode (default: builder)")
+    ctrl_cost_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_cost_parser.set_defaults(func=cmd_controls_check_cost)
+
+    # controls check-data-class
+    ctrl_dc_parser = controls_subparsers.add_parser(
+        "check-data-class", help="Check whether a data class is permitted"
+    )
+    ctrl_dc_parser.add_argument("--task", required=True, help="Task ID")
+    ctrl_dc_parser.add_argument("--data-class", required=True, help="Data class to check")
+    ctrl_dc_parser.add_argument("--risk", default="L1", help="Risk level (default: L1)")
+    ctrl_dc_parser.add_argument("--mode", default="builder", help="Agent mode (default: builder)")
+    ctrl_dc_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_dc_parser.set_defaults(func=cmd_controls_check_data_class)
+
+    # controls check-rollback
+    ctrl_rb_parser = controls_subparsers.add_parser(
+        "check-rollback", help="Check whether rollback evidence meets requirements"
+    )
+    ctrl_rb_parser.add_argument("--task", required=True, help="Task ID")
+    ctrl_rb_parser.add_argument("--risk", default="L1", help="Risk level (default: L1)")
+    ctrl_rb_parser.add_argument("--mode", default="builder", help="Agent mode (default: builder)")
+    ctrl_rb_parser.add_argument(
+        "--rollback-path", default=None, help="Documented rollback path/command"
+    )
+    ctrl_rb_parser.add_argument(
+        "--feature-flag", default=None, help="Feature flag name (if applicable)"
+    )
+    ctrl_rb_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_rb_parser.set_defaults(func=cmd_controls_check_rollback)
+
+    # controls evidence
+    ctrl_evidence_parser = controls_subparsers.add_parser(
+        "evidence", help="Write or check control matrix evidence"
+    )
+    ctrl_evidence_parser.add_argument("--task", required=True, help="Task ID")
+    ctrl_evidence_parser.add_argument("--risk", default=None, help="Risk level for L2+ enforcement")
+    ctrl_evidence_parser.add_argument(
+        "--check-only", action="store_true", help="Only check; do not write"
+    )
+    ctrl_evidence_parser.add_argument("--json", action="store_true", help="Output as JSON")
+    ctrl_evidence_parser.set_defaults(func=cmd_controls_evidence)
 
     return parser
 

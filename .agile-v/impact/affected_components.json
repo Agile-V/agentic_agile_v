@@ -1,0 +1,90 @@
+[
+  {
+    "component_id": "n1",
+    "path": "src/api/auth.py",
+    "symbol": null,
+    "impact_type": "modify",
+    "reason": "Keyword match in name/path/summary for change: 'Modify login endpoint to support multi-factor authentication (MFA) alongside pas'.",
+    "confidence": "high"
+  },
+  {
+    "component_id": "n2",
+    "path": "src/api/auth.py",
+    "symbol": "login",
+    "impact_type": "modify",
+    "reason": "Keyword match in name/path/summary for change: 'Modify login endpoint to support multi-factor authentication (MFA) alongside pas'.",
+    "confidence": "high"
+  },
+  {
+    "component_id": "n15",
+    "path": "src/db.py",
+    "symbol": null,
+    "impact_type": "modify",
+    "reason": "Keyword match in name/path/summary for change: 'Modify login endpoint to support multi-factor authentication (MFA) alongside pas'.",
+    "confidence": "high"
+  },
+  {
+    "component_id": "n19",
+    "path": "tests/test_auth.py",
+    "symbol": null,
+    "impact_type": "modify",
+    "reason": "Keyword match in name/path/summary for change: 'Modify login endpoint to support multi-factor authentication (MFA) alongside pas'.",
+    "confidence": "high"
+  },
+  {
+    "component_id": "n23",
+    "path": "src/main.py",
+    "symbol": null,
+    "impact_type": "modify",
+    "reason": "Keyword match in name/path/summary for change: 'Modify login endpoint to support multi-factor authentication (MFA) alongside pas'.",
+    "confidence": "high"
+  },
+  {
+    "component_id": "n7",
+    "path": "src/api/status.py",
+    "symbol": null,
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  },
+  {
+    "component_id": "n5",
+    "path": "src/services/token.py",
+    "symbol": null,
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  },
+  {
+    "component_id": "n24",
+    "path": "src/main.py",
+    "symbol": "create_app",
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  },
+  {
+    "component_id": "n16",
+    "path": "src/db.py",
+    "symbol": "get_session",
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  },
+  {
+    "component_id": "n3",
+    "path": "src/api/auth.py",
+    "symbol": "refresh_token",
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  },
+  {
+    "component_id": "n4",
+    "path": "src/services/token.py",
+    "symbol": "TokenStore",
+    "impact_type": "review",
+    "reason": "Indirect dependency on a directly affected component (\u22642 hops).",
+    "confidence": "medium"
+  }
+]

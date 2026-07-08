@@ -1,0 +1,50 @@
+{
+  "schema_version": "1.0.0",
+  "change_request_id": "CR-AUTH-001",
+  "links": [
+    {
+      "requirement_id": "REQ-001",
+      "component_id": "n1",
+      "path": "src/api/auth.py",
+      "symbol": null,
+      "test_id": null,
+      "test_path": "tests/test_auth.py",
+      "evidence_path": ".agile-v/tests/results.json",
+      "status": "not_applicable"
+    },
+    {
+      "requirement_id": "REQ-001",
+      "component_id": "n2",
+      "path": "src/api/auth.py",
+      "symbol": "login",
+      "test_id": null,
+      "test_path": null,
+      "evidence_path": null,
+      "status": "missing"
+    },
+    {
+      "requirement_id": "REQ-002",
+      "component_id": "n5",
+      "path": "src/services/token.py",
+      "symbol": null,
+      "test_id": null,
+      "test_path": "tests/test_token.py",
+      "evidence_path": ".agile-v/tests/results.json",
+      "status": "not_applicable"
+    },
+    {
+      "requirement_id": "REQ-002",
+      "component_id": "n4",
+      "path": "src/services/token.py",
+      "symbol": "TokenStore",
+      "test_id": null,
+      "test_path": null,
+      "evidence_path": null,
+      "status": "missing"
+    }
+  ],
+  "orphan_requirements": [],
+  "orphan_changes": [],
+  "warnings": [],
+  "decision": "pass"
+}
