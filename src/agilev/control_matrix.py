@@ -75,7 +75,7 @@ class ControlMatrix:
     # ------------------------------------------------------------------
 
     @classmethod
-    def load(cls, root: Path) -> "ControlMatrix":
+    def load(cls, root: Path) -> ControlMatrix:
         """Load the control matrix from the canonical search path.
 
         Raises ``ControlMatrixError`` when no matrix is found.

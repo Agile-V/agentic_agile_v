@@ -12,7 +12,6 @@ from typing import Any
 
 from agilev.control_matrix import ControlDecision
 
-
 # ---------------------------------------------------------------------------
 # Data class check
 # ---------------------------------------------------------------------------

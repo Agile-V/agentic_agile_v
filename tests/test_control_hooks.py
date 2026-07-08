@@ -19,7 +19,6 @@ from agilev.openhands.control_hooks import (
     load_raw_matrix,
 )
 
-
 # ---------------------------------------------------------------------------
 # classify_tool
 # ---------------------------------------------------------------------------
@@ -171,7 +170,7 @@ class TestAppendControlEvent:
         log = tmp_path / "events.jsonl"
         for i in range(3):
             append_control_event(log, f"TASK-{i:03d}", "cm-test", "tool", "allow", f"event {i}")
-        lines = [l for l in log.read_text().splitlines() if l.strip()]
+        lines = [line for line in log.read_text().splitlines() if line.strip()]
         assert len(lines) == 3
 
     def test_extra_fields_included(self, tmp_path: Path):
