@@ -8,6 +8,7 @@ import hashlib
 import json
 from datetime import UTC, datetime
 from pathlib import Path
+from typing import cast
 
 import yaml
 
@@ -18,7 +19,7 @@ from agilev.control_enforcer import (
     check_rollback,
     check_tool,
 )
-from agilev.control_matrix import ControlMatrix, ControlMatrixError
+from agilev.control_matrix import ControlMatrix, ControlMatrixError, RiskLevel
 from agilev.openhands.control_hooks import append_control_event, classify_tool, find_matrix_path
 from agilev.openhands.event_ledger import EventLedger, EventType
 from agilev.openhands.evidence_adapter import EvidenceAdapter
@@ -1374,7 +1375,7 @@ def cmd_controls_check_tool(args: argparse.Namespace) -> int:
     try:
         matrix = ControlMatrix.load(root)
         task_type = "feature"  # default; improve when task context resolver is available
-        risk = getattr(args, "risk", "L1")
+        risk = cast(RiskLevel, getattr(args, "risk", "L1"))
         mode = getattr(args, "mode", "builder")
         control = matrix.resolve(task_type=task_type, risk_level=risk, agent_mode=mode)
     except ControlMatrixError as exc:
@@ -1409,7 +1410,7 @@ def cmd_controls_check_model(args: argparse.Namespace) -> int:
     """Check whether a model/vendor is allowed."""
     root = Path.cwd()
     as_json = getattr(args, "json", False)
-    risk = getattr(args, "risk", "L1")
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
     mode = getattr(args, "mode", "builder")
 
     try:
@@ -1429,7 +1430,7 @@ def cmd_controls_check_cost(args: argparse.Namespace) -> int:
     """Check whether run/daily/monthly costs are within limits."""
     root = Path.cwd()
     as_json = getattr(args, "json", False)
-    risk = getattr(args, "risk", "L1")
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
     mode = getattr(args, "mode", "builder")
 
     try:
@@ -1450,7 +1451,7 @@ def cmd_controls_check_data_class(args: argparse.Namespace) -> int:
     """Check whether a data class is permitted under the active control."""
     root = Path.cwd()
     as_json = getattr(args, "json", False)
-    risk = getattr(args, "risk", "L1")
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
     mode = getattr(args, "mode", "builder")
 
     try:
@@ -1470,7 +1471,7 @@ def cmd_controls_check_rollback(args: argparse.Namespace) -> int:
     """Check whether rollback evidence meets control requirements for a risk level."""
     root = Path.cwd()
     as_json = getattr(args, "json", False)
-    risk = getattr(args, "risk", "L1")
+    risk = cast(RiskLevel, getattr(args, "risk", "L1"))
     mode = getattr(args, "mode", "builder")
 
     try:
