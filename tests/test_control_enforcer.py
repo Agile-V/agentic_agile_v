@@ -5,8 +5,6 @@ Implements: REQ-CM-004 through REQ-CM-010
 
 from __future__ import annotations
 
-import pytest
-
 from agilev.control_enforcer import (
     check_cost,
     check_data_class,
@@ -416,18 +414,18 @@ def test_check_max_permissions_no_max_permissions_key():
     assert result.decision == "allow"
 
 
-def test_check_max_permissions_exceeds_file_access():
+def test_check_max_permissions_exceeds_file_access_base_control():
     result = check_max_permissions(MAX_PERM_CONTROL, {"file_access": "global"})
     assert result.decision == "deny"
     assert "file_access" in result.reason
 
 
-def test_check_max_permissions_unknown_dimension_ignored():
+def test_check_max_permissions_unknown_dimension_ignored_base_control():
     """Dimensions not in max_permissions are not constrained."""
     result = check_max_permissions(CONTROL, {"unknown_dimension": "global"})
     assert result.decision == "allow"
 
 
-def test_check_max_permissions_empty_requested_allows():
+def test_check_max_permissions_empty_requested_allows_base_control():
     result = check_max_permissions(CONTROL, {})
     assert result.decision == "allow"

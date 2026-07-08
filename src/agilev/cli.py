@@ -14,10 +14,8 @@ import yaml
 from agilev.control_enforcer import (
     check_cost,
     check_data_class,
-    check_max_permissions,
     check_model,
     check_rollback,
-    check_tests,
     check_tool,
 )
 from agilev.control_matrix import ControlMatrix, ControlMatrixError
