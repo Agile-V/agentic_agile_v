@@ -79,7 +79,5 @@ def build_software_parser(subparsers: argparse._SubParsersAction) -> None:
         default="software/firmware_api.py",
         help="Output Python file path",
     )
-    gen_api_parser.add_argument(
-        "--verbose", "-v", action="store_true", help="Show detailed output"
-    )
+    gen_api_parser.add_argument("--verbose", "-v", action="store_true", help="Show detailed output")
     gen_api_parser.set_defaults(func=cmd_software_generate_api)

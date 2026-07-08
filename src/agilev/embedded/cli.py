@@ -66,9 +66,7 @@ def cmd_embedded_contract_validate(args: argparse.Namespace) -> int:
 
         # Find schema
         schema_path = (
-            Path(__file__).parent.parent.parent.parent
-            / "schemas"
-            / "system_contract.schema.json"
+            Path(__file__).parent.parent.parent.parent / "schemas" / "system_contract.schema.json"
         )
         if not schema_path.exists():
             print(f"✗ Schema not found: {schema_path}", file=sys.stderr)
@@ -318,9 +316,7 @@ def build_embedded_parser(subparsers: argparse._SubParsersAction) -> None:
     init_parser = embedded_subparsers.add_parser(
         "init", help="Initialize embedded systems structure"
     )
-    init_parser.add_argument(
-        "--template", action="store_true", help="Copy contract templates"
-    )
+    init_parser.add_argument("--template", action="store_true", help="Copy contract templates")
     init_parser.set_defaults(func=cmd_embedded_init)
 
     # embedded doctor
@@ -350,9 +346,7 @@ def build_embedded_parser(subparsers: argparse._SubParsersAction) -> None:
     verify_parser.set_defaults(func=cmd_embedded_verify)
 
     # embedded gate
-    gate_parser = embedded_subparsers.add_parser(
-        "gate", help="Check embedded release gate"
-    )
+    gate_parser = embedded_subparsers.add_parser("gate", help="Check embedded release gate")
     gate_parser.add_argument("--task-id", required=True, help="Task identifier")
     gate_parser.add_argument(
         "--risk-level",

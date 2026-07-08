@@ -84,9 +84,11 @@ class FirmwareSoftwareContractGenerator:
         commands = []
 
         # Look for common patterns in firmware code
-        src_files = list((self.project_dir / "src").rglob("*.cpp")) if (
-            self.project_dir / "src"
-        ).exists() else []
+        src_files = (
+            list((self.project_dir / "src").rglob("*.cpp"))
+            if (self.project_dir / "src").exists()
+            else []
+        )
 
         for src_file in src_files:
             try:

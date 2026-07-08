@@ -14,9 +14,7 @@ def test_system_contract_schema_exists():
 def test_hardware_firmware_contract_schema_exists():
     """Test that hardware-firmware contract schema exists."""
     schema_path = (
-        Path(__file__).parent.parent.parent
-        / "schemas"
-        / "hardware_firmware_contract.schema.json"
+        Path(__file__).parent.parent.parent / "schemas" / "hardware_firmware_contract.schema.json"
     )
     assert schema_path.exists(), f"Schema not found: {schema_path}"
 
@@ -24,9 +22,7 @@ def test_hardware_firmware_contract_schema_exists():
 def test_firmware_software_contract_schema_exists():
     """Test that firmware-software contract schema exists."""
     schema_path = (
-        Path(__file__).parent.parent.parent
-        / "schemas"
-        / "firmware_software_contract.schema.json"
+        Path(__file__).parent.parent.parent / "schemas" / "firmware_software_contract.schema.json"
     )
     assert schema_path.exists(), f"Schema not found: {schema_path}"
 

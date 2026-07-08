@@ -87,13 +87,15 @@ class CrossDomainVerifier:
         contract_mcu = hw_fw_contract.get("mcu", {}).get("part_number")
 
         if pcb_mcu != contract_mcu:
-            violations.append({
-                "domain": "pcb_to_firmware",
-                "severity": "error",
-                "message": f"MCU mismatch: PCB has {pcb_mcu}, contract has {contract_mcu}",
-                "pcb_value": pcb_mcu,
-                "contract_value": contract_mcu,
-            })
+            violations.append(
+                {
+                    "domain": "pcb_to_firmware",
+                    "severity": "error",
+                    "message": f"MCU mismatch: PCB has {pcb_mcu}, contract has {contract_mcu}",
+                    "pcb_value": pcb_mcu,
+                    "contract_value": contract_mcu,
+                }
+            )
 
         # Check interfaces
         pcb_interfaces = {iface["name"]: iface for iface in circuit_ir.get("interfaces", [])}
@@ -104,25 +106,29 @@ class CrossDomainVerifier:
         # Check for missing interfaces in contract
         for iface_name, pcb_iface in pcb_interfaces.items():
             if iface_name not in contract_interfaces:
-                violations.append({
-                    "domain": "pcb_to_firmware",
-                    "severity": "warning",
-                    "message": f"Interface '{iface_name}' in PCB but not in contract",
-                    "interface": iface_name,
-                })
+                violations.append(
+                    {
+                        "domain": "pcb_to_firmware",
+                        "severity": "warning",
+                        "message": f"Interface '{iface_name}' in PCB but not in contract",
+                        "interface": iface_name,
+                    }
+                )
             else:
                 # Verify interface details match
                 contract_iface = contract_interfaces[iface_name]
 
                 # Check type
                 if pcb_iface.get("type") != contract_iface.get("type"):
-                    violations.append({
-                        "domain": "pcb_to_firmware",
-                        "severity": "error",
-                        "message": f"Interface '{iface_name}' type mismatch",
-                        "pcb_type": pcb_iface.get("type"),
-                        "contract_type": contract_iface.get("type"),
-                    })
+                    violations.append(
+                        {
+                            "domain": "pcb_to_firmware",
+                            "severity": "error",
+                            "message": f"Interface '{iface_name}' type mismatch",
+                            "pcb_type": pcb_iface.get("type"),
+                            "contract_type": contract_iface.get("type"),
+                        }
+                    )
 
                 # Check pins
                 pcb_pins = pcb_iface.get("pins", {})
@@ -130,37 +136,43 @@ class CrossDomainVerifier:
 
                 for pin_name, pcb_pin in pcb_pins.items():
                     if pin_name not in contract_pins:
-                        violations.append({
-                            "domain": "pcb_to_firmware",
-                            "severity": "warning",
-                            "message": (
-                                f"Pin '{pin_name}' in interface '{iface_name}' "
-                                "missing from contract"
-                            ),
-                            "interface": iface_name,
-                            "pin": pin_name,
-                        })
+                        violations.append(
+                            {
+                                "domain": "pcb_to_firmware",
+                                "severity": "warning",
+                                "message": (
+                                    f"Pin '{pin_name}' in interface '{iface_name}' "
+                                    "missing from contract"
+                                ),
+                                "interface": iface_name,
+                                "pin": pin_name,
+                            }
+                        )
                     elif pcb_pin != contract_pins[pin_name]:
-                        violations.append({
-                            "domain": "pcb_to_firmware",
-                            "severity": "error",
-                            "message": f"Pin '{pin_name}' mismatch in interface '{iface_name}'",
-                            "pcb_pin": pcb_pin,
-                            "contract_pin": contract_pins[pin_name],
-                        })
+                        violations.append(
+                            {
+                                "domain": "pcb_to_firmware",
+                                "severity": "error",
+                                "message": f"Pin '{pin_name}' mismatch in interface '{iface_name}'",
+                                "pcb_pin": pcb_pin,
+                                "contract_pin": contract_pins[pin_name],
+                            }
+                        )
 
         # Check for contract interfaces not in PCB
         for iface_name in contract_interfaces:
             if iface_name not in pcb_interfaces:
-                violations.append({
-                    "domain": "pcb_to_firmware",
-                    "severity": "error",
-                    "message": (
-                        f"Interface '{iface_name}' in contract but not in PCB "
-                        "(firmware invented hardware!)"
-                    ),
-                    "interface": iface_name,
-                })
+                violations.append(
+                    {
+                        "domain": "pcb_to_firmware",
+                        "severity": "error",
+                        "message": (
+                            f"Interface '{iface_name}' in contract but not in PCB "
+                            "(firmware invented hardware!)"
+                        ),
+                        "interface": iface_name,
+                    }
+                )
 
         return violations
 
@@ -188,28 +200,32 @@ class CrossDomainVerifier:
 
         if "usb" in transport.lower():
             if "USB" not in fw_interfaces:
-                violations.append({
-                    "domain": "firmware_to_software",
-                    "severity": "error",
-                    "message": (
-                        f"Software contract requires {transport} but firmware has "
-                        "no USB interface"
-                    ),
-                    "transport": transport,
-                })
+                violations.append(
+                    {
+                        "domain": "firmware_to_software",
+                        "severity": "error",
+                        "message": (
+                            f"Software contract requires {transport} but firmware has "
+                            "no USB interface"
+                        ),
+                        "transport": transport,
+                    }
+                )
 
         elif "uart" in transport.lower() or "serial" in transport.lower():
             uart_found = any("UART" in name or "USART" in name for name in fw_interfaces)
             if not uart_found:
-                violations.append({
-                    "domain": "firmware_to_software",
-                    "severity": "error",
-                    "message": (
-                        f"Software contract requires {transport} but firmware has "
-                        "no UART interface"
-                    ),
-                    "transport": transport,
-                })
+                violations.append(
+                    {
+                        "domain": "firmware_to_software",
+                        "severity": "error",
+                        "message": (
+                            f"Software contract requires {transport} but firmware has "
+                            "no UART interface"
+                        ),
+                        "transport": transport,
+                    }
+                )
 
         # Check if commands reference valid sensors/peripherals
         commands = fw_sw_contract.get("commands", [])
@@ -221,15 +237,17 @@ class CrossDomainVerifier:
             if "temperature" in cmd_name.lower():
                 i2c_interfaces = [name for name in fw_interfaces if "I2C" in name]
                 if not i2c_interfaces:
-                    violations.append({
-                        "domain": "firmware_to_software",
-                        "severity": "warning",
-                        "message": (
-                            f"Command '{cmd_name}' implies temperature sensor but "
-                            "no I2C interface found"
-                        ),
-                        "command": cmd_name,
-                    })
+                    violations.append(
+                        {
+                            "domain": "firmware_to_software",
+                            "severity": "warning",
+                            "message": (
+                                f"Command '{cmd_name}' implies temperature sensor but "
+                                "no I2C interface found"
+                            ),
+                            "command": cmd_name,
+                        }
+                    )
 
         return violations
 

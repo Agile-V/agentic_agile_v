@@ -97,31 +97,39 @@ class FirmwareEvidenceAdapter:
         # Check if board_contract.h exists
         board_contract = self.project_dir / "include" / "board_contract.h"
         if board_contract.exists():
-            validation["checks"].append({
-                "name": "board_contract_h_exists",
-                "status": "passed",
-            })
+            validation["checks"].append(
+                {
+                    "name": "board_contract_h_exists",
+                    "status": "passed",
+                }
+            )
         else:
-            validation["checks"].append({
-                "name": "board_contract_h_exists",
-                "status": "failed",
-                "message": "board_contract.h not found",
-            })
+            validation["checks"].append(
+                {
+                    "name": "board_contract_h_exists",
+                    "status": "failed",
+                    "message": "board_contract.h not found",
+                }
+            )
 
         # Check if contract file is referenced
         if board_contract.exists():
             content = board_contract.read_text()
             if "DO NOT EDIT" in content and "hardware-firmware contract" in content:
-                validation["checks"].append({
-                    "name": "contract_header_present",
-                    "status": "passed",
-                })
+                validation["checks"].append(
+                    {
+                        "name": "contract_header_present",
+                        "status": "passed",
+                    }
+                )
             else:
-                validation["checks"].append({
-                    "name": "contract_header_present",
-                    "status": "warning",
-                    "message": "Contract header may be modified",
-                })
+                validation["checks"].append(
+                    {
+                        "name": "contract_header_present",
+                        "status": "warning",
+                        "message": "Contract header may be modified",
+                    }
+                )
 
         # Determine overall status
         failed = any(c["status"] == "failed" for c in validation["checks"])

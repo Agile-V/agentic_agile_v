@@ -12,19 +12,19 @@ def show_file_tree(directory: Path, prefix: str = "", max_depth: int = 3, curren
     """Display directory tree."""
     if current_depth >= max_depth:
         return
-    
+
     try:
         items = sorted(directory.iterdir())
     except PermissionError:
         return
-    
+
     for i, item in enumerate(items):
         is_last = i == len(items) - 1
         connector = "└── " if is_last else "├── "
-        
+
         print(f"{prefix}{connector}{item.name}")
-        
-        if item.is_dir() and not item.name.startswith('.'):
+
+        if item.is_dir() and not item.name.startswith("."):
             extension = "    " if is_last else "│   "
             show_file_tree(item, prefix + extension, max_depth, current_depth + 1)
 
@@ -32,7 +32,7 @@ def show_file_tree(directory: Path, prefix: str = "", max_depth: int = 3, curren
 def show_file_preview(file_path: Path, max_lines: int = 20):
     """Show preview of a file."""
     try:
-        lines = file_path.read_text().split('\n')
+        lines = file_path.read_text().split("\n")
         print(f"\n📄 {file_path.name}:")
         print("-" * 60)
         for i, line in enumerate(lines[:max_lines], 1):
@@ -49,13 +49,13 @@ def main():
     print("=" * 70)
     print("EMBEDDED SYSTEMS INTEGRATION DEMONSTRATION")
     print("=" * 70)
-    
+
     base_path = Path(__file__).parent.parent
-    
+
     # Show repository structure
     print("\n📁 Repository Structure:")
     print("-" * 70)
-    
+
     key_dirs = [
         ("docs/embedded", "Embedded systems documentation"),
         ("docs/adr", "Architecture decision records"),
@@ -66,7 +66,7 @@ def main():
         ("src/agilev/firmware", "Firmware backend Python module"),
         ("src/agilev/pcb", "PCB integration module"),
     ]
-    
+
     for dir_path, description in key_dirs:
         full_path = base_path / dir_path
         if full_path.exists():
@@ -74,18 +74,18 @@ def main():
             print(f"✓ {dir_path:<30} - {description} ({file_count} files)")
         else:
             print(f"✗ {dir_path:<30} - Missing!")
-    
+
     # Show template examples
     print("\n📋 Contract Templates:")
     print("-" * 70)
-    
+
     templates = [
         ("system_contract.yaml", "Top-level system contract"),
         ("hardware_firmware_contract.yaml", "PCB to firmware contract"),
         ("firmware_software_contract.yaml", "Firmware to software contract"),
         ("firmware_evidence_bundle.json", "Firmware evidence bundle"),
     ]
-    
+
     template_dir = base_path / "templates" / "embedded"
     for template_name, description in templates:
         template_path = template_dir / template_name
@@ -94,19 +94,19 @@ def main():
             print(f"✓ {template_name:<40} - {description} ({size} bytes)")
         else:
             print(f"✗ {template_name:<40} - Missing!")
-    
+
     # Show example template content
     print("\n📖 Example Template Content:")
     print("-" * 70)
-    
+
     hw_fw_contract = template_dir / "hardware_firmware_contract.yaml"
     if hw_fw_contract.exists():
         show_file_preview(hw_fw_contract, max_lines=30)
-    
+
     # Show CLI commands available
     print("\n⚙️  Available CLI Commands:")
     print("-" * 70)
-    
+
     commands = [
         ("agilev embedded init", "Initialize embedded systems structure"),
         ("agilev embedded doctor", "Check embedded environment"),
@@ -117,10 +117,10 @@ def main():
         ("agilev firmware build", "Build firmware project"),
         ("agilev firmware test --host", "Run host-based firmware tests"),
     ]
-    
+
     for cmd, description in commands:
         print(f"  {cmd:<40} - {description}")
-    
+
     # Show workflow
     print("\n🔄 Complete Workflow:")
     print("-" * 70)
@@ -162,29 +162,29 @@ def main():
        └─> Stale evidence detection
        └─> Release gate blocks merge if incomplete
     """)
-    
+
     # Show statistics
     print("\n📊 Implementation Statistics:")
     print("-" * 70)
-    
+
     python_files = list((base_path / "src" / "agilev" / "embedded").rglob("*.py"))
     python_files += list((base_path / "src" / "agilev" / "firmware").rglob("*.py"))
     python_files += list((base_path / "src" / "agilev" / "pcb").rglob("*firmware*.py"))
-    
+
     total_lines = 0
     for py_file in python_files:
-        total_lines += len(py_file.read_text().split('\n'))
-    
+        total_lines += len(py_file.read_text().split("\n"))
+
     print(f"  Python modules: {len(python_files)}")
     print(f"  Total lines: ~{total_lines}")
     print("  Schemas: 4")
     print("  Templates: 4")
     print("  Documentation: 3 files")
-    
+
     # Show key features
     print("\n✨ Key Features:")
     print("-" * 70)
-    
+
     features = [
         "✓ Machine-checkable contracts (PCB ↔ Firmware ↔ Software)",
         "✓ Automatic firmware code generation from contracts",
@@ -197,19 +197,20 @@ def main():
         "✓ Schema validation for all contracts",
         "✓ CLI tools for complete workflow",
     ]
-    
+
     for feature in features:
         print(f"  {feature}")
-    
+
     print("\n" + "=" * 70)
     print("✓ DEMONSTRATION COMPLETE")
     print("=" * 70)
     print("\nAll components implemented and ready for use!")
     print("Install pyyaml and jsonschema to enable full functionality.")
-    
+
     return 0
 
 
 if __name__ == "__main__":
     import sys
+
     sys.exit(main())

@@ -434,7 +434,7 @@ def cmd_firmware_simulate(args: argparse.Namespace) -> int:
 
         # Run simulation
         success, output = simulator.run_simulation(
-            script_path=config_files['platform'],
+            script_path=config_files["platform"],
             timeout=args.timeout,
         )
 

@@ -40,9 +40,7 @@ class EmbeddedReleaseGate:
                     "L0": {"evidence_required": ["documentation"]},
                     "L1": {"evidence_required": ["tests", "build_artifacts"]},
                     "L2": {"evidence_required": ["tests", "build_artifacts", "simulation"]},
-                    "L3": {
-                        "evidence_required": ["tests", "build_artifacts", "simulation", "hil"]
-                    },
+                    "L3": {"evidence_required": ["tests", "build_artifacts", "simulation", "hil"]},
                     "L4": {
                         "evidence_required": [
                             "tests",
@@ -245,11 +243,13 @@ class EmbeddedReleaseGate:
             results["passed"] = False
             results["blockers"].append(f"Evidence is stale: {stale_reason}")
 
-        results["checks"].append({
-            "name": "Evidence freshness",
-            "passed": not is_stale,
-            "message": "Evidence is current" if not is_stale else stale_reason,
-        })
+        results["checks"].append(
+            {
+                "name": "Evidence freshness",
+                "passed": not is_stale,
+                "message": "Evidence is current" if not is_stale else stale_reason,
+            }
+        )
 
         # Validate evidence meets risk level requirements
         missing_evidence = self.validate_evidence_for_risk_level(evidence, risk_level)
@@ -259,15 +259,17 @@ class EmbeddedReleaseGate:
             for item in missing_evidence:
                 results["blockers"].append(f"Missing required evidence: {item}")
 
-        results["checks"].append({
-            "name": f"Risk level {risk_level} requirements",
-            "passed": not missing_evidence,
-            "message": (
-                "All evidence present"
-                if not missing_evidence
-                else f"Missing: {', '.join(missing_evidence)}"
-            ),
-        })
+        results["checks"].append(
+            {
+                "name": f"Risk level {risk_level} requirements",
+                "passed": not missing_evidence,
+                "message": (
+                    "All evidence present"
+                    if not missing_evidence
+                    else f"Missing: {', '.join(missing_evidence)}"
+                ),
+            }
+        )
 
         # Check firmware evidence if provided
         if firmware_task_id:
@@ -276,11 +278,13 @@ class EmbeddedReleaseGate:
             if not firmware_evidence:
                 results["warnings"].append(f"No firmware evidence found for {firmware_task_id}")
             else:
-                results["checks"].append({
-                    "name": "Firmware evidence",
-                    "passed": True,
-                    "message": f"Firmware evidence available for {firmware_task_id}",
-                })
+                results["checks"].append(
+                    {
+                        "name": "Firmware evidence",
+                        "passed": True,
+                        "message": f"Firmware evidence available for {firmware_task_id}",
+                    }
+                )
 
         return results
 
