@@ -1,6 +1,6 @@
 {
-  "generated_at": "2026-07-07T21:05:00.275933+00:00",
-  "manifest_generated_at": "2026-07-07T21:05:00.274234+00:00",
+  "generated_at": "2026-07-08T18:40:45.390172+00:00",
+  "manifest_generated_at": "2026-07-08T18:40:45.355978+00:00",
   "pages": {
     "ARCHITECTURE.md": {
       "missing_sources": [],
@@ -23,6 +23,24 @@
     "ci-and-release.md": {
       "missing_sources": [],
       "path": "ci-and-release.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "co-verification.md": {
+      "missing_sources": [],
+      "path": "co-verification.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "domains/embedded.md": {
+      "missing_sources": [],
+      "path": "domains/embedded.md",
+      "stale": false,
+      "stale_sources": []
+    },
+    "domains/firmware.md": {
+      "missing_sources": [],
+      "path": "domains/firmware.md",
       "stale": false,
       "stale_sources": []
     },

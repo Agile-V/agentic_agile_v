@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2026-07-07T21:05:55.653433+00:00",
+  "generated_at": "2026-07-08T18:40:48.558874+00:00",
   "passed": true,
   "required_pages": [
     "README.md",
@@ -8,7 +8,10 @@
     "ONBOARDING.md",
     "domains/software.md",
     "ci-and-release.md",
-    "domains/pcb.md"
+    "domains/pcb.md",
+    "domains/firmware.md",
+    "domains/embedded.md",
+    "co-verification.md"
   ],
   "schema_version": "1.0.0",
   "stale_pages": [],
