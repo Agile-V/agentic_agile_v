@@ -15,9 +15,9 @@ Exit codes:
     2: Invalid input or usage error
 """
 
-import sys
 import argparse
 import re
+import sys
 from pathlib import Path
 
 # Minimum time requirements by risk level (in minutes)
@@ -56,7 +56,7 @@ def parse_agent_plan(plan_path):
     if not Path(plan_path).exists():
         raise FileNotFoundError(f"Agent plan not found: {plan_path}")
     
-    with open(plan_path, 'r') as f:
+    with open(plan_path) as f:
         content = f.read()
     
     # Extract risk level
@@ -120,18 +120,18 @@ def validate_time(risk_level, multipliers, time_allocated):
     
     # Print report
     print(f"\n{'='*70}")
-    print(f"Time Allocation Validation")
+    print("Time Allocation Validation")
     print(f"{'='*70}")
     print(f"Risk Level: {risk_level} ({RISK_LEVELS[risk_level]['name']})")
     print(f"Base Minimum: {RISK_LEVELS[risk_level]['min']} minutes")
     
     if multipliers:
-        print(f"\nComplexity Multipliers:")
+        print("\nComplexity Multipliers:")
         for mult in multipliers:
             print(f"  + {mult.title()}: +{MULTIPLIERS[mult]} min")
         print(f"  Total Multipliers: +{sum(MULTIPLIERS[m] for m in multipliers)} min")
     else:
-        print(f"\nComplexity Multipliers: None")
+        print("\nComplexity Multipliers: None")
     
     print(f"\n{'─'*70}")
     print(f"Minimum Required Time: {minimum_required} minutes")
@@ -140,25 +140,25 @@ def validate_time(risk_level, multipliers, time_allocated):
     if is_adequate:
         surplus = time_allocated - minimum_required
         percentage = (time_allocated / minimum_required) * 100
-        print(f"\n✅ PASS: Time allocation is adequate")
+        print("\n✅ PASS: Time allocation is adequate")
         print(f"   Surplus: +{surplus} min ({percentage:.0f}% of minimum)")
         print(f"{'='*70}\n")
         return True
     else:
         shortfall = minimum_required - time_allocated
         percentage = (time_allocated / minimum_required) * 100
-        print(f"\n❌ FAIL: Insufficient time allocated")
+        print("\n❌ FAIL: Insufficient time allocated")
         print(f"   Shortfall: -{shortfall} min (only {percentage:.0f}% of minimum)")
-        print(f"\n⚠️  WARNING: Rushing complex tasks leads to quality failures.")
-        print(f"   Historical data shows strong correlation between adequate time")
-        print(f"   and quality on complex tasks (r=0.89).")
-        print(f"\n📊 Evidence:")
+        print("\n⚠️  WARNING: Rushing complex tasks leads to quality failures.")
+        print("   Historical data shows strong correlation between adequate time")
+        print("   and quality on complex tasks (r=0.89).")
+        print("\n📊 Evidence:")
         print(f"   - Task with {time_allocated} min on {risk_level}: 36% quality (WORST)")
         print(f"   - Task with {minimum_required}+ min on {risk_level}: 80-100% quality")
-        print(f"\n🔧 Resolution:")
+        print("\n🔧 Resolution:")
         print(f"   Option 1: Allocate {shortfall} more minutes")
         print(f"   Option 2: Reduce scope to fit {time_allocated} min")
-        print(f"   Option 3: Re-evaluate risk level (may be under-classified)")
+        print("   Option 3: Re-evaluate risk level (may be under-classified)")
         print(f"{'='*70}\n")
         return False
 

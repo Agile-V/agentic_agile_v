@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T21:05:00.274694+00:00",
+  "generated_at": "2026-07-08T18:40:45.357013+00:00",
   "page_sources": {
     "ARCHITECTURE.md": [
       "src/agilev",
@@ -18,6 +18,17 @@
       ".github/workflows",
       "schemas/evidence_bundle.schema.json",
       "schemas/task_brief.schema.json"
+    ],
+    "co-verification.md": [
+      "src/agilev/pcb",
+      "src/agilev/firmware",
+      "src/agilev/embedded"
+    ],
+    "domains/embedded.md": [
+      "src/agilev/embedded"
+    ],
+    "domains/firmware.md": [
+      "src/agilev/firmware"
     ],
     "domains/pcb.md": [
       "src/agilev/pcb",
@@ -65,10 +76,19 @@
     "src/agilev/cli.py": [
       "domains/software.md"
     ],
+    "src/agilev/embedded": [
+      "co-verification.md",
+      "domains/embedded.md"
+    ],
+    "src/agilev/firmware": [
+      "co-verification.md",
+      "domains/firmware.md"
+    ],
     "src/agilev/openhands": [
       "domains/software.md"
     ],
     "src/agilev/pcb": [
+      "co-verification.md",
       "domains/pcb.md"
     ],
     "src/agilev/state.py": [

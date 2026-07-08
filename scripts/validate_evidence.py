@@ -2,7 +2,6 @@
 """Validate Agentic Agile-V evidence bundles without external dependencies."""
 import argparse
 import json
-import sys
 from pathlib import Path
 from urllib.parse import urlparse
 

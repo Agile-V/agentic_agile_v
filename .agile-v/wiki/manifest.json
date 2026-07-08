@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-07-07T21:05:00.274234+00:00",
+  "generated_at": "2026-07-08T18:40:45.355978+00:00",
   "pages": {
     "ARCHITECTURE.md": {
       "last_reviewed": null,
@@ -54,6 +54,44 @@
         "schemas/task_brief.schema.json"
       ],
       "title": "CI, Evidence Bundles, Task Briefs, and Release Gates"
+    },
+    "co-verification.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "co-verification.md",
+      "sha256": "sha256:589db45cabb00934839d5cacee2fe68909e10410ebafb19b1aad8b1e04ea9d40",
+      "sources": [
+        "src/agilev/pcb",
+        "src/agilev/firmware",
+        "src/agilev/embedded"
+      ],
+      "title": "Cross-Domain Co-Verification"
+    },
+    "domains/embedded.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "domains/embedded.md",
+      "sha256": "sha256:bec14a864b2f26367617eda55cb55093b0ddfa4fccf24ba93a898f0777656f55",
+      "sources": [
+        "src/agilev/embedded"
+      ],
+      "title": "Embedded Systems Backend"
+    },
+    "domains/firmware.md": {
+      "last_reviewed": null,
+      "owners": [
+        "agile-v-core"
+      ],
+      "path": "domains/firmware.md",
+      "sha256": "sha256:88c80f880dd78bb5bb914e40eaf155ffd01957ec8aa39730e703aa72084637a0",
+      "sources": [
+        "src/agilev/firmware"
+      ],
+      "title": "Firmware Backend"
     },
     "domains/pcb.md": {
       "last_reviewed": null,

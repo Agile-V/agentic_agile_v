@@ -1,0 +1,90 @@
+{
+  "contract_id": "FSC-001",
+  "source_firmware_task": "TASK-123-firmware",
+  "transport": "usb_cdc_serial",
+  "protocol_version": 1,
+  "commands": [
+    {
+      "name": "get_temperature",
+      "request": {
+        "type": "object",
+        "fields": {}
+      },
+      "response": {
+        "type": "object",
+        "fields": {
+          "temperature_c": {
+            "type": "number",
+            "unit": "celsius"
+          },
+          "timestamp_ms": {
+            "type": "integer"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ok",
+              "sensor_missing",
+              "bus_error"
+            ]
+          }
+        }
+      },
+      "max_response_time_ms": 50
+    },
+    {
+      "name": "run_diagnostics",
+      "request": {
+        "type": "object",
+        "fields": {}
+      },
+      "response": {
+        "type": "object",
+        "fields": {
+          "i2c_scan": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "self_test": {
+            "type": "string",
+            "enum": [
+              "passed",
+              "failed"
+            ]
+          },
+          "firmware_version": {
+            "type": "string"
+          }
+        }
+      },
+      "max_response_time_ms": 200
+    }
+  ],
+  "error_codes": [
+    {
+      "code": "SENSOR_MISSING",
+      "meaning": "Sensor not found at I2C address",
+      "recoverable": false
+    },
+    {
+      "code": "BUS_ERROR",
+      "meaning": "I2C bus communication error",
+      "recoverable": true
+    },
+    {
+      "code": "NOT_READY",
+      "meaning": "Firmware not initialized",
+      "recoverable": true
+    }
+  ],
+  "software_expectations": {
+    "retries": {
+      "max_attempts": 3,
+      "backoff_ms": 100
+    },
+    "data_freshness_max_ms": 500
+  }
+}

@@ -20,16 +20,15 @@ Exit codes:
 Inspired by: Agile-V Skills quality-gates (Interface Validation Gate)
 """
 
-import sys
 import argparse
-import re
-import ast
 import importlib.util
+import re
+import sys
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
 
 
-def parse_task_examples(task_path: Path) -> Dict[str, List[Dict[str, Any]]]:
+def parse_task_examples(task_path: Path) -> dict[str, list[dict[str, Any]]]:
     """
     Parse task description to extract API usage examples.
     
@@ -44,7 +43,7 @@ def parse_task_examples(task_path: Path) -> Dict[str, List[Dict[str, Any]]]:
     if not task_path.exists():
         raise FileNotFoundError(f"Task description not found: {task_path}")
     
-    with open(task_path, 'r') as f:
+    with open(task_path) as f:
         content = f.read()
     
     examples = {}
@@ -108,7 +107,7 @@ def load_implementation(impl_path: Path) -> Any:
     return module
 
 
-def extract_class_signature(module: Any, class_name: str) -> Optional[Dict[str, Any]]:
+def extract_class_signature(module: Any, class_name: str) -> dict[str, Any] | None:
     """
     Extract __init__ signature for a class.
     
@@ -152,7 +151,7 @@ def extract_class_signature(module: Any, class_name: str) -> Optional[Dict[str, 
         return None
 
 
-def validate_call_compatibility(class_name: str, example_call: str, signature: Dict[str, Any]) -> tuple[bool, Optional[str]]:
+def validate_call_compatibility(class_name: str, example_call: str, signature: dict[str, Any]) -> tuple[bool, str | None]:
     """
     Validate that an example call is compatible with implementation signature.
     
@@ -248,7 +247,7 @@ def validate_interfaces(task_path: Path, impl_path: Path) -> bool:
         bool: True if all validations pass
     """
     print(f"\n{'='*70}")
-    print(f"Interface Contract Validation")
+    print("Interface Contract Validation")
     print(f"{'='*70}")
     print(f"Task: {task_path}")
     print(f"Implementation: {impl_path}")
@@ -265,7 +264,7 @@ def validate_interfaces(task_path: Path, impl_path: Path) -> bool:
     # Load implementation
     try:
         module = load_implementation(impl_path)
-        print(f"✅ Implementation loaded successfully\n")
+        print("✅ Implementation loaded successfully\n")
     except Exception as e:
         print(f"❌ ERROR: Failed to load implementation: {e}\n", file=sys.stderr)
         return False
@@ -281,8 +280,8 @@ def validate_interfaces(task_path: Path, impl_path: Path) -> bool:
         signature = extract_class_signature(module, class_name)
         
         if signature is None:
-            print(f"   ⚠️  Class not found in implementation or signature unavailable")
-            print(f"      This may be OK if it's defined elsewhere\n")
+            print("   ⚠️  Class not found in implementation or signature unavailable")
+            print("      This may be OK if it's defined elsewhere\n")
             continue
         
         print(f"   Required params: {signature['required']}")
@@ -314,21 +313,21 @@ def validate_interfaces(task_path: Path, impl_path: Path) -> bool:
         print(f"{'='*70}\n")
         return True
     else:
-        print(f"❌ FAIL: Interface incompatibility detected")
-        print(f"\n⚠️  CRITICAL: Implementation API doesn't match task examples.")
-        print(f"   This will cause TypeErrors or missing argument errors at runtime.")
-        print(f"\n🔧 Resolution:")
-        print(f"   Option 1: Make missing parameters optional with defaults")
-        print(f"   Option 2: Adjust implementation to match task examples")
-        print(f"   Option 3: Update task description if examples are wrong")
-        print(f"\n📊 Evidence:")
-        print(f"   - Agentic Agile-V v2.1: Made sender_id required → 8 tests ERROR")
-        print(f"   - Agile-V Skills v2.1: Interface validation caught this → 100% pass")
+        print("❌ FAIL: Interface incompatibility detected")
+        print("\n⚠️  CRITICAL: Implementation API doesn't match task examples.")
+        print("   This will cause TypeErrors or missing argument errors at runtime.")
+        print("\n🔧 Resolution:")
+        print("   Option 1: Make missing parameters optional with defaults")
+        print("   Option 2: Adjust implementation to match task examples")
+        print("   Option 3: Update task description if examples are wrong")
+        print("\n📊 Evidence:")
+        print("   - Agentic Agile-V v2.1: Made sender_id required → 8 tests ERROR")
+        print("   - Agile-V Skills v2.1: Interface validation caught this → 100% pass")
         print(f"{'='*70}\n")
         return False
 
 
-def find_task_and_implementation(task_id: str, search_root: Path = Path('.')) -> tuple[Optional[Path], Optional[Path]]:
+def find_task_and_implementation(task_id: str, search_root: Path = Path('.')) -> tuple[Path | None, Path | None]:
     """
     Auto-discover task description and implementation for a task ID.
     
@@ -351,8 +350,8 @@ def find_task_and_implementation(task_id: str, search_root: Path = Path('.')) ->
     # Look for implementation (common patterns)
     impl_patterns = [
         search_root / f"tasks/{task_id}/implementation/*.py",
-        search_root / f"src/*.py",
-        search_root / f"*.py",
+        search_root / "src/*.py",
+        search_root / "*.py",
     ]
     
     impl_path = None

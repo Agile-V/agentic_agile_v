@@ -1,0 +1,52 @@
+contract_id: SYS-001
+product: example_product
+revision: rev_a
+risk_level: L3
+
+requirements:
+  - id: REQ-EXAMPLE-001
+    text: "System shall perform primary function"
+    risk_level: L3
+
+pcb:
+  task_id: AAV-PCB-001
+  candidate_id: pcb-candidate-001
+  kicad_project: hardware/example_product/
+  evidence_bundle: .agentic-agile-v/tasks/AAV-PCB-001/evidence_bundle.json
+
+firmware:
+  task_id: AAV-FW-001
+  backend: platformio
+  board: example_product_rev_a
+  evidence_bundle: .agentic-agile-v/tasks/AAV-FW-001/firmware_evidence_bundle.json
+
+software:
+  task_id: AAV-SW-001
+  backend: openhands
+  api_contract: .agentic-agile-v/contracts/firmware_software_contract.yaml
+  evidence_bundle: .agentic-agile-v/tasks/AAV-SW-001/evidence_bundle.json
+
+integration:
+  required_evidence:
+    - pcb_erc_passed
+    - hardware_firmware_contract_valid
+    - firmware_build_passed
+    - firmware_unit_tests_passed
+    - simulation_passed
+    - hardware_in_loop_passed
+    - software_api_tests_passed
+    - end_to_end_test_passed
+    - independent_verification_passed
+    - human_approval_recorded
+
+  human_approvals:
+    - role: electrical_engineer
+      approved: false
+    - role: firmware_engineer
+      approved: false
+    - role: software_owner
+      approved: false
+
+metadata:
+  created_at: "2026-01-01T00:00:00Z"
+  created_by: "agilev"

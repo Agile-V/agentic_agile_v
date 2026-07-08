@@ -1,0 +1,211 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://agile-v.org/schemas/firmware_evidence_bundle.schema.json",
+  "title": "Firmware Evidence Bundle",
+  "description": "Evidence bundle for firmware implementation and validation",
+  "type": "object",
+  "required": ["task_id", "artifact_type", "risk_level", "board", "backend"],
+  "properties": {
+    "task_id": {
+      "type": "string",
+      "pattern": "^AAV-FW-[0-9]+$"
+    },
+    "artifact_type": {
+      "type": "string",
+      "const": "firmware"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": ["L0", "L1", "L2", "L3", "L4"]
+    },
+    "board": {
+      "type": "string",
+      "description": "Board identifier"
+    },
+    "pcb_task_id": {
+      "type": "string",
+      "pattern": "^AAV-PCB-[0-9]+$"
+    },
+    "pcb_candidate_id": {
+      "type": "string"
+    },
+    "hardware_firmware_contract": {
+      "type": "string",
+      "description": "Path to hardware-firmware contract"
+    },
+    "firmware_software_contract": {
+      "type": "string",
+      "description": "Path to firmware-software contract"
+    },
+    "backend": {
+      "type": "string",
+      "enum": ["platformio", "zephyr", "cmake", "esp-idf"]
+    },
+    "build": {
+      "type": "object",
+      "required": ["status"],
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "log": {
+          "type": "string",
+          "description": "Path to build log"
+        },
+        "image_hash": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "image_size_bytes": {
+          "type": "integer"
+        },
+        "timestamp": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "static_analysis": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "tool": {
+          "type": "string"
+        },
+        "issues_found": {
+          "type": "integer"
+        }
+      }
+    },
+    "tests": {
+      "type": "object",
+      "properties": {
+        "host_unit_tests": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "target_tests": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "simulation_tests": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "hil_tests": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "test_logs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "type": {
+                "type": "string"
+              },
+              "path": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "diagnostics": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "string",
+        "enum": ["passed", "failed", "not_run"]
+      }
+    },
+    "traceability": {
+      "type": "object",
+      "properties": {
+        "requirements": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^REQ-[A-Z0-9-]+$"
+          }
+        },
+        "pcb_nets": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "firmware_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "properties": {
+        "independent_verifier": {
+          "type": "string",
+          "enum": ["passed", "failed", "not_run"]
+        },
+        "verifier_report": {
+          "type": "string",
+          "description": "Path to verification report"
+        },
+        "residual_risks": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "human_approval_required": {
+      "type": "boolean"
+    },
+    "human_approval": {
+      "type": "string",
+      "enum": ["approved", "pending", "rejected", "not_required"]
+    },
+    "approvals": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["role", "status"],
+        "properties": {
+          "role": {
+            "type": "string",
+            "enum": ["firmware_engineer", "electrical_engineer", "security_reviewer"]
+          },
+          "status": {
+            "type": "string",
+            "enum": ["approved", "pending", "rejected"]
+          },
+          "approved_by": {
+            "type": "string"
+          },
+          "approved_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "comments": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "stale": {
+      "type": "boolean",
+      "description": "Whether evidence is stale due to upstream changes"
+    },
+    "stale_reason": {
+      "type": "string"
+    }
+  }
+}
